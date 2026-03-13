@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amy's 80s Movie Vault</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* VERSION A: Collections as compact filter pills in the sticky filter bar */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #1a1520;
+  --bg2: #2a2030;
+  --bg3: #3a3040;
+  --pink: #e8527a;
+  --cyan: #00f0ff;
+  --yellow: #f0ff00;
+  --text: #f0e6d3;
+  --text-dim: rgba(240, 230, 211, 0.5);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scanline overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
+}
+
+/* CRT vignette */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.4) 100%);
+}
+
+/* ── Header ── */
+.header {
+  text-align: center;
+  padding: 40px 24px 20px;
+  position: relative;
+}
+
+.site-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: clamp(14px, 3vw, 24px);
+  color: var(--pink);
+  text-shadow: 0 0 4px rgba(232,82,122,0.6), 0 0 12px rgba(232,82,122,0.3);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.site-subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+.site-subtitle span { color: var(--cyan); text-shadow: 0 0 8px var(--cyan); }
+
+/* ── Dashboard Collections (VERSION A: removed, using filter pills instead) ── */
+
+/* ── Sticky Filter Bar ── */
+.filter-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(26, 21, 32, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 2px solid var(--pink);
+  box-shadow: 0 2px 30px rgba(232, 82, 122, 0.25);
+  padding: 12px 24px;
+}
+
+.filter-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 360px;
+  min-width: 200px;
+}
+
+.search-wrap::before {
+  content: '>';
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--pink);
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
+}
+
+.search-bar {
+  width: 100%;
+  padding: 10px 14px 10px 30px;
+  background: rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(232,82,122,0.4);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-bar::placeholder { color: var(--text-dim); }
+.search-bar:focus { border-color: var(--pink); box-shadow: 0 0 12px rgba(232,82,122,0.35); }
+
+.result-count {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.result-count span { color: var(--cyan); text-shadow: 0 0 6px var(--cyan); }
+
+.filter-toggle {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 8px;
+  padding: 8px 14px;
+  background: rgba(232,82,122,0.1);
+  border: 1.5px solid rgba(232,82,122,0.3);
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer;
+  display: none;
+}
+
+.sort-select {
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(232,82,122,0.3);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+
+.sort-select option { background: var(--bg); color: var(--text); }
+
+.filter-panels {
+  overflow: hidden;
+  max-height: 300px;
+  transition: max-height 0.3s;
+}
+
+.filter-panels.collapsed { max-height: 0; }
+
+.filter-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.filter-row-label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 7px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.filter-pill {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(232,82,122,0.25);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.filter-pill:hover { border-color: var(--pink); background: rgba(232,82,122,0.1); }
+.filter-pill.active { background: var(--pink); border-color: var(--pink); color: #fff; box-shadow: 0 0 10px rgba(232,82,122,0.4); }
+
+.active-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.active-tag {
+  font-size: 10px;
+  padding: 4px 10px;
+  background: rgba(0,240,255,0.1);
+  border: 1px solid rgba(0,240,255,0.3);
+  border-radius: 12px;
+  color: var(--cyan);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.active-tag .x { opacity: 0.6; }
+.active-tag:hover .x { opacity: 1; }
+
+.clear-all-btn {
+  font-size: 10px;
+  padding: 4px 10px;
+  background: rgba(232,82,122,0.1);
+  border: 1px solid rgba(232,82,122,0.3);
+  border-radius: 12px;
+  color: var(--pink);
+  cursor: pointer;
+}
+
+/* ── Movie Grid ── */
+.grid-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 20px;
+}
+
+.movie-card {
+  cursor: pointer;
+  transition: transform 0.25s, opacity 0.3s;
+}
+
+.movie-card.hidden { display: none; }
+
+.card-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 8px;
+  border: 2px solid rgba(232,82,122,0.15);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+}
+
+.movie-card:hover .card-poster {
+  border-color: var(--pink);
+  box-shadow: 0 0 8px rgba(232,82,122,0.4), 0 0 24px rgba(232,82,122,0.2), 0 0 48px rgba(232,82,122,0.1);
+  transform: translateY(-4px) scale(1.03);
+}
+
+.poster-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+}
+
+.poster-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.year-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 7px;
+  background: rgba(0,0,0,0.7);
+  color: var(--yellow);
+  padding: 4px 6px;
+  border-radius: 3px;
+  text-shadow: 0 0 6px var(--yellow);
+  z-index: 2;
+}
+
+.rating-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 7px;
+  background: rgba(0,0,0,0.7);
+  color: var(--cyan);
+  padding: 4px 6px;
+  border-radius: 3px;
+  text-shadow: 0 0 6px var(--cyan);
+  z-index: 2;
+}
+
+.card-title {
+  padding: 8px 2px 2px;
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Genre gradient backgrounds */
+.genre-grad-Action { background: linear-gradient(135deg, #8b0000, #ff4500); }
+.genre-grad-Adventure { background: linear-gradient(135deg, #2e4a1e, #daa520); }
+.genre-grad-Animation { background: linear-gradient(135deg, #1a237e, #7c4dff); }
+.genre-grad-Comedy { background: linear-gradient(135deg, #b8860b, #ffc53d); }
+.genre-grad-Crime { background: linear-gradient(135deg, #1a1a2e, #6b6b6b); }
+.genre-grad-Documentary { background: linear-gradient(135deg, #2d3436, #636e72); }
+.genre-grad-Drama { background: linear-gradient(135deg, #1a3a5c, #69c0ff); }
+.genre-grad-Fantasy { background: linear-gradient(135deg, #2d1b69, #b37feb); }
+.genre-grad-Holiday { background: linear-gradient(135deg, #1b5e20, #c62828); }
+.genre-grad-Horror { background: linear-gradient(135deg, #1a0a0a, #8b0000); }
+.genre-grad-Musical { background: linear-gradient(135deg, #4a148c, #ce93d8); }
+.genre-grad-Romance { background: linear-gradient(135deg, #880e4f, #ff85c0); }
+.genre-grad-Sci-Fi { background: linear-gradient(135deg, #0d1b2a, #00f0ff); }
+.genre-grad-Sports { background: linear-gradient(135deg, #1b5e20, #4caf50); }
+.genre-grad-Teen { background: linear-gradient(135deg, #5c1a3a, #e8527a); }
+.genre-grad-Thriller { background: linear-gradient(135deg, #212121, #9e9e9e); }
+.genre-grad-War { background: linear-gradient(135deg, #1b3a1a, #556b2f); }
+
+/* Genre neon colors */
+.genre-color-Action { color: #ff7a45; }
+.genre-color-Adventure { color: #daa520; }
+.genre-color-Animation { color: #7c4dff; }
+.genre-color-Comedy { color: #ffc53d; }
+.genre-color-Crime { color: #9e9e9e; }
+.genre-color-Documentary { color: #636e72; }
+.genre-color-Drama { color: #69c0ff; }
+.genre-color-Fantasy { color: #b37feb; }
+.genre-color-Holiday { color: #ff6b6b; }
+.genre-color-Horror { color: #ff4444; }
+.genre-color-Musical { color: #ce93d8; }
+.genre-color-Romance { color: #ff85c0; }
+.genre-color-Sci-Fi { color: #00f0ff; }
+.genre-color-Sports { color: #4caf50; }
+.genre-color-Teen { color: #e8527a; }
+.genre-color-Thriller { color: #9e9e9e; }
+.genre-color-War { color: #556b2f; }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--bg2);
+  border: 2px solid var(--pink);
+  border-radius: 16px;
+  max-width: 800px;
+  width: 100%;
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+  position: relative;
+  box-shadow: 0 0 40px rgba(232,82,122,0.3), 0 0 80px rgba(232,82,122,0.1);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 14px;
+  color: var(--text-dim);
+  cursor: pointer;
+  background: none;
+  border: none;
+  z-index: 2;
+  transition: color 0.2s;
+}
+
+.modal-close:hover { color: var(--pink); }
+
+.modal-poster {
+  flex: 0 0 220px;
+  aspect-ratio: 2 / 3;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.modal-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal-poster .poster-bg {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+}
+
+.modal-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: clamp(12px, 2vw, 16px);
+  color: var(--pink);
+  text-shadow: 0 0 7px var(--pink), 0 0 20px var(--pink);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.modal-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.modal-year { color: var(--yellow); text-shadow: 0 0 6px var(--yellow); font-weight: 700; }
+.modal-rating { color: var(--cyan); text-shadow: 0 0 6px var(--cyan); }
+
+.modal-genres {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.modal-genre-tag {
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1px solid;
+  font-weight: 700;
+}
+
+.modal-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.modal-badge {
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--text-dim);
+}
+
+.modal-section { margin-bottom: 14px; }
+
+.modal-section-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 8px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.modal-director { font-size: 14px; font-weight: 700; }
+
+.modal-cast-list {
+  list-style: none;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.modal-cast-list .character { color: var(--text-dim); }
+
+.modal-overview {
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(240,230,211,0.85);
+}
+
+.modal-notes {
+  background: rgba(232,82,122,0.08);
+  border-left: 3px solid var(--pink);
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  font-size: 13px;
+  line-height: 1.6;
+  font-style: italic;
+  color: rgba(240,230,211,0.9);
+}
+
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  padding: 40px 24px;
+  border-top: 1px solid var(--bg3);
+  margin-top: 40px;
+}
+
+.footer-text {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 9px;
+  color: var(--text-dim);
+  line-height: 2;
+}
+
+.footer-text a { color: var(--pink); text-decoration: none; }
+.footer-text a:hover { text-shadow: 0 0 8px var(--pink); }
+
+/* ── Back to Top ── */
+.back-to-top {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--pink);
+  color: #fff;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 5000;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s, transform 0.3s;
+  box-shadow: 0 0 16px rgba(232,82,122,0.4);
+}
+
+.back-to-top.visible { opacity: 1; transform: translateY(0); }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .filter-toggle { display: block; }
+  .filter-panels { max-height: 0; }
+  .filter-panels.expanded { max-height: 400px; }
+  .filter-row-label { width: 60px; font-size: 6px; }
+
+  .movie-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+  .modal { flex-direction: column; padding: 16px; }
+  .modal-poster { flex: none; width: 100%; max-width: 250px; margin: 0 auto; }
+
+  .collections-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .collection-card { padding: 14px; }
+  .collection-card .cc-name { font-size: 8px; }
+}
+
+@media (max-width: 480px) {
+  .movie-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .collections-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <h1 class="site-title">AMY'S 80s MOVIE VAULT</h1>
+  <p class="site-subtitle"><span>296</span> Films &mdash; The Ultimate Collection</p>
+</div>
+
+<!-- Dashboard (hidden in Version A: collections are filter pills instead) -->
+<div class="dashboard" id="dashboard" style="display:none">
+  <div class="dash-title">Collections &amp; Curated Sections</div>
+  <div class="collections-grid" id="collectionsGrid"></div>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar" id="filterBar">
+  <div class="filter-top">
+    <div class="search-wrap">
+      <input type="text" class="search-bar" id="searchBar" placeholder="SEARCH MOVIES..." autocomplete="off">
+    </div>
+    <div class="result-count" id="resultCount">Showing <span>296</span> of 296 films</div>
+    <select class="sort-select" id="sortSelect">
+      <option value="title-asc">Title A-Z</option>
+      <option value="title-desc">Title Z-A</option>
+      <option value="year-asc">Year (oldest)</option>
+      <option value="year-desc">Year (newest)</option>
+      <option value="rating-desc">Rating (highest)</option>
+    </select>
+    <button class="filter-toggle" id="filterToggle">FILTERS</button>
+  </div>
+  <div class="filter-panels" id="filterPanels">
+    <div class="filter-row" id="genreFilters">
+      <span class="filter-row-label">Genre</span>
+    </div>
+    <div class="filter-row" id="yearFilters">
+      <span class="filter-row-label">Years</span>
+    </div>
+    <div class="filter-row" id="sectionFilters">
+      <span class="filter-row-label">Sections</span>
+    </div>
+    <div class="filter-row" id="collectionFilters">
+      <span class="filter-row-label">Collections</span>
+    </div>
+  </div>
+  <div class="active-filters" id="activeFilters"></div>
+</div>
+
+<!-- Movie Grid -->
+<div class="grid-container">
+  <div class="movie-grid" id="movieGrid"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <div class="modal-poster" id="modalPoster"></div>
+    <div class="modal-info" id="modalInfo"></div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <p class="footer-text">Built with love for the Bramily<br>
+  <a href="index.html">&larr; Design Gallery</a></p>
+</div>
+
+<button class="back-to-top" id="backToTop">&uarr;</button>
+
+<script>
+// ── Movie Data ──
+const MOVIES = [{"title":"*batteries not included","year":1987,"genres":["Sci-Fi"],"special_sections":["Spielberg Universe"],"collections":[],"queer_flagged":false,"notes":"Spielberg produced"},{"title":"48 Hrs.","year":1982,"genres":["Action","Comedy","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Nick Nolte and Eddie Murphy invented the buddy cop genre"},{"title":"9 to 5","year":1980,"genres":["Comedy","Musical"],"special_sections":[],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"","poster_path":"/6xIKMxk2h6vP1WA7bqFqjvEFvqT.jpg","poster_url":"https://image.tmdb.org/t/p/w300/6xIKMxk2h6vP1WA7bqFqjvEFvqT.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/6xIKMxk2h6vP1WA7bqFqjvEFvqT.jpg"},{"title":"A Charlie Brown Christmas","year":1965,"genres":["Animation","Holiday"],"special_sections":["Holiday Films"],"collections":[],"queer_flagged":false,"notes":"Bending the year rule — too classic to leave out"},{"title":"A Chorus Line","year":1985,"genres":["Musical","Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"A Christmas Story","year":1983,"genres":["Comedy","Holiday"],"special_sections":["Holiday Films"],"collections":[],"queer_flagged":false,"notes":""},{"title":"A Nightmare on Elm Street","year":1984,"genres":["Horror"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":"","poster_path":"/wGTpGGRMZmyFCcrY2mFKBSHoXw1.jpg","poster_url":"https://image.tmdb.org/t/p/w300/wGTpGGRMZmyFCcrY2mFKBSHoXw1.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/wGTpGGRMZmyFCcrY2mFKBSHoXw1.jpg"},{"title":"About Last Night","year":1986,"genres":["Drama","Romance"],"special_sections":[],"collections":["Brat Pack"],"queer_flagged":false,"notes":""},{"title":"Absence of Malice","year":1981,"genres":["Thriller","Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Absolute Beginners","year":1986,"genres":["Musical","Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"David Bowie"},{"title":"Adventures in Babysitting","year":1987,"genres":["Comedy","Adventure"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"After Hours","year":1985,"genres":["Comedy","Thriller"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Scorsese"},{"title":"Against All Odds","year":1984,"genres":["Romance","Thriller"],"special_sections":[],"collections":["Iconic Soundtracks"],"queer_flagged":false,"notes":""},{"title":"Aliens","year":1986,"genres":["Sci-Fi","Action"],"special_sections":[],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"Ripley is THE ultimate 80s badass woman","poster_path":"/r1x5JGpyqZU8PYhbs4UcrO1Xb6x.jpg","poster_url":"https://image.tmdb.org/t/p/w300/r1x5JGpyqZU8PYhbs4UcrO1Xb6x.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/r1x5JGpyqZU8PYhbs4UcrO1Xb6x.jpg"},{"title":"Amadeus","year":1984,"genres":["Drama","Musical"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"F. Murray Abraham won Oscar in one of the great villain performances"},{"title":"An American Tail","year":1986,"genres":["Animation"],"special_sections":["Spielberg Universe"],"collections":[],"queer_flagged":false,"notes":"Don Bluth / Spielberg produced — everyone cried"},{"title":"An American Werewolf in London","year":1981,"genres":["Horror"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":"Best practical werewolf transformation ever put on film"},{"title":"An Officer and a Gentleman","year":1982,"genres":["Romance","Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"","poster_path":"/chQtVijGFPzFMYEnFolk09JbRLU.jpg","poster_url":"https://image.tmdb.org/t/p/w300/chQtVijGFPzFMYEnFolk09JbRLU.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/chQtVijGFPzFMYEnFolk09JbRLU.jpg"},{"title":"Annie","year":1982,"genres":["Musical"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"April Fool's Day","year":1986,"genres":["Horror"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":""},{"title":"Arthur","year":1981,"genres":["Comedy","Romance"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Bachelor Party","year":1984,"genres":["Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Back to the Future","year":1985,"genres":["Sci-Fi","Comedy"],"special_sections":["Spielberg Universe"],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":"Spielberg produced — one of the most perfectly constructed films ever made","poster_path":"/fNOH9f1aA7XRTzl1sAOx9iF553Q.jpg","poster_url":"https://image.tmdb.org/t/p/w300/fNOH9f1aA7XRTzl1sAOx9iF553Q.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/fNOH9f1aA7XRTzl1sAOx9iF553Q.jpg"},{"title":"Back to the Future Part II","year":1989,"genres":["Sci-Fi","Comedy"],"special_sections":["Spielberg Universe"],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":"Spielberg produced"},{"title":"Beastmaster","year":1982,"genres":["Action","Fantasy"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":""},{"title":"Beat Street","year":1984,"genres":["Musical","Drama","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Hip hop culture documentary energy"},{"title":"Beetlejuice","year":1988,"genres":["Horror","Comedy"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":"Tim Burton at his most inventive","poster_path":"/nnl6OWkyPpuMm595hmAxNW614NU.jpg","poster_url":"https://image.tmdb.org/t/p/w300/nnl6OWkyPpuMm595hmAxNW614NU.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/nnl6OWkyPpuMm595hmAxNW614NU.jpg"},{"title":"Better Off Dead","year":1985,"genres":["Teen","Comedy"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Two dollars!"},{"title":"Beverly Hills Cop","year":1984,"genres":["Action","Comedy","Crime"],"special_sections":[],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":"Eddie Murphy at his absolute peak","poster_path":"/eBJEvMR82Lhyri6XKV2B3pRXCAm.jpg","poster_url":"https://image.tmdb.org/t/p/w300/eBJEvMR82Lhyri6XKV2B3pRXCAm.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/eBJEvMR82Lhyri6XKV2B3pRXCAm.jpg"},{"title":"Big","year":1988,"genres":["Fantasy","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Tom Hanks earns his first Oscar nomination"},{"title":"Big Trouble in Little China","year":1986,"genres":["Action","Fantasy"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"John Carpenter's most purely fun film"},{"title":"Birdy","year":1984,"genres":["Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Black Widow","year":1987,"genres":["Thriller"],"special_sections":[],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":""},{"title":"Blade Runner","year":1982,"genres":["Sci-Fi","Thriller"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Ridley Scott / still looks better than most modern films","poster_path":"/63N9uy8nd9j7Eog2axPQ8lbr3Wj.jpg","poster_url":"https://image.tmdb.org/t/p/w300/63N9uy8nd9j7Eog2axPQ8lbr3Wj.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/63N9uy8nd9j7Eog2axPQ8lbr3Wj.jpg"},{"title":"Blood Simple","year":1984,"genres":["Thriller","Crime"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Coen Brothers debut — Frances McDormand's first film"},{"title":"Blow Out","year":1981,"genres":["Thriller"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Brian De Palma's most underrated"},{"title":"Blue Velvet","year":1986,"genres":["Thriller"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"David Lynch pulls back the curtain on suburban America","poster_path":"/p74T3JoHsL1MFMfL5rTgm3OWbeS.jpg","poster_url":"https://image.tmdb.org/t/p/w300/p74T3JoHsL1MFMfL5rTgm3OWbeS.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/p74T3JoHsL1MFMfL5rTgm3OWbeS.jpg"},{"title":"Body Heat","year":1981,"genres":["Thriller","Romance"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Kathleen Turner announced herself to the world"},{"title":"Born on the Fourth of July","year":1989,"genres":["War","Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Oliver Stone / Tom Cruise finally acting"},{"title":"Brainstorm","year":1983,"genres":["Sci-Fi"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Breakin'","year":1984,"genres":["Musical","Action"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Broadcast News","year":1987,"genres":["Drama","Comedy"],"special_sections":[],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"Holly Hunter is extraordinary"},{"title":"Bull Durham","year":1988,"genres":["Sports","Romance"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"The greatest baseball movie ever made"},{"title":"Caddyshack","year":1980,"genres":["Comedy","Sports"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Can't Buy Me Love","year":1987,"genres":["Teen","Romance"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Casualties of War","year":1989,"genres":["War","Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Cat People","year":1982,"genres":["Horror","Fantasy"],"special_sections":["Horror Vault","Queer Cinema & Stories"],"collections":[],"queer_flagged":true,"notes":"Queer coded / Giorgio Moroder soundtrack"},{"title":"Chariots of Fire","year":1981,"genres":["Sports","Drama"],"special_sections":["Holiday Films"],"collections":[],"queer_flagged":false,"notes":"Christmas scenes / British classic / that Vangelis score"},{"title":"Children of a Lesser God","year":1986,"genres":["Drama","Romance"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Marlee Matlin won Oscar"},{"title":"Children of the Corn","year":1984,"genres":["Horror"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":"Stephen King / he of the corn"},{"title":"Christine","year":1983,"genres":["Horror"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":"Stephen King / John Carpenter — a car with feelings and homicidal tendencies","poster_path":"/c0RuUAvsCW9t8gGVLR4cH3EB9t3.jpg","poster_url":"https://image.tmdb.org/t/p/w300/c0RuUAvsCW9t8gGVLR4cH3EB9t3.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/c0RuUAvsCW9t8gGVLR4cH3EB9t3.jpg"},{"title":"Christmas Evil","year":1980,"genres":["Horror"],"special_sections":["Horror Vault","Holiday Films"],"collections":["Cult Classics"],"queer_flagged":false,"notes":"Cult Christmas horror"},{"title":"Clash of the Titans","year":1981,"genres":["Fantasy","Action"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Class","year":1983,"genres":["Teen","Comedy"],"special_sections":[],"collections":["Brat Pack"],"queer_flagged":false,"notes":""},{"title":"Clue","year":1985,"genres":["Comedy","Thriller","Crime"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Tim Curry steals every scene in the most fun whodunit ever made"},{"title":"Cobra","year":1986,"genres":["Action","Crime"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Stallone at his most Stallone"},{"title":"Cocoon","year":1985,"genres":["Sci-Fi","Drama"],"special_sections":["Spielberg Universe"],"collections":[],"queer_flagged":false,"notes":"Spielberg produced","poster_path":"/sLXYEGxwbPIh2FwBcEGdBqO2hJR.jpg","poster_url":"https://image.tmdb.org/t/p/w300/sLXYEGxwbPIh2FwBcEGdBqO2hJR.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/sLXYEGxwbPIh2FwBcEGdBqO2hJR.jpg"},{"title":"Colors","year":1988,"genres":["Crime","Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Raw and unflinching look at LA gang culture — genuinely important film"},{"title":"Comfort and Joy","year":1984,"genres":["Comedy"],"special_sections":["Holiday Films"],"collections":[],"queer_flagged":false,"notes":"British Christmas gem"},{"title":"Coming to America","year":1988,"genres":["Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Eddie Murphy","poster_path":"/djRAvxyvvN4yMFnDEqeKkz7lkOl.jpg","poster_url":"https://image.tmdb.org/t/p/w300/djRAvxyvvN4yMFnDEqeKkz7lkOl.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/djRAvxyvvN4yMFnDEqeKkz7lkOl.jpg"},{"title":"Commando","year":1985,"genres":["Action"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Schwarzenegger"},{"title":"Conan the Barbarian","year":1982,"genres":["Action","Fantasy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Schwarzenegger"},{"title":"Creepshow","year":1982,"genres":["Horror"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":"Stephen King writes / Stephen King stars"},{"title":"Crocodile Dundee","year":1986,"genres":["Comedy","Adventure"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Crossing Delancey","year":1988,"genres":["Romance"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Cruising","year":1980,"genres":["Thriller","Crime"],"special_sections":["Queer Cinema & Stories"],"collections":[],"queer_flagged":true,"notes":"Al Pacino deep in gay subculture — raw and controversial"},{"title":"Cujo","year":1983,"genres":["Horror","Thriller"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":"Stephen King / never look at a Saint Bernard the same way"},{"title":"Dangerous Liaisons","year":1988,"genres":["Drama","Romance"],"special_sections":[],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"Glenn Close and Michelle Pfeiffer in their prime"},{"title":"Desert Hearts","year":1985,"genres":["Romance","Drama"],"special_sections":["Queer Cinema & Stories"],"collections":[],"queer_flagged":true,"notes":"Gorgeous tender lesbian love story — way ahead of its time"},{"title":"Desperately Seeking Susan","year":1985,"genres":["Comedy","Thriller"],"special_sections":[],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"Madonna actually acting"},{"title":"Die Hard","year":1988,"genres":["Action","Adventure"],"special_sections":["Holiday Films"],"collections":[],"queer_flagged":false,"notes":"Yes it IS a Christmas movie and this hill is worth dying on","poster_path":"/yFihWxQcmqcaBR31QM6Y8gT6aYV.jpg","poster_url":"https://image.tmdb.org/t/p/w300/yFihWxQcmqcaBR31QM6Y8gT6aYV.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/yFihWxQcmqcaBR31QM6Y8gT6aYV.jpg"},{"title":"Diner","year":1982,"genres":["Comedy","Drama","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Barry Levinson's love letter to Baltimore — early Brat Pack adjacent"},{"title":"Dirty Dancing","year":1987,"genres":["Romance","Musical"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Nobody puts Baby in a corner","poster_path":"/ePXzWAn8015YPEk3RkEB3GXlhBx.jpg","poster_url":"https://image.tmdb.org/t/p/w300/ePXzWAn8015YPEk3RkEB3GXlhBx.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/ePXzWAn8015YPEk3RkEB3GXlhBx.jpg"},{"title":"Do the Right Thing","year":1989,"genres":["Drama","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Spike Lee's masterpiece — still as urgent as ever","poster_path":"/v8GAMPFijQddPWPxECDETRfSqfR.jpg","poster_url":"https://image.tmdb.org/t/p/w300/v8GAMPFijQddPWPxECDETRfSqfR.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/v8GAMPFijQddPWPxECDETRfSqfR.jpg"},{"title":"Dragonslayer","year":1981,"genres":["Fantasy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Dream a Little Dream","year":1989,"genres":["Romance","Fantasy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Dreamscape","year":1984,"genres":["Fantasy","Sci-Fi"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"E.T. the Extra-Terrestrial","year":1982,"genres":["Sci-Fi"],"special_sections":["Spielberg Universe"],"collections":[],"queer_flagged":false,"notes":"Spielberg directed — made an entire generation afraid of government agents","poster_path":"/an0UbGBgYMjO5CbRKcMV3UAvAcn.jpg","poster_url":"https://image.tmdb.org/t/p/w300/an0UbGBgYMjO5CbRKcMV3UAvAcn.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/an0UbGBgYMjO5CbRKcMV3UAvAcn.jpg"},{"title":"Eight Men Out","year":1988,"genres":["Drama","Sports"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Emmet Otter's Jug-Band Christmas","year":1977,"genres":["Animation","Holiday"],"special_sections":["Holiday Films"],"collections":[],"queer_flagged":false,"notes":"Bending the year rule — Jim Henson classic"},{"title":"Empire of the Sun","year":1987,"genres":["War","Drama"],"special_sections":["Spielberg Universe"],"collections":[],"queer_flagged":false,"notes":"Spielberg directed / Christian Bale's debut"},{"title":"Enemy Mine","year":1985,"genres":["Sci-Fi"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Ernest Saves Christmas","year":1988,"genres":["Comedy"],"special_sections":["Holiday Films"],"collections":[],"queer_flagged":false,"notes":"Know what I mean Vern?"},{"title":"Escape from New York","year":1981,"genres":["Action","Sci-Fi"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"John Carpenter / Snake Plissken is cooler than everyone"},{"title":"Evil Dead","year":1981,"genres":["Horror"],"special_sections":["Horror Vault","Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Sam Raimi made this for nothing and it changed horror forever"},{"title":"Excalibur","year":1981,"genres":["Fantasy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Explorers","year":1985,"genres":["Sci-Fi"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Fame","year":1980,"genres":["Musical","Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Fast Times at Ridgemont High","year":1982,"genres":["Teen","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"","poster_path":"/7jACMfZTM2r0IPo35JxnKbNn7Ix.jpg","poster_url":"https://image.tmdb.org/t/p/w300/7jACMfZTM2r0IPo35JxnKbNn7Ix.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/7jACMfZTM2r0IPo35JxnKbNn7Ix.jpg"},{"title":"Fatal Attraction","year":1987,"genres":["Thriller"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Boiled bunnies and broken marriages"},{"title":"Ferris Bueller's Day Off","year":1986,"genres":["Comedy","Teen"],"special_sections":["John Hughes Universe"],"collections":[],"queer_flagged":false,"notes":"Hughes directed — life moves pretty fast","poster_path":"/9LddG87JMmHXsRJbpLpwMjcWpW2.jpg","poster_url":"https://image.tmdb.org/t/p/w300/9LddG87JMmHXsRJbpLpwMjcWpW2.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/9LddG87JMmHXsRJbpLpwMjcWpW2.jpg"},{"title":"Five Corners","year":1987,"genres":["Romance","Thriller"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Jodie Foster"},{"title":"Flash Gordon","year":1980,"genres":["Action","Sci-Fi"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Queen soundtrack alone justifies its existence"},{"title":"Flashdance","year":1983,"genres":["Drama","Musical"],"special_sections":[],"collections":["Badass Women of the 80s","Iconic Soundtracks"],"queer_flagged":false,"notes":"What a feeling","poster_path":"/hGGRxjRDBhp2yRRAPRAYBo7FMbt.jpg","poster_url":"https://image.tmdb.org/t/p/w300/hGGRxjRDBhp2yRRAPRAYBo7FMbt.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/hGGRxjRDBhp2yRRAPRAYBo7FMbt.jpg"},{"title":"Fletch","year":1985,"genres":["Comedy","Thriller","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Chevy Chase at his absolute funniest"},{"title":"Flight of the Navigator","year":1986,"genres":["Sci-Fi"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Disney"},{"title":"Footloose","year":1984,"genres":["Teen","Musical"],"special_sections":[],"collections":["Iconic Soundtracks"],"queer_flagged":false,"notes":""},{"title":"Foxes","year":1980,"genres":["Teen","Drama"],"special_sections":[],"collections":[],"queer_flagged":true,"notes":"Jodie Foster"},{"title":"Fright Night","year":1985,"genres":["Horror","Comedy"],"special_sections":["Horror Vault"],"collections":["Underrated Gems"],"queer_flagged":false,"notes":"Charming and genuinely scary — massively underrated"},{"title":"Full Metal Jacket","year":1987,"genres":["War"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Kubrick / R. Lee Ermey was actually a real drill sergeant","poster_path":"/kMKyx1k8hWWscYFnPbnxxYAEOoW.jpg","poster_url":"https://image.tmdb.org/t/p/w300/kMKyx1k8hWWscYFnPbnxxYAEOoW.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/kMKyx1k8hWWscYFnPbnxxYAEOoW.jpg"},{"title":"Ghostbusters","year":1984,"genres":["Comedy","Sci-Fi"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Who you gonna call","poster_path":"/loFCAro1YSAhMJHfmRFCemMNLun.jpg","poster_url":"https://image.tmdb.org/t/p/w300/loFCAro1YSAhMJHfmRFCemMNLun.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/loFCAro1YSAhMJHfmRFCemMNLun.jpg"},{"title":"Girls Just Want to Have Fun","year":1985,"genres":["Teen","Musical"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Gleaming the Cube","year":1989,"genres":["Sports"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Christian Slater on a skateboard solving a murder"},{"title":"Good Morning, Vietnam","year":1987,"genres":["War","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Robin Williams improvised most of it"},{"title":"Gorillas in the Mist","year":1988,"genres":["Drama"],"special_sections":[],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"Sigourney Weaver — Dian Fossey's extraordinary life and death"},{"title":"Grease 2","year":1982,"genres":["Musical","Romance"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Michelle Pfeiffer somehow makes this worth watching"},{"title":"Gremlins","year":1984,"genres":["Horror","Comedy"],"special_sections":["Horror Vault","Holiday Films"],"collections":["Spielberg Universe"],"queer_flagged":false,"notes":"Spielberg produced / never feed them after midnight","poster_path":"/kFNVfJCjs5d4GD5nRt0dxMUcbtC.jpg","poster_url":"https://image.tmdb.org/t/p/w300/kFNVfJCjs5d4GD5nRt0dxMUcbtC.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/kFNVfJCjs5d4GD5nRt0dxMUcbtC.jpg"},{"title":"Hairspray","year":1988,"genres":["Musical","Comedy"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":true,"notes":"John Waters / Divine's last film"},{"title":"Halloween","year":1978,"genres":["Horror"],"special_sections":["Horror Vault","Holiday Films"],"collections":[],"queer_flagged":false,"notes":"Bending the year rule — grandfather of everything in the Horror Vault"},{"title":"Halloween II","year":1981,"genres":["Horror"],"special_sections":["Horror Vault","Holiday Films"],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":"","poster_path":"/wSqAXL1EHVJ3MnDZ7dOucGGMscu.jpg","poster_url":"https://image.tmdb.org/t/p/w300/wSqAXL1EHVJ3MnDZ7dOucGGMscu.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/wSqAXL1EHVJ3MnDZ7dOucGGMscu.jpg"},{"title":"Halloween III: Season of the Witch","year":1982,"genres":["Horror"],"special_sections":["Horror Vault","Holiday Films"],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":"No Michael Myers — wildly divisive — actually kind of brilliant"},{"title":"Heartbreak Ridge","year":1986,"genres":["War","Action"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Clint Eastwood"},{"title":"Heathers","year":1988,"genres":["Teen","Comedy"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":true,"notes":"The darkest teen movie ever made — way ahead of its time","poster_path":"/n28BVBzMkim2dO2bInY7vMi1H7r.jpg","poster_url":"https://image.tmdb.org/t/p/w300/n28BVBzMkim2dO2bInY7vMi1H7r.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/n28BVBzMkim2dO2bInY7vMi1H7r.jpg"},{"title":"Heavy Metal","year":1981,"genres":["Animation","Sci-Fi"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Adult animated anthology — not for kids"},{"title":"Hellraiser","year":1987,"genres":["Horror"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":"Clive Barker / the Cenobites are still nightmare fuel","poster_path":"/tCBFDCeB3wYlfVHvE06tCOFfoJq.jpg","poster_url":"https://image.tmdb.org/t/p/w300/tCBFDCeB3wYlfVHvE06tCOFfoJq.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/tCBFDCeB3wYlfVHvE06tCOFfoJq.jpg"},{"title":"Highlander","year":1986,"genres":["Fantasy","Action"],"special_sections":["Cult Classics"],"collections":["Iconic Soundtracks"],"queer_flagged":false,"notes":"There can be only one / Queen soundtrack"},{"title":"Hoosiers","year":1986,"genres":["Sports","Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Gene Hackman / the gold standard of sports movies"},{"title":"House","year":1986,"genres":["Horror","Comedy"],"special_sections":["Horror Vault","Cult Classics"],"collections":[],"queer_flagged":false,"notes":""},{"title":"Indiana Jones and the Last Crusade","year":1989,"genres":["Action","Adventure"],"special_sections":["Spielberg Universe"],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":"Spielberg directed / Sean Connery steals the whole movie"},{"title":"Indiana Jones and the Temple of Doom","year":1984,"genres":["Action","Adventure"],"special_sections":["Spielberg Universe"],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":"Spielberg directed / darker and weirder than Raiders"},{"title":"Innerspace","year":1987,"genres":["Sci-Fi","Comedy"],"special_sections":["Spielberg Universe"],"collections":[],"queer_flagged":false,"notes":"Spielberg produced"},{"title":"Jagged Edge","year":1985,"genres":["Thriller","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Glenn Close / did he do it? You'll argue about it after"},{"title":"Just One of the Guys","year":1985,"genres":["Teen","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Krull","year":1983,"genres":["Fantasy","Sci-Fi"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Deeply weird / deeply beloved"},{"title":"La Bamba","year":1987,"genres":["Musical","Drama"],"special_sections":[],"collections":["Iconic Soundtracks"],"queer_flagged":false,"notes":"Lou Diamond Phillips / Ritchie Valens story"},{"title":"Labyrinth","year":1986,"genres":["Fantasy","Musical"],"special_sections":[],"collections":["Iconic Soundtracks"],"queer_flagged":false,"notes":"David Bowie / Jennifer Connelly / unforgettable"},{"title":"Ladyhawke","year":1985,"genres":["Fantasy","Romance"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Matthew Broderick / Michelle Pfeiffer / cursed lovers"},{"title":"Lean on Me","year":1989,"genres":["Drama","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Morgan Freeman as Joe Clark — legendary principal / based on a true story"},{"title":"Legend","year":1985,"genres":["Fantasy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Tom Cruise / Ridley Scott / Tim Curry as the Lord of Darkness"},{"title":"Less Than Zero","year":1987,"genres":["Drama","Crime"],"special_sections":[],"collections":["Brat Pack"],"queer_flagged":false,"notes":"Robert Downey Jr. basically playing himself — devastating"},{"title":"Lethal Weapon","year":1987,"genres":["Action","Adventure","Crime"],"special_sections":[],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":"","poster_path":"/bFxAftejRNhkMFederCq9QghF8u.jpg","poster_url":"https://image.tmdb.org/t/p/w300/bFxAftejRNhkMFederCq9QghF8u.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/bFxAftejRNhkMFederCq9QghF8u.jpg"},{"title":"Little Shop of Horrors","year":1986,"genres":["Musical","Comedy","Horror"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Feed me Seymour"},{"title":"Lucas","year":1986,"genres":["Teen","Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Major League","year":1989,"genres":["Sports","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Juuust a bit outside"},{"title":"Making Love","year":1982,"genres":["Romance","Drama"],"special_sections":["Queer Cinema & Stories"],"collections":[],"queer_flagged":true,"notes":"One of Hollywood's first sympathetic mainstream gay storylines"},{"title":"Manhunter","year":1986,"genres":["Thriller","Crime"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"First Hannibal Lecter ever / Michael Mann / completely overlooked"},{"title":"Mannequin","year":1987,"genres":["Romance","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Married to the Mob","year":1988,"genres":["Comedy","Crime"],"special_sections":[],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"Michelle Pfeiffer trying to escape the mob life — funny and charming"},{"title":"Mask","year":1985,"genres":["Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Cher / Eric Stoltz"},{"title":"Maximum Overdrive","year":1986,"genres":["Horror","Sci-Fi"],"special_sections":["Horror Vault","Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Stephen King directed it himself / AC/DC soundtrack / machines attack"},{"title":"Midnight Run","year":1988,"genres":["Comedy","Action","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Robert De Niro and Charles Grodin — one of the great comedic pairings"},{"title":"Millennium","year":1989,"genres":["Sci-Fi"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Missing in Action","year":1984,"genres":["War","Action"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Chuck Norris"},{"title":"Moonstruck","year":1987,"genres":["Romance","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Cher won the Oscar / Nicolas Cage at peak Nicolas Cage","poster_path":"/tmHNSJOGjrJwxiPbZBEVlORjCgx.jpg","poster_url":"https://image.tmdb.org/t/p/w300/tmHNSJOGjrJwxiPbZBEVlORjCgx.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/tmHNSJOGjrJwxiPbZBEVlORjCgx.jpg"},{"title":"My Beautiful Laundrette","year":1985,"genres":["Drama","Romance"],"special_sections":["Queer Cinema & Stories"],"collections":[],"queer_flagged":true,"notes":"Gay interracial relationship in Thatcher's Britain — quietly radical"},{"title":"My Neighbor Totoro","year":1988,"genres":["Animation","Fantasy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Miyazaki / perfection"},{"title":"My Stepmother Is an Alien","year":1988,"genres":["Sci-Fi","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Mystic Pizza","year":1988,"genres":["Romance","Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Julia Roberts before anyone knew who she was"},{"title":"National Lampoon's Christmas Vacation","year":1989,"genres":["Comedy"],"special_sections":["Holiday Films","John Hughes Universe"],"collections":[],"queer_flagged":false,"notes":"Hughes written / Clark Griswold is all of us at Christmas"},{"title":"National Lampoon's Vacation","year":1983,"genres":["Comedy"],"special_sections":["John Hughes Universe"],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":"Hughes written","poster_path":"/q3DvIoSbhwOOd4T7mDYENsaXvYH.jpg","poster_url":"https://image.tmdb.org/t/p/w300/q3DvIoSbhwOOd4T7mDYENsaXvYH.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/q3DvIoSbhwOOd4T7mDYENsaXvYH.jpg"},{"title":"Nausicaä of the Valley of the Wind","year":1984,"genres":["Animation","Fantasy"],"special_sections":[],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"Miyazaki / one of the great female heroes in any medium"},{"title":"Night of the Demons","year":1988,"genres":["Horror"],"special_sections":["Horror Vault","Holiday Films"],"collections":[],"queer_flagged":false,"notes":"Halloween party horror"},{"title":"No Way Out","year":1987,"genres":["Thriller","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Kevin Costner / that ending"},{"title":"Once Upon a Time in America","year":1984,"genres":["Crime","Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Sergio Leone's final film — epic four hour mob masterpiece in the league of Godfather"},{"title":"One Crazy Summer","year":1986,"genres":["Teen","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"John Cusack"},{"title":"One Magic Christmas","year":1985,"genres":["Fantasy"],"special_sections":["Holiday Films"],"collections":[],"queer_flagged":false,"notes":"Disney's darker Christmas film"},{"title":"Ordinary People","year":1980,"genres":["Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"","poster_path":"/4eFgqxMbFxV7lSjRNphdCJK8VIt.jpg","poster_url":"https://image.tmdb.org/t/p/w300/4eFgqxMbFxV7lSjRNphdCJK8VIt.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/4eFgqxMbFxV7lSjRNphdCJK8VIt.jpg"},{"title":"Overboard","year":1987,"genres":["Romance","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Goldie Hawn / Kurt Russell / chaotic and wonderful"},{"title":"Parting Glances","year":1986,"genres":["Drama","Romance"],"special_sections":["Queer Cinema & Stories"],"collections":[],"queer_flagged":true,"notes":"One of the first films to address AIDS directly and honestly"},{"title":"Pee-wee's Big Adventure","year":1985,"genres":["Comedy"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Tim Burton's debut / I know you are but what am I"},{"title":"Peggy Sue Got Married","year":1986,"genres":["Fantasy","Romance"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Kathleen Turner / Nicolas Cage"},{"title":"Personal Best","year":1982,"genres":["Sports","Drama"],"special_sections":["Queer Cinema & Stories"],"collections":[],"queer_flagged":true,"notes":"Explicit lesbian relationship between two Olympic athletes — groundbreaking"},{"title":"Pet Sematary","year":1989,"genres":["Horror"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":"Stephen King / sometimes dead is better"},{"title":"Planes, Trains and Automobiles","year":1987,"genres":["Comedy"],"special_sections":["John Hughes Universe","Holiday Films"],"collections":[],"queer_flagged":false,"notes":"Hughes directed / the greatest Thanksgiving movie ever made"},{"title":"Platoon","year":1986,"genres":["Drama","War"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Oliver Stone","poster_path":"/oJDPvJynGqVfxjJMkMjXJIPhSsa.jpg","poster_url":"https://image.tmdb.org/t/p/w300/oJDPvJynGqVfxjJMkMjXJIPhSsa.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/oJDPvJynGqVfxjJMkMjXJIPhSsa.jpg"},{"title":"Poltergeist","year":1982,"genres":["Horror"],"special_sections":["Horror Vault","Spielberg Universe"],"collections":[],"queer_flagged":false,"notes":"Spielberg produced / they're here","poster_path":"/2DMJV9RhTtaXnEUmjuqmBj1jCD5.jpg","poster_url":"https://image.tmdb.org/t/p/w300/2DMJV9RhTtaXnEUmjuqmBj1jCD5.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/2DMJV9RhTtaXnEUmjuqmBj1jCD5.jpg"},{"title":"Porky's","year":1981,"genres":["Comedy","Teen"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":""},{"title":"Prancer","year":1989,"genres":["Drama"],"special_sections":["Holiday Films"],"collections":[],"queer_flagged":false,"notes":"Sam Elliott / sweet and underrated Christmas film"},{"title":"Predator","year":1987,"genres":["Action","Sci-Fi"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Schwarzenegger / get to the choppa","poster_path":"/bFOqHIDN2MnJNQph5SMpWnQyilq.jpg","poster_url":"https://image.tmdb.org/t/p/w300/bFOqHIDN2MnJNQph5SMpWnQyilq.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/bFOqHIDN2MnJNQph5SMpWnQyilq.jpg"},{"title":"Pretty in Pink","year":1986,"genres":["Teen","Romance"],"special_sections":["John Hughes Universe"],"collections":["Brat Pack"],"queer_flagged":false,"notes":"Hughes written / wrong ending but still essential","poster_path":"/cMcggIi3JDvnVfK5BoMTj4BpkCA.jpg","poster_url":"https://image.tmdb.org/t/p/w300/cMcggIi3JDvnVfK5BoMTj4BpkCA.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/cMcggIi3JDvnVfK5BoMTj4BpkCA.jpg"},{"title":"Private Benjamin","year":1980,"genres":["Comedy","War"],"special_sections":[],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"Goldie Hawn / she earned every laugh"},{"title":"Prizzi's Honor","year":1985,"genres":["Crime","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Mob hitman falls for another hitman — darkly hilarious / Jack Nicholson"},{"title":"Pumpkinhead","year":1988,"genres":["Horror"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":"Lance Henriksen / grief and revenge and a monster"},{"title":"Purple Rain","year":1984,"genres":["Musical","Drama"],"special_sections":[],"collections":["Iconic Soundtracks"],"queer_flagged":false,"notes":"Prince / there will never be another"},{"title":"Rad","year":1986,"genres":["Sports"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"BMX racing / pure distilled 80s"},{"title":"Raiders of the Lost Ark","year":1981,"genres":["Action","Adventure"],"special_sections":["Spielberg Universe"],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":"Spielberg directed / one of the greatest adventure films ever made","poster_path":"/ceG9VzoRAVGwivFU403Wc3AHRys.jpg","poster_url":"https://image.tmdb.org/t/p/w300/ceG9VzoRAVGwivFU403Wc3AHRys.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/ceG9VzoRAVGwivFU403Wc3AHRys.jpg"},{"title":"Rain Man","year":1988,"genres":["Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Hoffman and Cruise / Hoffman won the Oscar","poster_path":"/jOUPMGemkJBd6sGl0NnjIS3CoWQ.jpg","poster_url":"https://image.tmdb.org/t/p/w300/jOUPMGemkJBd6sGl0NnjIS3CoWQ.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/jOUPMGemkJBd6sGl0NnjIS3CoWQ.jpg"},{"title":"Raising Arizona","year":1987,"genres":["Comedy","Crime"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Coen Brothers / Nicolas Cage / Holly Hunter / completely unhinged in the best way"},{"title":"Rambo: First Blood Part II","year":1985,"genres":["War","Action"],"special_sections":[],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":"Stallone"},{"title":"Real Genius","year":1985,"genres":["Comedy","Sci-Fi"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Val Kilmer / nerds save the world with popcorn"},{"title":"Red Dawn","year":1984,"genres":["Action","War"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Repo Man","year":1984,"genres":["Sci-Fi","Comedy","Crime"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Punk cult classic / Emilio Estevez / the life of a repo man is always intense"},{"title":"Revenge of the Nerds","year":1984,"genres":["Comedy"],"special_sections":["Cult Classics"],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":""},{"title":"Risky Business","year":1983,"genres":["Teen","Comedy","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Tom Cruise / old time rock and roll"},{"title":"River's Edge","year":1986,"genres":["Teen","Drama","Crime"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Dark and disturbing / based on a true story"},{"title":"Roadhouse","year":1989,"genres":["Action","Crime"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Patrick Swayze / pain don't hurt"},{"title":"RoboCop","year":1987,"genres":["Action","Sci-Fi","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Paul Verhoeven / satire disguised as action movie","poster_path":"/hoCbhAOfOFpnF7MCsIv04v1rnkS.jpg","poster_url":"https://image.tmdb.org/t/p/w300/hoCbhAOfOFpnF7MCsIv04v1rnkS.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/hoCbhAOfOFpnF7MCsIv04v1rnkS.jpg"},{"title":"Rocky III","year":1982,"genres":["Sports","Action"],"special_sections":[],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":"Mr. T / Eye of the Tiger"},{"title":"Rocky IV","year":1985,"genres":["Sports","Action"],"special_sections":[],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":"Stallone / Dolph Lundgren / if he dies he dies"},{"title":"Roxanne","year":1987,"genres":["Comedy","Romance"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Steve Martin"},{"title":"Rumble Fish","year":1983,"genres":["Teen","Drama","Crime"],"special_sections":[],"collections":["Brat Pack"],"queer_flagged":false,"notes":"Coppola / shot in black and white / very cool"},{"title":"Running Man","year":1987,"genres":["Action","Sci-Fi","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Schwarzenegger / scarily prescient about reality TV"},{"title":"Running on Empty","year":1988,"genres":["Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"River Phoenix / heartbreaking"},{"title":"Santa Claus: The Movie","year":1985,"genres":["Fantasy"],"special_sections":["Holiday Films"],"collections":[],"queer_flagged":false,"notes":""},{"title":"Say Anything","year":1989,"genres":["Romance","Teen"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"John Cusack / the boom box scene invented a generation of romantics"},{"title":"Scanners","year":1981,"genres":["Horror","Sci-Fi"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":"Cronenberg / that head explosion"},{"title":"Scarface","year":1983,"genres":["Crime","Drama","Action"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Al Pacino / Brian De Palma / say hello to my little friend","poster_path":"/iQ5ztdjvteGeboXVh1eW3xIF5gO.jpg","poster_url":"https://image.tmdb.org/t/p/w300/iQ5ztdjvteGeboXVh1eW3xIF5gO.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/iQ5ztdjvteGeboXVh1eW3xIF5gO.jpg"},{"title":"Scrooged","year":1988,"genres":["Comedy"],"special_sections":["Holiday Films"],"collections":[],"queer_flagged":false,"notes":"Bill Murray / the best Christmas Carol adaptation"},{"title":"Sea of Love","year":1989,"genres":["Thriller","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Al Pacino"},{"title":"Secret Admirer","year":1985,"genres":["Romance","Teen"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Seven Minutes in Heaven","year":1985,"genres":["Teen","Romance"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Early Jennifer Connelly"},{"title":"Sid and Nancy","year":1986,"genres":["Drama","Musical","Crime"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Gary Oldman as Sid Vicious — extraordinary and devastating"},{"title":"Silent Night Deadly Night","year":1984,"genres":["Horror"],"special_sections":["Horror Vault","Holiday Films"],"collections":["Cult Classics"],"queer_flagged":false,"notes":"Infamous killer Santa / caused actual protests"},{"title":"Silkwood","year":1983,"genres":["Drama","Thriller"],"special_sections":[],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"Meryl Streep and Cher — nuclear whistleblower true story"},{"title":"Silver Bullet","year":1985,"genres":["Horror"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":"Stephen King"},{"title":"Sing","year":1989,"genres":["Musical","Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Sixteen Candles","year":1984,"genres":["Teen","Comedy"],"special_sections":["John Hughes Universe"],"collections":[],"queer_flagged":false,"notes":"Hughes directed","poster_path":"/aXcidnDDnCmoEnc9MIQ7bNlMd2z.jpg","poster_url":"https://image.tmdb.org/t/p/w300/aXcidnDDnCmoEnc9MIQ7bNlMd2z.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/aXcidnDDnCmoEnc9MIQ7bNlMd2z.jpg"},{"title":"Some Kind of Wonderful","year":1987,"genres":["Romance","Teen"],"special_sections":["John Hughes Universe"],"collections":[],"queer_flagged":false,"notes":"Hughes written — the one where he got the ending right","poster_path":"/z5WNAhS9DO4BBDNA39MHKGN8hyB.jpg","poster_url":"https://image.tmdb.org/t/p/w300/z5WNAhS9DO4BBDNA39MHKGN8hyB.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/z5WNAhS9DO4BBDNA39MHKGN8hyB.jpg"},{"title":"Something Wild","year":1986,"genres":["Comedy","Thriller","Crime"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Jeff Daniels / Melanie Griffith / Ray Liotta is terrifying"},{"title":"Somewhere in Time","year":1980,"genres":["Romance","Fantasy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Christopher Reeve"},{"title":"SpaceCamp","year":1986,"genres":["Sci-Fi","Adventure"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Spaceballs","year":1987,"genres":["Comedy","Sci-Fi"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Mel Brooks / may the schwartz be with you","poster_path":"/o624HTt9RMu9YwWHKt7lSm1DVXE.jpg","poster_url":"https://image.tmdb.org/t/p/w300/o624HTt9RMu9YwWHKt7lSm1DVXE.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/o624HTt9RMu9YwWHKt7lSm1DVXE.jpg"},{"title":"Splash","year":1984,"genres":["Romance","Comedy"],"special_sections":["Spielberg Universe"],"collections":[],"queer_flagged":false,"notes":"Tom Hanks / Daryl Hannah / Spielberg produced"},{"title":"St. Elmo's Fire","year":1985,"genres":["Drama","Teen"],"special_sections":[],"collections":["Brat Pack"],"queer_flagged":false,"notes":"The Brat Pack at peak Brat Pack"},{"title":"Stand By Me","year":1986,"genres":["Drama","Teen"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Stephen King / Rob Reiner / the last days of childhood","poster_path":"/bXbTlLFj3zHEdcfnlMlNvPbY8za.jpg","poster_url":"https://image.tmdb.org/t/p/w300/bXbTlLFj3zHEdcfnlMlNvPbY8za.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/bXbTlLFj3zHEdcfnlMlNvPbY8za.jpg"},{"title":"Stand and Deliver","year":1988,"genres":["Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Edward James Olmos / East LA / calculus / based on a true story — genuinely inspiring"},{"title":"Star 80","year":1983,"genres":["Drama","Crime"],"special_sections":[],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"Bob Fosse / Dorothy Stratten's story — devastating"},{"title":"Starman","year":1984,"genres":["Sci-Fi","Romance"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"John Carpenter's most tender film"},{"title":"Staying Alive","year":1983,"genres":["Musical","Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"John Travolta"},{"title":"Stealing Home","year":1988,"genres":["Drama","Sports"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Jodie Foster / Mark Harmon"},{"title":"Steel Magnolias","year":1989,"genres":["Drama","Comedy"],"special_sections":[],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"Six extraordinary women / you will cry"},{"title":"Stop Making Sense","year":1984,"genres":["Musical","Documentary"],"special_sections":[],"collections":["Iconic Soundtracks"],"queer_flagged":false,"notes":"Talking Heads / greatest concert film ever made"},{"title":"Stripes","year":1981,"genres":["Comedy","War"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Bill Murray"},{"title":"Tango & Cash","year":1989,"genres":["Action","Comedy","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Stallone / Kurt Russell"},{"title":"Terms of Endearment","year":1983,"genres":["Drama","Romance"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Shirley MacLaine won Oscar / Jack Nicholson won Oscar / everyone cried"},{"title":"The Abyss","year":1989,"genres":["Sci-Fi"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"James Cameron"},{"title":"The Accused","year":1988,"genres":["Drama","Thriller"],"special_sections":[],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"Jodie Foster won Oscar"},{"title":"The Big Chill","year":1983,"genres":["Drama","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Baby boomers facing mortality / great soundtrack"},{"title":"The Black Cauldron","year":1985,"genres":["Animation"],"special_sections":[],"collections":["Underrated Gems"],"queer_flagged":false,"notes":"Disney's dark one / nearly killed the studio"},{"title":"The Blue Lagoon","year":1980,"genres":["Fantasy","Romance"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"The Blues Brothers","year":1980,"genres":["Musical","Comedy","Crime"],"special_sections":["Cult Classics"],"collections":["Iconic Soundtracks"],"queer_flagged":false,"notes":"Belushi and Aykroyd on a mission from God"},{"title":"The Brave Little Toaster","year":1987,"genres":["Animation"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Genuinely traumatizing for an entire generation of children"},{"title":"The Breakfast Club","year":1985,"genres":["Teen","Comedy"],"special_sections":["John Hughes Universe"],"collections":["Brat Pack"],"queer_flagged":false,"notes":"Hughes directed — still the definitive high school film","poster_path":"/aYPV0pzfoaaCvn9CBfXPqqFMFTi.jpg","poster_url":"https://image.tmdb.org/t/p/w300/aYPV0pzfoaaCvn9CBfXPqqFMFTi.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/aYPV0pzfoaaCvn9CBfXPqqFMFTi.jpg"},{"title":"The Color Purple","year":1985,"genres":["Drama"],"special_sections":["Spielberg Universe"],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"Spielberg directed","poster_path":"/sGNlnJEhm5x7BBCsSFxfSpqzTAF.jpg","poster_url":"https://image.tmdb.org/t/p/w300/sGNlnJEhm5x7BBCsSFxfSpqzTAF.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/sGNlnJEhm5x7BBCsSFxfSpqzTAF.jpg"},{"title":"The Color of Money","year":1986,"genres":["Drama","Thriller"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"The Dark Crystal","year":1982,"genres":["Fantasy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Jim Henson's dark masterpiece — one of a kind"},{"title":"The Fly","year":1986,"genres":["Horror","Sci-Fi"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":"Cronenberg / Jeff Goldblum gives the performance of his life","poster_path":"/1MYCbEMbXTNjVbaiGJElCOGLkfR.jpg","poster_url":"https://image.tmdb.org/t/p/w300/1MYCbEMbXTNjVbaiGJElCOGLkfR.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/1MYCbEMbXTNjVbaiGJElCOGLkfR.jpg"},{"title":"The Fog","year":1980,"genres":["Horror"],"special_sections":["Horror Vault","Holiday Films"],"collections":[],"queer_flagged":false,"notes":"John Carpenter / atmospheric coastal horror"},{"title":"The Fox and the Hound","year":1981,"genres":["Animation"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Disney / everyone cried"},{"title":"The Goonies","year":1985,"genres":["Adventure","Action"],"special_sections":["Spielberg Universe"],"collections":[],"queer_flagged":false,"notes":"Spielberg produced — every kid wanted to find One-Eyed Willy's treasure"},{"title":"The Great Mouse Detective","year":1986,"genres":["Animation"],"special_sections":[],"collections":["Underrated Gems"],"queer_flagged":false,"notes":"Disney's most underrated film of the decade"},{"title":"The Hidden","year":1987,"genres":["Sci-Fi","Action","Crime"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Kyle MacLachlan / wildly underrated sci-fi thriller"},{"title":"The Hotel New Hampshire","year":1984,"genres":["Drama","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Jodie Foster / Rob Lowe / very strange and very good"},{"title":"The Howling","year":1981,"genres":["Horror"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":""},{"title":"The Karate Kid","year":1984,"genres":["Sports","Teen"],"special_sections":[],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":"Wax on wax off"},{"title":"The Karate Kid Part II","year":1986,"genres":["Sports","Teen"],"special_sections":[],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":""},{"title":"The Killing Fields","year":1984,"genres":["Drama","War"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"The Land Before Time","year":1988,"genres":["Animation"],"special_sections":["Spielberg Universe"],"collections":[],"queer_flagged":false,"notes":"Don Bluth / Spielberg produced — everyone cried again"},{"title":"The Last Starfighter","year":1984,"genres":["Sci-Fi"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Video games will save the world","poster_path":"/an1x4uKGERzVJvZpAo7qMiEMDBX.jpg","poster_url":"https://image.tmdb.org/t/p/w300/an1x4uKGERzVJvZpAo7qMiEMDBX.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/an1x4uKGERzVJvZpAo7qMiEMDBX.jpg"},{"title":"The Last Unicorn","year":1982,"genres":["Animation","Fantasy"],"special_sections":[],"collections":["Underrated Gems"],"queer_flagged":false,"notes":"Heartbreaking and gorgeous — criminally underseen"},{"title":"The Legend of Billie Jean","year":1985,"genres":["Teen","Drama"],"special_sections":["Cult Classics"],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"Fair is fair! — Helen Slater is a revelation"},{"title":"The Little Mermaid","year":1989,"genres":["Animation","Musical"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Disney renaissance begins here"},{"title":"The Lost Boys","year":1987,"genres":["Horror","Crime"],"special_sections":["Horror Vault","Queer Cinema & Stories"],"collections":[],"queer_flagged":true,"notes":"Heavily queer coded / best vampire movie of the decade"},{"title":"The Money Pit","year":1986,"genres":["Comedy"],"special_sections":["Spielberg Universe"],"collections":[],"queer_flagged":false,"notes":"Spielberg produced"},{"title":"The Natural","year":1984,"genres":["Sports","Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Robert Redford / gorgeous and mythic"},{"title":"The NeverEnding Story","year":1984,"genres":["Fantasy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Artax. We don't talk about Artax."},{"title":"The Outsiders","year":1983,"genres":["Teen","Drama","Crime"],"special_sections":[],"collections":["Brat Pack"],"queer_flagged":false,"notes":"Coppola / S.E. Hinton / launched a dozen careers"},{"title":"The Principal","year":1987,"genres":["Drama","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Tough principal sent to the most dangerous school in the district"},{"title":"The Secret of NIMH","year":1982,"genres":["Animation","Fantasy"],"special_sections":[],"collections":["Underrated Gems"],"queer_flagged":false,"notes":"Don Bluth / darker and smarter than anything Disney made that year"},{"title":"The Sure Thing","year":1985,"genres":["Romance","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"John Cusack / Rob Reiner / underrated road trip romance"},{"title":"The Terminator","year":1984,"genres":["Action","Sci-Fi","Crime"],"special_sections":[],"collections":["Sequels & Franchises"],"queer_flagged":false,"notes":"James Cameron / I'll be back","poster_path":"/qvktm0BHcnmDpul4Hz01GIazWPr.jpg","poster_url":"https://image.tmdb.org/t/p/w300/qvktm0BHcnmDpul4Hz01GIazWPr.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/qvktm0BHcnmDpul4Hz01GIazWPr.jpg"},{"title":"The Thing","year":1982,"genres":["Horror","Sci-Fi"],"special_sections":["Horror Vault"],"collections":[],"queer_flagged":false,"notes":"John Carpenter / practical effects that still hold up / pure paranoia","poster_path":"/tzGY49kseSE9QAKk47uuDGwnSCu.jpg","poster_url":"https://image.tmdb.org/t/p/w300/tzGY49kseSE9QAKk47uuDGwnSCu.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/tzGY49kseSE9QAKk47uuDGwnSCu.jpg"},{"title":"The Untouchables","year":1987,"genres":["Crime","Drama","Action"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Brian De Palma / Kevin Costner / De Niro as Capone / that train station scene"},{"title":"The Worst Witch","year":1986,"genres":["Fantasy"],"special_sections":["Holiday Films"],"collections":[],"queer_flagged":false,"notes":"Halloween themed / Tim Curry"},{"title":"They Live","year":1988,"genres":["Sci-Fi","Horror","Crime"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"John Carpenter / obey / consume / the sunglasses scene","poster_path":"/wXlOkp4002hAP7drPaFPmA1kHKH.jpg","poster_url":"https://image.tmdb.org/t/p/w300/wXlOkp4002hAP7drPaFPmA1kHKH.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/wXlOkp4002hAP7drPaFPmA1kHKH.jpg"},{"title":"Thief","year":1981,"genres":["Crime","Thriller"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Michael Mann's debut / moody and gorgeous / very 80s synth aesthetic"},{"title":"This Is Spinal Tap","year":1984,"genres":["Comedy","Musical"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Christopher Guest / these go to eleven / invented the mockumentary"},{"title":"Three Men and a Baby","year":1987,"genres":["Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":""},{"title":"Time Bandits","year":1981,"genres":["Fantasy","Comedy"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Terry Gilliam / time travelling dwarves / genuinely strange"},{"title":"To Live and Die in L.A.","year":1985,"genres":["Crime","Thriller"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"William Friedkin / one of the most underrated crime films of the decade"},{"title":"Tootsie","year":1982,"genres":["Comedy"],"special_sections":[],"collections":[],"queer_flagged":true,"notes":"Dustin Hoffman / gender bending / still holds up","poster_path":"/rBaW4mq1E3NqWfVHU9GPn5hOj8I.jpg","poster_url":"https://image.tmdb.org/t/p/w300/rBaW4mq1E3NqWfVHU9GPn5hOj8I.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/rBaW4mq1E3NqWfVHU9GPn5hOj8I.jpg"},{"title":"Top Gun","year":1986,"genres":["Action","Adventure"],"special_sections":[],"collections":["Iconic Soundtracks"],"queer_flagged":false,"notes":"The danger zone / highway to the danger zone","poster_path":"/xUuHj3CgmZQ9P2cMaqQs4J0d4Zc.jpg","poster_url":"https://image.tmdb.org/t/p/w300/xUuHj3CgmZQ9P2cMaqQs4J0d4Zc.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/xUuHj3CgmZQ9P2cMaqQs4J0d4Zc.jpg"},{"title":"Torch Song Trilogy","year":1988,"genres":["Drama"],"special_sections":["Queer Cinema & Stories"],"collections":[],"queer_flagged":true,"notes":"Harvey Fierstein / landmark explicitly gay film"},{"title":"Trading Places","year":1983,"genres":["Comedy","Crime"],"special_sections":["Holiday Films"],"collections":[],"queer_flagged":false,"notes":"Christmas Eve setting / Eddie Murphy and Dan Aykroyd / still brilliant","poster_path":"/4ACm9hOr7ib3TjBqv5dRkAe0JKb.jpg","poster_url":"https://image.tmdb.org/t/p/w300/4ACm9hOr7ib3TjBqv5dRkAe0JKb.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/4ACm9hOr7ib3TjBqv5dRkAe0JKb.jpg"},{"title":"Transformers: The Movie","year":1986,"genres":["Animation","Sci-Fi"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"They killed Optimus Prime and an entire generation never recovered"},{"title":"Trick or Treat","year":1986,"genres":["Horror","Musical"],"special_sections":["Horror Vault","Holiday Films"],"collections":[],"queer_flagged":false,"notes":"Halloween themed / rock horror / Gene Simmons cameo"},{"title":"Tron","year":1982,"genres":["Sci-Fi"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Disney / groundbreaking visuals / still looks cool","poster_path":"/zwSFEczP4eOSCipmqeHBEBJf7HR.jpg","poster_url":"https://image.tmdb.org/t/p/w300/zwSFEczP4eOSCipmqeHBEBJf7HR.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/zwSFEczP4eOSCipmqeHBEBJf7HR.jpg"},{"title":"Tucker: The Man and His Dream","year":1988,"genres":["Drama"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Jeff Bridges / Coppola"},{"title":"Twins","year":1988,"genres":["Comedy","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Schwarzenegger and DeVito — should not work / absolutely works"},{"title":"Uncle Buck","year":1989,"genres":["Comedy"],"special_sections":["John Hughes Universe"],"collections":[],"queer_flagged":false,"notes":"Hughes directed / John Candy at his best"},{"title":"Valley Girl","year":1983,"genres":["Teen","Romance"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Early Nicolas Cage / like totally","poster_path":"/cpf1F0r33EX5vRBPDT1bBBgcj4r.jpg","poster_url":"https://image.tmdb.org/t/p/w300/cpf1F0r33EX5vRBPDT1bBBgcj4r.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/cpf1F0r33EX5vRBPDT1bBBgcj4r.jpg"},{"title":"Victor/Victoria","year":1982,"genres":["Comedy","Musical"],"special_sections":["Queer Cinema & Stories"],"collections":[],"queer_flagged":true,"notes":"Julie Andrews playing a woman playing a man — gender identity ahead of its time"},{"title":"Videodrome","year":1983,"genres":["Horror","Sci-Fi"],"special_sections":["Horror Vault","Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Cronenberg / long live the new flesh"},{"title":"Vision Quest","year":1985,"genres":["Sports","Drama"],"special_sections":[],"collections":["Iconic Soundtracks"],"queer_flagged":false,"notes":"Madonna on the soundtrack / Crazy for You"},{"title":"Wall Street","year":1987,"genres":["Drama","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Gordon Gekko / greed is good / Michael Douglas won Oscar"},{"title":"WarGames","year":1983,"genres":["Sci-Fi","Thriller"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Shall we play a game","poster_path":"/gOINggBk1iFLTZFDifxFGPaqjzd.jpg","poster_url":"https://image.tmdb.org/t/p/w300/gOINggBk1iFLTZFDifxFGPaqjzd.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/gOINggBk1iFLTZFDifxFGPaqjzd.jpg"},{"title":"Weird Science","year":1985,"genres":["Teen","Comedy","Sci-Fi"],"special_sections":["John Hughes Universe"],"collections":[],"queer_flagged":false,"notes":"Hughes directed","poster_path":"/fNOJwol6l1X82A3OQRT2FfdIPKN.jpg","poster_url":"https://image.tmdb.org/t/p/w300/fNOJwol6l1X82A3OQRT2FfdIPKN.jpg","poster_url_large":"https://image.tmdb.org/t/p/w500/fNOJwol6l1X82A3OQRT2FfdIPKN.jpg"},{"title":"When Harry Met Sally","year":1989,"genres":["Romance","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"I'll have what she's having"},{"title":"Who's That Girl","year":1987,"genres":["Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Madonna"},{"title":"Wildcats","year":1986,"genres":["Sports","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Goldie Hawn"},{"title":"Willow","year":1988,"genres":["Action","Fantasy"],"special_sections":["Spielberg Universe"],"collections":[],"queer_flagged":false,"notes":"George Lucas produced / Ron Howard directed"},{"title":"Wise Guys","year":1986,"genres":["Crime","Comedy"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Two low level mob guys accidentally steal from the boss — very funny"},{"title":"Witness","year":1985,"genres":["Thriller","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Harrison Ford / Peter Weir / beautiful and tense"},{"title":"Working Girl","year":1988,"genres":["Drama","Comedy"],"special_sections":[],"collections":["Badass Women of the 80s"],"queer_flagged":false,"notes":"Melanie Griffith / Sigourney Weaver / she's got a head for business"},{"title":"Xanadu","year":1980,"genres":["Musical","Fantasy"],"special_sections":["Cult Classics"],"collections":[],"queer_flagged":false,"notes":"Olivia Newton-John / so bad it became immortal"},{"title":"Youngblood","year":1986,"genres":["Sports","Crime"],"special_sections":[],"collections":[],"queer_flagged":false,"notes":"Rob Lowe / Patrick Swayze / hockey"}];
+
+// ── Genre Config ──
+const GENRE_ICONS = {
+  Action: '💥', Adventure: '🗺️', Animation: '🎨', Comedy: '😂',
+  Crime: '🔫', Documentary: '📹', Drama: '🎭', Fantasy: '🧙',
+  Holiday: '🎄', Horror: '👻', Musical: '🎵', Romance: '💕',
+  'Sci-Fi': '🚀', Sports: '🏆', Teen: '🎒', Thriller: '🔪', War: '⚔️'
+};
+
+const GENRE_COLORS = {
+  Action: '#ff7a45', Adventure: '#daa520', Animation: '#7c4dff', Comedy: '#ffc53d',
+  Crime: '#9e9e9e', Documentary: '#636e72', Drama: '#69c0ff', Fantasy: '#b37feb',
+  Holiday: '#ff6b6b', Horror: '#ff4444', Musical: '#ce93d8', Romance: '#ff85c0',
+  'Sci-Fi': '#00f0ff', Sports: '#4caf50', Teen: '#e8527a', Thriller: '#9e9e9e', War: '#556b2f'
+};
+
+// All filter categories
+const ALL_GENRES = ["Action","Adventure","Animation","Comedy","Crime","Documentary","Drama","Fantasy","Holiday","Horror","Musical","Romance","Sci-Fi","Sports","Teen","Thriller","War"];
+const ALL_SECTIONS = ["Cult Classics","Holiday Films","Horror Vault","John Hughes Universe","Queer Cinema & Stories","Spielberg Universe"];
+const ALL_COLLECTIONS = ["Badass Women of the 80s","Brat Pack","Cult Classics","Iconic Soundtracks","Sequels & Franchises","Spielberg Universe","Underrated Gems"];
+const YEAR_RANGES = [
+  { label: '1980-82', min: 1980, max: 1982 },
+  { label: '1983-85', min: 1983, max: 1985 },
+  { label: '1986-88', min: 1986, max: 1988 },
+  { label: '1989', min: 1989, max: 1989 }
+];
+
+// ── State ──
+let activeGenre = null;
+let activeYear = null;
+let activeSection = null;
+let activeCollection = null;
+let searchQuery = '';
+let sortBy = 'title-asc';
+
+// ── Build Collections Dashboard ──
+function buildDashboard() {
+  const grid = document.getElementById('collectionsGrid');
+  const allGroups = [
+    ...ALL_SECTIONS.map(s => ({ id: s, type: 'section' })),
+    ...ALL_COLLECTIONS.filter(c => !ALL_SECTIONS.includes(c)).map(c => ({ id: c, type: 'collection' }))
+  ];
+
+  allGroups.forEach(group => {
+    const movies = MOVIES.filter(m => {
+      if (group.type === 'section') return (m.special_sections || []).includes(group.id);
+      return (m.collections || []).includes(group.id);
+    });
+    if (movies.length === 0) return;
+
+    const card = document.createElement('div');
+    card.className = 'collection-card';
+    card.dataset.id = group.id;
+    card.dataset.type = group.type;
+
+    const postersWithImages = movies.filter(m => m.poster_path || m.poster_url);
+    const previewMovies = postersWithImages.slice(0, 4);
+
+    let postersHTML = previewMovies.map(m => {
+      const url = m.poster_url || (m.poster_path ? 'https://image.tmdb.org/t/p/w92' + m.poster_path : '');
+      if (!url) return '';
+      return '<img src="' + url.replace('/w300/', '/w92/').replace('/w300', '/w92') + '" alt="" loading="lazy" onerror="this.remove()">';
+    }).join('');
+
+    card.innerHTML =
+      '<div class="cc-name">' + group.id + '</div>' +
+      '<div class="cc-count">' + movies.length + ' films</div>' +
+      '<div class="cc-posters">' + postersHTML + '</div>';
+
+    card.addEventListener('click', () => {
+      // Clear other filters, set this one
+      activeGenre = null; activeYear = null; activeSection = null; activeCollection = null;
+      if (group.type === 'section') activeSection = group.id;
+      else activeCollection = group.id;
+      updateFilterUI();
+      applyFilters();
+      document.getElementById('filterBar').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+// ── Build Filter Pills ──
+function buildFilters() {
+  const genreRow = document.getElementById('genreFilters');
+  ALL_GENRES.forEach(g => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-pill';
+    btn.textContent = g;
+    btn.dataset.genre = g;
+    btn.style.borderColor = GENRE_COLORS[g] || 'var(--pink)';
+    btn.addEventListener('click', () => {
+      activeGenre = activeGenre === g ? null : g;
+      updateFilterUI();
+      applyFilters();
+    });
+    genreRow.appendChild(btn);
+  });
+
+  const yearRow = document.getElementById('yearFilters');
+  YEAR_RANGES.forEach(yr => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-pill';
+    btn.textContent = yr.label;
+    btn.dataset.year = yr.label;
+    btn.addEventListener('click', () => {
+      activeYear = activeYear === yr.label ? null : yr.label;
+      updateFilterUI();
+      applyFilters();
+    });
+    yearRow.appendChild(btn);
+  });
+
+  const sectionRow = document.getElementById('sectionFilters');
+  ALL_SECTIONS.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-pill';
+    btn.textContent = s;
+    btn.dataset.section = s;
+    btn.addEventListener('click', () => {
+      activeSection = activeSection === s ? null : s;
+      updateFilterUI();
+      applyFilters();
+    });
+    sectionRow.appendChild(btn);
+  });
+
+  const collRow = document.getElementById('collectionFilters');
+  ALL_COLLECTIONS.filter(c => !ALL_SECTIONS.includes(c)).forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-pill';
+    btn.textContent = c;
+    btn.dataset.collection = c;
+    btn.addEventListener('click', () => {
+      activeCollection = activeCollection === c ? null : c;
+      updateFilterUI();
+      applyFilters();
+    });
+    collRow.appendChild(btn);
+  });
+}
+
+function updateFilterUI() {
+  document.querySelectorAll('#genreFilters .filter-pill').forEach(b => b.classList.toggle('active', b.dataset.genre === activeGenre));
+  document.querySelectorAll('#yearFilters .filter-pill').forEach(b => b.classList.toggle('active', b.dataset.year === activeYear));
+  document.querySelectorAll('#sectionFilters .filter-pill').forEach(b => b.classList.toggle('active', b.dataset.section === activeSection));
+  document.querySelectorAll('#collectionFilters .filter-pill').forEach(b => b.classList.toggle('active', b.dataset.collection === activeCollection));
+
+  // Active filter tags
+  const container = document.getElementById('activeFilters');
+  container.innerHTML = '';
+  const filters = [];
+  if (activeGenre) filters.push({ label: activeGenre, clear: () => { activeGenre = null; } });
+  if (activeYear) filters.push({ label: activeYear, clear: () => { activeYear = null; } });
+  if (activeSection) filters.push({ label: activeSection, clear: () => { activeSection = null; } });
+  if (activeCollection) filters.push({ label: activeCollection, clear: () => { activeCollection = null; } });
+  if (searchQuery) filters.push({ label: '"' + searchQuery + '"', clear: () => { searchQuery = ''; document.getElementById('searchBar').value = ''; } });
+
+  filters.forEach(f => {
+    const tag = document.createElement('span');
+    tag.className = 'active-tag';
+    tag.innerHTML = f.label + ' <span class="x">&times;</span>';
+    tag.addEventListener('click', () => { f.clear(); updateFilterUI(); applyFilters(); });
+    container.appendChild(tag);
+  });
+
+  if (filters.length > 1) {
+    const clearAll = document.createElement('span');
+    clearAll.className = 'clear-all-btn';
+    clearAll.textContent = 'Clear all';
+    clearAll.addEventListener('click', () => {
+      activeGenre = null; activeYear = null; activeSection = null; activeCollection = null;
+      searchQuery = ''; document.getElementById('searchBar').value = '';
+      updateFilterUI(); applyFilters();
+    });
+    container.appendChild(clearAll);
+  }
+}
+
+// ── Build Movie Grid ──
+function buildGrid() {
+  const grid = document.getElementById('movieGrid');
+  grid.innerHTML = '';
+
+  MOVIES.forEach((movie, idx) => {
+    const card = document.createElement('div');
+    card.className = 'movie-card';
+    card.dataset.idx = idx;
+
+    const genre = movie.genres[0] || 'Drama';
+    const gradClass = 'genre-grad-' + genre.replace(/[^a-zA-Z-]/g, '');
+    const posterUrl = movie.poster_url || (movie.poster_path ? 'https://image.tmdb.org/t/p/w300' + movie.poster_path : '');
+    const icon = GENRE_ICONS[genre] || '🎬';
+    const rating = movie.vote_average ? movie.vote_average.toFixed(1) : '';
+
+    let posterHTML = '<div class="poster-bg ' + gradClass + '">' + icon + '</div>';
+    if (posterUrl) {
+      posterHTML += '<img class="poster-img" src="' + posterUrl + '" alt="' + movie.title.replace(/"/g, '&quot;') + '" loading="lazy" onerror="this.remove()">';
+    }
+
+    card.innerHTML =
+      '<div class="card-poster">' +
+        posterHTML +
+        '<div class="year-badge">' + movie.year + '</div>' +
+        (rating ? '<div class="rating-badge">' + rating + '</div>' : '') +
+      '</div>' +
+      '<div class="card-title">' + movie.title + '</div>';
+
+    card.addEventListener('click', () => openModal(idx));
+    grid.appendChild(card);
+  });
+}
+
+// ── Filtering ──
+function applyFilters() {
+  const cards = document.querySelectorAll('.movie-card');
+  let visibleCount = 0;
+  const q = searchQuery.toLowerCase();
+
+  const yearRange = activeYear ? YEAR_RANGES.find(yr => yr.label === activeYear) : null;
+
+  cards.forEach(card => {
+    const movie = MOVIES[parseInt(card.dataset.idx)];
+    let visible = true;
+
+    if (q && !movie.title.toLowerCase().includes(q)) visible = false;
+    if (activeGenre && !movie.genres.includes(activeGenre)) visible = false;
+    if (yearRange && (movie.year < yearRange.min || movie.year > yearRange.max)) visible = false;
+    if (activeSection && !(movie.special_sections || []).includes(activeSection) && !(movie.collections || []).includes(activeSection)) visible = false;
+    if (activeCollection && !(movie.collections || []).includes(activeCollection) && !(movie.special_sections || []).includes(activeCollection)) visible = false;
+
+    card.classList.toggle('hidden', !visible);
+    if (visible) visibleCount++;
+  });
+
+  document.getElementById('resultCount').innerHTML = 'Showing <span>' + visibleCount + '</span> of ' + MOVIES.length + ' films';
+}
+
+// ── Sorting ──
+function applySorting() {
+  const grid = document.getElementById('movieGrid');
+  const cards = [...grid.children];
+
+  cards.sort((a, b) => {
+    const ma = MOVIES[parseInt(a.dataset.idx)];
+    const mb = MOVIES[parseInt(b.dataset.idx)];
+    switch (sortBy) {
+      case 'title-asc': return ma.title.localeCompare(mb.title);
+      case 'title-desc': return mb.title.localeCompare(ma.title);
+      case 'year-asc': return ma.year - mb.year || ma.title.localeCompare(mb.title);
+      case 'year-desc': return mb.year - ma.year || ma.title.localeCompare(mb.title);
+      case 'rating-desc': return (mb.vote_average || 0) - (ma.vote_average || 0) || ma.title.localeCompare(mb.title);
+      default: return 0;
+    }
+  });
+
+  cards.forEach(c => grid.appendChild(c));
+}
+
+// ── Modal ──
+function openModal(idx) {
+  const movie = MOVIES[idx];
+  const overlay = document.getElementById('modalOverlay');
+  const posterDiv = document.getElementById('modalPoster');
+  const infoDiv = document.getElementById('modalInfo');
+
+  const genre = movie.genres[0] || 'Drama';
+  const gradClass = 'genre-grad-' + genre.replace(/[^a-zA-Z-]/g, '');
+  const posterUrl = movie.poster_url_large || movie.poster_url || (movie.poster_path ? 'https://image.tmdb.org/t/p/w500' + movie.poster_path : '');
+
+  let posterHTML = '<div class="poster-bg ' + gradClass + '">' + (GENRE_ICONS[genre] || '🎬') + '</div>';
+  if (posterUrl) {
+    posterHTML += '<img src="' + posterUrl + '" alt="' + movie.title.replace(/"/g, '&quot;') + '" onerror="this.remove()">';
+  }
+  posterDiv.innerHTML = posterHTML;
+
+  let html = '<div class="modal-title">' + movie.title + '</div>';
+  html += '<div class="modal-meta">';
+  html += '<span class="modal-year">' + movie.year + '</span>';
+  if (movie.vote_average) html += '<span class="modal-rating">&#9733; ' + movie.vote_average.toFixed(1) + '/10</span>';
+  html += '</div>';
+
+  // Genres
+  html += '<div class="modal-genres">';
+  movie.genres.forEach(g => {
+    const col = GENRE_COLORS[g] || '#888';
+    html += '<span class="modal-genre-tag" style="color:' + col + ';border-color:' + col + '">' + g + '</span>';
+  });
+  html += '</div>';
+
+  // Badges (sections + collections)
+  const badges = [...(movie.special_sections || []), ...(movie.collections || [])];
+  if (badges.length) {
+    html += '<div class="modal-badges">';
+    badges.forEach(b => { html += '<span class="modal-badge">' + b + '</span>'; });
+    html += '</div>';
+  }
+
+  // Director
+  if (movie.director) {
+    html += '<div class="modal-section"><div class="modal-section-title">Director</div><div class="modal-director">' + movie.director + '</div></div>';
+  }
+
+  // Cast
+  if (movie.cast && movie.cast.length) {
+    html += '<div class="modal-section"><div class="modal-section-title">Cast</div><ul class="modal-cast-list">';
+    movie.cast.forEach(c => {
+      html += '<li>' + c.name + (c.character ? ' <span class="character">as ' + c.character + '</span>' : '') + '</li>';
+    });
+    html += '</ul></div>';
+  }
+
+  // Overview
+  if (movie.overview) {
+    html += '<div class="modal-section"><div class="modal-section-title">Synopsis</div><div class="modal-overview">' + movie.overview + '</div></div>';
+  }
+
+  // Amy's Notes
+  if (movie.notes) {
+    html += '<div class="modal-section"><div class="modal-section-title">Amy\'s Notes</div><div class="modal-notes">' + movie.notes + '</div></div>';
+  }
+
+  infoDiv.innerHTML = html;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── Event Listeners ──
+document.getElementById('searchBar').addEventListener('input', (e) => {
+  searchQuery = e.target.value.trim();
+  updateFilterUI();
+  applyFilters();
+});
+
+document.getElementById('sortSelect').addEventListener('change', (e) => {
+  sortBy = e.target.value;
+  applySorting();
+});
+
+document.getElementById('filterToggle').addEventListener('click', () => {
+  document.getElementById('filterPanels').classList.toggle('expanded');
+  document.getElementById('filterPanels').classList.toggle('collapsed');
+});
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// Back to top
+const backBtn = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  backBtn.classList.toggle('visible', window.scrollY > 400);
+});
+backBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// ── TMDB Client-Side Enrichment ──
+const TMDB_KEY = 'b5be0091e28a74a864c82ec31da4f981';
+const TMDB_CACHE_KEY = 'amys_vault_tmdb_v2';
+const TMDB_CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+function loadTmdbCache() {
+  try {
+    const raw = localStorage.getItem(TMDB_CACHE_KEY);
+    if (!raw) return {};
+    const cache = JSON.parse(raw);
+    if (Date.now() - (cache._ts || 0) > TMDB_CACHE_TTL) return {};
+    return cache;
+  } catch { return {}; }
+}
+
+function saveTmdbCache(cache) {
+  cache._ts = Date.now();
+  try { localStorage.setItem(TMDB_CACHE_KEY, JSON.stringify(cache)); } catch {}
+}
+
+async function tmdbFetch(url) {
+  const res = await fetch(url + (url.includes('?') ? '&' : '?') + 'api_key=' + TMDB_KEY);
+  if (!res.ok) throw new Error('TMDB ' + res.status);
+  return res.json();
+}
+
+async function enrichMovie(movie, idx) {
+  const key = movie.title + '|' + movie.year;
+  const cache = loadTmdbCache();
+  if (cache[key]) {
+    Object.assign(movie, cache[key]);
+    return true;
+  }
+
+  try {
+    const search = await tmdbFetch('https://api.themoviedb.org/3/search/movie?query=' + encodeURIComponent(movie.title) + '&year=' + movie.year);
+    if (!search.results || !search.results.length) return false;
+
+    const result = search.results[0];
+    const enriched = {
+      tmdb_id: result.id,
+      poster_path: result.poster_path,
+      poster_url: result.poster_path ? 'https://image.tmdb.org/t/p/w300' + result.poster_path : null,
+      poster_url_large: result.poster_path ? 'https://image.tmdb.org/t/p/w500' + result.poster_path : null,
+      overview: result.overview,
+      vote_average: result.vote_average
+    };
+
+    // Fetch credits
+    try {
+      const credits = await tmdbFetch('https://api.themoviedb.org/3/movie/' + result.id + '/credits');
+      const dir = (credits.crew || []).find(c => c.job === 'Director');
+      enriched.director = dir ? dir.name : null;
+      enriched.cast = (credits.cast || []).slice(0, 5).map(c => ({ name: c.name, character: c.character }));
+    } catch {}
+
+    Object.assign(movie, enriched);
+    cache[key] = enriched;
+    saveTmdbCache(cache);
+    return true;
+  } catch { return false; }
+}
+
+function updateCardPoster(idx) {
+  const movie = MOVIES[idx];
+  const card = document.querySelector('.movie-card[data-idx="' + idx + '"]');
+  if (!card || !movie.poster_url) return;
+
+  const posterDiv = card.querySelector('.card-poster');
+  const existing = posterDiv.querySelector('.poster-img');
+  if (existing) return; // already has image
+
+  const img = document.createElement('img');
+  img.className = 'poster-img';
+  img.src = movie.poster_url;
+  img.alt = movie.title;
+  img.loading = 'lazy';
+  img.onerror = function() { this.remove(); };
+  posterDiv.appendChild(img);
+
+  // Add rating badge if missing
+  if (movie.vote_average && !posterDiv.querySelector('.rating-badge')) {
+    const badge = document.createElement('div');
+    badge.className = 'rating-badge';
+    badge.textContent = movie.vote_average.toFixed(1);
+    posterDiv.appendChild(badge);
+  }
+}
+
+async function enrichAllMovies() {
+  const cache = loadTmdbCache();
+  let needsFetch = [];
+
+  // First pass: apply cached data immediately
+  MOVIES.forEach((movie, idx) => {
+    const key = movie.title + '|' + movie.year;
+    if (cache[key] && !movie.tmdb_id) {
+      Object.assign(movie, cache[key]);
+      updateCardPoster(idx);
+    } else if (!movie.poster_url && !movie.poster_path) {
+      needsFetch.push(idx);
+    }
+  });
+
+  // Rebuild dashboard with any newly cached posters (skipped in Version A)
+  // if (Object.keys(cache).length > 1) {
+  //   document.getElementById('collectionsGrid').innerHTML = '';
+  //   buildDashboard();
+  // }
+
+  if (needsFetch.length === 0) return;
+
+  // Fetch in batches of 5, 250ms between each request
+  for (let i = 0; i < needsFetch.length; i++) {
+    const idx = needsFetch[i];
+    const ok = await enrichMovie(MOVIES[idx], idx);
+    if (ok) updateCardPoster(idx);
+
+    // Rate limit: ~3 req/sec (search + credits = 2 calls per movie)
+    await new Promise(r => setTimeout(r, 350));
+
+    // Rebuild dashboard every 20 movies (skipped in Version A)
+    // if (i > 0 && i % 20 === 0) {
+    //   document.getElementById('collectionsGrid').innerHTML = '';
+    //   buildDashboard();
+    // }
+  }
+
+  // Final dashboard rebuild (skipped in Version A)
+  // document.getElementById('collectionsGrid').innerHTML = '';
+  // buildDashboard();
+}
+
+// ── Init ──
+// buildDashboard(); // Skipped in Version A: collections are filter pills
+buildFilters();
+buildGrid();
+
+// Default: show filters expanded on desktop
+if (window.innerWidth > 768) {
+  document.getElementById('filterPanels').classList.remove('collapsed');
+}
+
+// Start TMDB enrichment after page renders
+setTimeout(enrichAllMovies, 500);
+</script>
+</body>
+</html>

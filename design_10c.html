@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mainframe Dashboard — 80s Movie Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --pink: #e8527a;
+  --green: #33ff33;
+  --amber: #ffaa00;
+  --white: #fff;
+  --bg: #000;
+  --panel-bg: #0a0a0a;
+  --border: #333;
+}
+
+body {
+  font-family: 'Fira Code', monospace;
+  background: var(--bg);
+  color: var(--green);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* CRT Scanline Overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,0.15) 0px,
+    rgba(0,0,0,0.15) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* CRT Vignette */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+.dashboard {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+/* Header */
+.main-header {
+  text-align: center;
+  padding: 12px 0 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+.main-header h1 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 4px;
+  text-shadow: 0 0 10px rgba(51,255,51,0.5);
+}
+.main-header .sub {
+  font-size: 0.65rem;
+  color: var(--amber);
+  margin-top: 2px;
+}
+
+/* Top Panel Row */
+.panel-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.panel {
+  border: 1px solid var(--border);
+  background: var(--panel-bg);
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-title {
+  background: #111;
+  border-bottom: 1px solid var(--border);
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.panel-title .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 4px var(--green);
+  animation: blink-dot 2s infinite;
+}
+@keyframes blink-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.panel-title.pink { color: var(--pink); }
+.panel-title.pink .dot { background: var(--pink); box-shadow: 0 0 4px var(--pink); }
+
+.panel-body {
+  flex: 1;
+  padding: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Panel 1: System Status */
+.stat-line {
+  font-size: 0.75rem;
+  margin-bottom: 6px;
+  color: var(--green);
+}
+.stat-line .label { color: #888; }
+.stat-line .value {
+  color: var(--green);
+  text-shadow: 0 0 6px rgba(51,255,51,0.4);
+}
+.stat-line .value.amber { color: var(--amber); text-shadow: 0 0 6px rgba(255,170,0,0.4); }
+
+/* Panel 2: Now Playing */
+.now-playing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+.now-poster {
+  width: 80px;
+  height: 70px;
+  border-radius: 2px;
+  margin-bottom: 6px;
+  border: 1px solid var(--border);
+}
+.now-title {
+  font-size: 0.7rem;
+  color: var(--pink);
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(232,82,122,0.4);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.now-year {
+  font-size: 0.6rem;
+  color: var(--pink);
+  opacity: 0.7;
+  margin-top: 2px;
+}
+.now-hint {
+  font-size: 0.55rem;
+  color: #555;
+  margin-top: 8px;
+  animation: blink-cursor 1s step-end infinite;
+}
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Panel 3: Activity Log */
+.activity-log {
+  font-size: 0.65rem;
+  color: var(--green);
+  overflow: hidden;
+  height: 100%;
+}
+.log-line {
+  margin-bottom: 3px;
+  white-space: nowrap;
+  opacity: 0;
+  animation: fadein-line 0.3s forwards;
+}
+.log-line .ok { color: var(--green); }
+.log-line .warn { color: var(--amber); }
+.log-line .info { color: #888; }
+
+@keyframes fadein-line {
+  to { opacity: 1; }
+}
+
+/* Browser Section */
+.browser-section {
+  border: 1px solid var(--border);
+  background: var(--panel-bg);
+  margin-bottom: 10px;
+}
+
+.browser-header {
+  background: #111;
+  border-bottom: 1px solid var(--border);
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.browser-header .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 4px var(--green);
+}
+
+/* Genre Tabs */
+.genre-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.genre-tab {
+  background: none;
+  border: 1px solid var(--border);
+  color: #888;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-right: -1px;
+}
+.genre-tab:hover {
+  color: var(--pink);
+  border-color: var(--pink);
+  z-index: 1;
+}
+.genre-tab.active {
+  color: var(--pink);
+  border-color: var(--pink);
+  background: rgba(232,82,122,0.1);
+  text-shadow: 0 0 6px rgba(232,82,122,0.3);
+  z-index: 1;
+}
+
+/* Search Bar */
+.search-bar {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+}
+.search-bar .prompt {
+  color: var(--green);
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+.search-bar input {
+  background: none;
+  border: none;
+  color: var(--green);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  outline: none;
+  flex: 1;
+  caret-color: var(--green);
+}
+.search-bar input::placeholder { color: #444; }
+.search-bar .cursor-blink {
+  color: var(--green);
+  animation: blink-cursor 1s step-end infinite;
+}
+
+/* Movie Grid */
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  padding: 10px;
+}
+
+.movie-card {
+  background: #0d0d0d;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.movie-card:hover {
+  border-color: var(--pink);
+  transform: translateY(-2px);
+}
+.movie-poster {
+  width: 100%;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  position: relative;
+}
+.movie-poster .poster-label {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  font-size: 0.5rem;
+  color: rgba(255,255,255,0.6);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.movie-meta {
+  padding: 6px 8px;
+  font-size: 0.55rem;
+  color: #888;
+  border-top: 1px solid var(--border);
+  line-height: 1.5;
+}
+.movie-meta .movie-name {
+  color: var(--white);
+  font-weight: 600;
+  font-size: 0.6rem;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.movie-meta .movie-id {
+  color: var(--amber);
+}
+
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: #555;
+  font-size: 0.8rem;
+}
+
+/* Bottom Ticker */
+.ticker {
+  border: 1px solid var(--border);
+  background: var(--panel-bg);
+  overflow: hidden;
+  padding: 6px 0;
+  position: relative;
+}
+.ticker-inner {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 0.7rem;
+  color: var(--amber);
+  animation: scroll-ticker 20s linear infinite;
+}
+@keyframes scroll-ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .panel-row {
+    grid-template-columns: 1fr;
+  }
+  .panel { height: 180px; }
+  .genre-tabs { flex-wrap: wrap; }
+  .genre-tab { font-size: 0.6rem; padding: 3px 6px; }
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+  }
+  .movie-poster { height: 130px; }
+}
+
+@media (max-width: 480px) {
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+  .movie-poster { height: 110px; }
+}
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+  <!-- Header -->
+  <div class="main-header">
+    <h1>MAINFRAME DASHBOARD v3.1</h1>
+    <div class="sub">// 80s MOVIE DATABASE TERMINAL — AUTHORIZED ACCESS ONLY</div>
+  </div>
+
+  <!-- Top Panels -->
+  <div class="panel-row">
+    <!-- Panel 1: System Status -->
+    <div class="panel">
+      <div class="panel-title"><span class="dot"></span>SYSTEM STATUS</div>
+      <div class="panel-body">
+        <div class="stat-line"><span class="label">FILMS_LOADED: </span><span class="value" id="stat-films">0</span></div>
+        <div class="stat-line"><span class="label">GENRES_ACTIVE: </span><span class="value" id="stat-genres">0</span></div>
+        <div class="stat-line"><span class="label">UPTIME: </span><span class="value amber" id="stat-uptime">0</span><span class="label">h</span></div>
+        <div class="stat-line"><span class="label">MEM_USAGE: </span><span class="value amber" id="stat-mem">0</span><span class="label">KB</span></div>
+        <div class="stat-line" style="margin-top: 10px;"><span class="label">STATUS: </span><span class="value">OPERATIONAL</span></div>
+        <div class="stat-line"><span class="label">LAST_SYNC: </span><span class="value" style="font-size:0.65rem;">1989.12.31</span></div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Now Playing -->
+    <div class="panel">
+      <div class="panel-title pink"><span class="dot"></span>NOW PLAYING</div>
+      <div class="panel-body">
+        <div class="now-playing">
+          <div class="now-poster" id="now-poster"></div>
+          <div class="now-title" id="now-title">—</div>
+          <div class="now-year" id="now-year"></div>
+          <div class="now-hint">PRESS R TO RANDOMIZE</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 3: Activity Log -->
+    <div class="panel">
+      <div class="panel-title"><span class="dot"></span>ACTIVITY LOG</div>
+      <div class="panel-body">
+        <div class="activity-log" id="activity-log"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Browser Section -->
+  <div class="browser-section">
+    <div class="browser-header"><span class="dot"></span>DATABASE BROWSER — RECORDS</div>
+
+    <!-- Genre Tabs -->
+    <div class="genre-tabs" id="genre-tabs"></div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <span class="prompt">&gt; SEARCH:</span>
+      <input type="text" id="search-input" placeholder="_" autocomplete="off">
+      <span class="cursor-blink">█</span>
+    </div>
+
+    <!-- Movie Grid -->
+    <div class="movie-grid" id="movie-grid"></div>
+  </div>
+
+  <!-- Bottom Ticker -->
+  <div class="ticker">
+    <div class="ticker-inner" id="ticker-inner"></div>
+  </div>
+</div>
+
+<script>
+// Movie Data
+const movies = [
+  // Action
+  { id: 1, title: "Raiders of the Lost Ark", year: 1981, genre: "ACTION", gradient: "linear-gradient(135deg, #d4380d, #ff7a45)" },
+  { id: 2, title: "Die Hard", year: 1988, genre: "ACTION", gradient: "linear-gradient(135deg, #d4380d, #ff7a45)" },
+  { id: 3, title: "The Terminator", year: 1984, genre: "ACTION", gradient: "linear-gradient(135deg, #d4380d, #ff7a45)" },
+  { id: 4, title: "RoboCop", year: 1987, genre: "ACTION", gradient: "linear-gradient(135deg, #d4380d, #ff7a45)" },
+  { id: 5, title: "Beverly Hills Cop", year: 1984, genre: "ACTION", gradient: "linear-gradient(135deg, #d4380d, #ff7a45)" },
+  { id: 6, title: "Top Gun", year: 1986, genre: "ACTION", gradient: "linear-gradient(135deg, #d4380d, #ff7a45)" },
+  { id: 7, title: "Lethal Weapon", year: 1987, genre: "ACTION", gradient: "linear-gradient(135deg, #d4380d, #ff7a45)" },
+  { id: 8, title: "Aliens", year: 1986, genre: "ACTION", gradient: "linear-gradient(135deg, #d4380d, #ff7a45)" },
+  { id: 9, title: "First Blood", year: 1982, genre: "ACTION", gradient: "linear-gradient(135deg, #d4380d, #ff7a45)" },
+  { id: 10, title: "Predator", year: 1987, genre: "ACTION", gradient: "linear-gradient(135deg, #d4380d, #ff7a45)" },
+  // Comedy
+  { id: 11, title: "Ghostbusters", year: 1984, genre: "COMEDY", gradient: "linear-gradient(135deg, #faad14, #ffc53d)" },
+  { id: 12, title: "Ferris Bueller's Day Off", year: 1986, genre: "COMEDY", gradient: "linear-gradient(135deg, #faad14, #ffc53d)" },
+  { id: 13, title: "Tootsie", year: 1982, genre: "COMEDY", gradient: "linear-gradient(135deg, #faad14, #ffc53d)" },
+  { id: 14, title: "Coming to America", year: 1988, genre: "COMEDY", gradient: "linear-gradient(135deg, #faad14, #ffc53d)" },
+  { id: 15, title: "Airplane!", year: 1980, genre: "COMEDY", gradient: "linear-gradient(135deg, #faad14, #ffc53d)" },
+  { id: 16, title: "Beetlejuice", year: 1988, genre: "COMEDY", gradient: "linear-gradient(135deg, #faad14, #ffc53d)" },
+  { id: 17, title: "Trading Places", year: 1983, genre: "COMEDY", gradient: "linear-gradient(135deg, #faad14, #ffc53d)" },
+  { id: 18, title: "National Lampoon's Vacation", year: 1983, genre: "COMEDY", gradient: "linear-gradient(135deg, #faad14, #ffc53d)" },
+  { id: 19, title: "Spaceballs", year: 1987, genre: "COMEDY", gradient: "linear-gradient(135deg, #faad14, #ffc53d)" },
+  { id: 20, title: "9 to 5", year: 1980, genre: "COMEDY", gradient: "linear-gradient(135deg, #faad14, #ffc53d)" },
+  // Drama
+  { id: 21, title: "Stand By Me", year: 1986, genre: "DRAMA", gradient: "linear-gradient(135deg, #1890ff, #69c0ff)" },
+  { id: 22, title: "Scarface", year: 1983, genre: "DRAMA", gradient: "linear-gradient(135deg, #1890ff, #69c0ff)" },
+  { id: 23, title: "Rain Man", year: 1988, genre: "DRAMA", gradient: "linear-gradient(135deg, #1890ff, #69c0ff)" },
+  { id: 24, title: "The Color Purple", year: 1985, genre: "DRAMA", gradient: "linear-gradient(135deg, #1890ff, #69c0ff)" },
+  { id: 25, title: "Platoon", year: 1986, genre: "DRAMA", gradient: "linear-gradient(135deg, #1890ff, #69c0ff)" },
+  { id: 26, title: "Full Metal Jacket", year: 1987, genre: "DRAMA", gradient: "linear-gradient(135deg, #1890ff, #69c0ff)" },
+  { id: 27, title: "Ordinary People", year: 1980, genre: "DRAMA", gradient: "linear-gradient(135deg, #1890ff, #69c0ff)" },
+  { id: 28, title: "Driving Miss Daisy", year: 1989, genre: "DRAMA", gradient: "linear-gradient(135deg, #1890ff, #69c0ff)" },
+  { id: 29, title: "Blue Velvet", year: 1986, genre: "DRAMA", gradient: "linear-gradient(135deg, #1890ff, #69c0ff)" },
+  { id: 30, title: "Do the Right Thing", year: 1989, genre: "DRAMA", gradient: "linear-gradient(135deg, #1890ff, #69c0ff)" },
+  // Horror
+  { id: 31, title: "The Shining", year: 1980, genre: "HORROR", gradient: "linear-gradient(135deg, #722ed1, #b37feb)" },
+  { id: 32, title: "A Nightmare on Elm Street", year: 1984, genre: "HORROR", gradient: "linear-gradient(135deg, #722ed1, #b37feb)" },
+  { id: 33, title: "The Thing", year: 1982, genre: "HORROR", gradient: "linear-gradient(135deg, #722ed1, #b37feb)" },
+  { id: 34, title: "Poltergeist", year: 1982, genre: "HORROR", gradient: "linear-gradient(135deg, #722ed1, #b37feb)" },
+  { id: 35, title: "Gremlins", year: 1984, genre: "HORROR", gradient: "linear-gradient(135deg, #722ed1, #b37feb)" },
+  { id: 36, title: "The Fly", year: 1986, genre: "HORROR", gradient: "linear-gradient(135deg, #722ed1, #b37feb)" },
+  { id: 37, title: "Friday the 13th", year: 1980, genre: "HORROR", gradient: "linear-gradient(135deg, #722ed1, #b37feb)" },
+  { id: 38, title: "Halloween II", year: 1981, genre: "HORROR", gradient: "linear-gradient(135deg, #722ed1, #b37feb)" },
+  { id: 39, title: "Christine", year: 1983, genre: "HORROR", gradient: "linear-gradient(135deg, #722ed1, #b37feb)" },
+  { id: 40, title: "Hellraiser", year: 1987, genre: "HORROR", gradient: "linear-gradient(135deg, #722ed1, #b37feb)" },
+  // Teen
+  { id: 41, title: "The Breakfast Club", year: 1985, genre: "TEEN", gradient: "linear-gradient(135deg, #e8527a, #ff85a2)" },
+  { id: 42, title: "Sixteen Candles", year: 1984, genre: "TEEN", gradient: "linear-gradient(135deg, #e8527a, #ff85a2)" },
+  { id: 43, title: "Pretty in Pink", year: 1986, genre: "TEEN", gradient: "linear-gradient(135deg, #e8527a, #ff85a2)" },
+  { id: 44, title: "Fast Times at Ridgemont High", year: 1982, genre: "TEEN", gradient: "linear-gradient(135deg, #e8527a, #ff85a2)" },
+  { id: 45, title: "Heathers", year: 1988, genre: "TEEN", gradient: "linear-gradient(135deg, #e8527a, #ff85a2)" },
+  { id: 46, title: "Say Anything", year: 1989, genre: "TEEN", gradient: "linear-gradient(135deg, #e8527a, #ff85a2)" },
+  { id: 47, title: "Valley Girl", year: 1983, genre: "TEEN", gradient: "linear-gradient(135deg, #e8527a, #ff85a2)" },
+  { id: 48, title: "Some Kind of Wonderful", year: 1987, genre: "TEEN", gradient: "linear-gradient(135deg, #e8527a, #ff85a2)" },
+  { id: 49, title: "Weird Science", year: 1985, genre: "TEEN", gradient: "linear-gradient(135deg, #e8527a, #ff85a2)" },
+  // Sci-Fi
+  { id: 50, title: "Back to the Future", year: 1985, genre: "SCI-FI", gradient: "linear-gradient(135deg, #13c2c2, #5cdbd3)" },
+  { id: 51, title: "E.T.", year: 1982, genre: "SCI-FI", gradient: "linear-gradient(135deg, #13c2c2, #5cdbd3)" },
+  { id: 52, title: "Blade Runner", year: 1982, genre: "SCI-FI", gradient: "linear-gradient(135deg, #13c2c2, #5cdbd3)" },
+  { id: 53, title: "Tron", year: 1982, genre: "SCI-FI", gradient: "linear-gradient(135deg, #13c2c2, #5cdbd3)" },
+  { id: 54, title: "WarGames", year: 1983, genre: "SCI-FI", gradient: "linear-gradient(135deg, #13c2c2, #5cdbd3)" },
+  { id: 55, title: "The Last Starfighter", year: 1984, genre: "SCI-FI", gradient: "linear-gradient(135deg, #13c2c2, #5cdbd3)" },
+  { id: 56, title: "Cocoon", year: 1985, genre: "SCI-FI", gradient: "linear-gradient(135deg, #13c2c2, #5cdbd3)" },
+  { id: 57, title: "Short Circuit", year: 1986, genre: "SCI-FI", gradient: "linear-gradient(135deg, #13c2c2, #5cdbd3)" },
+  { id: 58, title: "They Live", year: 1988, genre: "SCI-FI", gradient: "linear-gradient(135deg, #13c2c2, #5cdbd3)" },
+  // Romance
+  { id: 59, title: "Dirty Dancing", year: 1987, genre: "ROMANCE", gradient: "linear-gradient(135deg, #eb2f96, #ff85c0)" },
+  { id: 60, title: "Flashdance", year: 1983, genre: "ROMANCE", gradient: "linear-gradient(135deg, #eb2f96, #ff85c0)" },
+  { id: 61, title: "An Officer and a Gentleman", year: 1982, genre: "ROMANCE", gradient: "linear-gradient(135deg, #eb2f96, #ff85c0)" },
+  { id: 62, title: "When Harry Met Sally", year: 1989, genre: "ROMANCE", gradient: "linear-gradient(135deg, #eb2f96, #ff85c0)" },
+  { id: 63, title: "Moonstruck", year: 1987, genre: "ROMANCE", gradient: "linear-gradient(135deg, #eb2f96, #ff85c0)" },
+  { id: 64, title: "The Princess Bride", year: 1987, genre: "ROMANCE", gradient: "linear-gradient(135deg, #eb2f96, #ff85c0)" }
+];
+
+const genres = ["ALL", "ACTION", "COMEDY", "DRAMA", "HORROR", "TEEN", "SCI-FI", "ROMANCE"];
+let activeGenre = "ALL";
+let searchQuery = "";
+
+// --- Animate stat counters ---
+function animateCount(el, target, duration, suffix) {
+  const start = performance.now();
+  const update = (now) => {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.floor(target * eased) + (suffix || '');
+    if (progress < 1) requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
+}
+
+// --- Now Playing ---
+function randomizeNowPlaying() {
+  const movie = movies[Math.floor(Math.random() * movies.length)];
+  const poster = document.getElementById('now-poster');
+  const title = document.getElementById('now-title');
+  const year = document.getElementById('now-year');
+  poster.style.background = movie.gradient;
+  title.textContent = movie.title.toUpperCase();
+  year.textContent = movie.year + ' | ' + movie.genre;
+}
+
+// --- Activity Log ---
+function buildActivityLog() {
+  const log = document.getElementById('activity-log');
+  const genreCounts = {};
+  movies.forEach(m => { genreCounts[m.genre] = (genreCounts[m.genre] || 0) + 1; });
+
+  const lines = [];
+  lines.push({ type: 'ok', text: '[BOOT] Mainframe initialized' });
+  lines.push({ type: 'ok', text: '[AUTH] Terminal access granted' });
+  for (const g of Object.keys(genreCounts)) {
+    lines.push({ type: 'ok', text: `[OK] Loaded ${g}: ${genreCounts[g]} films` });
+  }
+  lines.push({ type: 'ok', text: `[OK] Total records: ${movies.length}` });
+  lines.push({ type: 'warn', text: '[SYNC] Database synced @ 23:59' });
+  lines.push({ type: 'ok', text: '[RDY] Awaiting user input...' });
+
+  let i = 0;
+  function addLine() {
+    if (i >= lines.length) return;
+    const div = document.createElement('div');
+    div.className = 'log-line';
+    const cls = lines[i].type === 'warn' ? 'warn' : 'ok';
+    div.innerHTML = `<span class="${cls}">${lines[i].text}</span>`;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+    i++;
+    setTimeout(addLine, 300 + Math.random() * 200);
+  }
+  addLine();
+}
+
+// --- Genre Tabs ---
+function buildGenreTabs() {
+  const container = document.getElementById('genre-tabs');
+  genres.forEach(g => {
+    const btn = document.createElement('button');
+    btn.className = 'genre-tab' + (g === activeGenre ? ' active' : '');
+    btn.textContent = `[${g}]`;
+    btn.addEventListener('click', () => {
+      activeGenre = g;
+      document.querySelectorAll('.genre-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderGrid();
+    });
+    container.appendChild(btn);
+  });
+}
+
+// --- Movie Grid ---
+function renderGrid() {
+  const grid = document.getElementById('movie-grid');
+  grid.innerHTML = '';
+
+  let filtered = movies;
+  if (activeGenre !== 'ALL') {
+    filtered = filtered.filter(m => m.genre === activeGenre);
+  }
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(m => m.title.toLowerCase().includes(q));
+  }
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="no-results">&gt; NO RECORDS FOUND_</div>';
+    return;
+  }
+
+  filtered.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'movie-card';
+    const idStr = String(m.id).padStart(3, '0');
+    card.innerHTML = `
+      <div class="movie-poster" style="background: ${m.gradient};">
+        <span class="poster-label">${m.genre}</span>
+      </div>
+      <div class="movie-meta">
+        <span class="movie-name">${m.title.toUpperCase()}</span>
+        <span class="movie-id">ID: ${idStr}</span> | ${m.year}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// --- Search ---
+document.getElementById('search-input').addEventListener('input', (e) => {
+  searchQuery = e.target.value;
+  renderGrid();
+});
+
+// --- R key randomize ---
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'r' || e.key === 'R') {
+    if (document.activeElement === document.getElementById('search-input')) return;
+    randomizeNowPlaying();
+  }
+});
+
+// --- Ticker ---
+function buildTicker() {
+  const el = document.getElementById('ticker-inner');
+  const text = '>> NOW TRACKING 296 FILMS >> QUIZ MODE AVAILABLE >> BUILD YOUR TIER LIST >> RANDOM PICK READY >> ';
+  el.textContent = text + text;
+}
+
+// --- Init ---
+function init() {
+  animateCount(document.getElementById('stat-films'), 296, 1800);
+  animateCount(document.getElementById('stat-genres'), 7, 1200);
+  animateCount(document.getElementById('stat-uptime'), 12847, 2200);
+  animateCount(document.getElementById('stat-mem'), 64, 1000);
+
+  randomizeNowPlaying();
+  buildActivityLog();
+  buildGenreTabs();
+  renderGrid();
+  buildTicker();
+}
+
+init();
+</script>
+</body>
+</html>

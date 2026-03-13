@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head><title>TMDB Poster Path Fetcher</title></head>
+<body>
+<h1>TMDB Poster Path Fetcher</h1>
+<p>Enter your TMDB API key (get one free at <a href="https://www.themoviedb.org/settings/api">themoviedb.org/settings/api</a>):</p>
+<input type="text" id="apiKey" placeholder="Your TMDB API key" style="width:400px;padding:8px">
+<button onclick="fetchAll()" style="padding:8px 16px">Fetch All Poster Paths</button>
+<pre id="output" style="background:#222;color:#0f0;padding:20px;margin-top:20px;max-height:80vh;overflow:auto"></pre>
+
+<script>
+const MOVIES = {
+  // Action
+  "Raiders of the Lost Ark": 85,
+  "Die Hard": 562,
+  "The Terminator": 218,
+  "RoboCop": 5548,
+  "Beverly Hills Cop": 90,
+  "Top Gun": 744,
+  "Lethal Weapon": 941,
+  "Aliens": 679,
+  "First Blood": 1368,
+  "Predator": 106,
+  // Comedy
+  "Ghostbusters": 620,
+  "Ferris Bueller's Day Off": 9377,
+  "Tootsie": 9576,
+  "Coming to America": 9602,
+  "Airplane!": 813,
+  "Beetlejuice": 4011,
+  "Trading Places": 1621,
+  "National Lampoon's Vacation": 11153,
+  "Spaceballs": 957,
+  "9 to 5": 9918,
+  // Drama
+  "Stand By Me": 235,
+  "Scarface": 111,
+  "Rain Man": 380,
+  "The Color Purple": 873,
+  "Platoon": 792,
+  "Full Metal Jacket": 600,
+  "Ordinary People": 12516,
+  "Driving Miss Daisy": 403,
+  "Blue Velvet": 793,
+  "Do the Right Thing": 925,
+  // Horror
+  "The Shining": 694,
+  "A Nightmare on Elm Street": 377,
+  "The Thing": 1091,
+  "Poltergeist": 609,
+  "Gremlins": 927,
+  "The Fly": 9426,
+  "Friday the 13th": 4488,
+  "Halloween II": 11281,
+  "Christine": 10907,
+  "Hellraiser": 9003,
+  // Teen
+  "The Breakfast Club": 2108,
+  "Sixteen Candles": 15144,
+  "Pretty in Pink": 11522,
+  "Fast Times at Ridgemont High": 13342,
+  "Heathers": 2640,
+  "Say Anything...": 2028,
+  "Valley Girl": 21580,
+  "Some Kind of Wonderful": 15143,
+  "Weird Science": 11517,
+  // Sci-Fi
+  "Back to the Future": 105,
+  "E.T. the Extra-Terrestrial": 601,
+  "Blade Runner": 78,
+  "Tron": 97,
+  "WarGames": 860,
+  "The Last Starfighter": 11884,
+  "Cocoon": 10328,
+  "Short Circuit": 2605,
+  "They Live": 8337,
+  // Romance
+  "Dirty Dancing": 88,
+  "Flashdance": 535,
+  "An Officer and a Gentleman": 2623,
+  "When Harry Met Sally...": 639,
+  "Moonstruck": 2039,
+  "The Princess Bride": 2493
+};
+
+async function fetchAll() {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if (!apiKey) { alert('Please enter your TMDB API key'); return; }
+
+  const output = document.getElementById('output');
+  output.textContent = 'Fetching poster paths...\n\n';
+
+  const results = {};
+  const entries = Object.entries(MOVIES);
+
+  for (let i = 0; i < entries.length; i++) {
+    const [title, id] = entries[i];
+    try {
+      const resp = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${apiKey}&language=en-US`);
+      const data = await resp.json();
+      results[title] = data.poster_path || null;
+      output.textContent += `✓ ${title}: ${data.poster_path}\n`;
+    } catch (e) {
+      results[title] = null;
+      output.textContent += `✗ ${title}: ERROR - ${e.message}\n`;
+    }
+    // Small delay to be nice to the API
+    await new Promise(r => setTimeout(r, 250));
+  }
+
+  output.textContent += '\n\n// ===== COPY THIS JAVASCRIPT OBJECT =====\n\n';
+  output.textContent += 'const POSTERS = {\n';
+  for (const [title, path] of Object.entries(results)) {
+    output.textContent += `  "${title}": "${path}",\n`;
+  }
+  output.textContent += '};\n';
+}
+</script>
+</body>
+</html>

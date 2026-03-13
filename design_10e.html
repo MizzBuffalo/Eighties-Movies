@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMY'S 80s MOVIE VAULT — Hacker Desktop</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --pink: #e8527a;
+  --green: #33ff33;
+  --amber: #ffaa00;
+  --white: #fff;
+  --gray: #c0c0c0;
+  --bg: #0a0a0a;
+  --win-border-light: #dfdfdf;
+  --win-border-dark: #808080;
+  --taskbar: #333;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Fira Code', monospace;
+  background: var(--bg);
+  color: var(--green);
+  overflow: hidden;
+}
+
+/* ── Matrix Rain ── */
+.matrix-rain {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.matrix-column {
+  position: absolute;
+  top: -100%;
+  width: 18px;
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--green);
+  opacity: 0.12;
+  animation: matrix-fall linear infinite;
+  white-space: pre;
+  font-family: 'Fira Code', monospace;
+}
+
+@keyframes matrix-fall {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(calc(100vh + 100%)); }
+}
+
+/* ── CRT Overlay ── */
+.crt-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.crt-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,0.15) 0px,
+    rgba(0,0,0,0.15) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.crt-overlay::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%);
+}
+
+/* ── Desktop ── */
+.desktop {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 40px);
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* ── Window Component ── */
+.win {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--win-border-light);
+  border-right-color: var(--win-border-dark);
+  border-bottom-color: var(--win-border-dark);
+  box-shadow: 2px 2px 0 #000, inset 1px 1px 0 var(--win-border-light);
+  background: #000;
+  z-index: 10;
+}
+
+.win.focused { z-index: 20; }
+
+.win-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--gray);
+  padding: 2px 4px;
+  height: 24px;
+  min-height: 24px;
+  flex-shrink: 0;
+  cursor: default;
+  border-bottom: 2px solid var(--win-border-dark);
+}
+
+.win-titlebar span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #000;
+  font-family: 'Fira Code', monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.win-close {
+  width: 18px;
+  height: 18px;
+  background: var(--gray);
+  border: 2px outset var(--gray);
+  font-size: 11px;
+  font-weight: bold;
+  color: #000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fira Code', monospace;
+  flex-shrink: 0;
+}
+
+.win-close:active { border-style: inset; }
+
+.win-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray) #222;
+}
+
+.win-body::-webkit-scrollbar { width: 14px; }
+.win-body::-webkit-scrollbar-track { background: #222; border: 1px solid var(--win-border-dark); }
+.win-body::-webkit-scrollbar-thumb { background: var(--gray); border: 2px outset var(--gray); }
+
+/* ── Window 1: MOVIE_DATABASE ── */
+#win-db {
+  width: 60%;
+  height: 70%;
+  top: 12%;
+  left: 20%;
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.genre-tab {
+  background: #222;
+  color: var(--green);
+  border: 1px solid var(--green);
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: 'Fira Code', monospace;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.genre-tab:hover, .genre-tab.active {
+  background: var(--green);
+  color: #000;
+}
+
+.search-bar {
+  flex: 1;
+  min-width: 120px;
+  background: #111;
+  border: 1px solid var(--green);
+  color: var(--green);
+  padding: 3px 8px;
+  font-size: 12px;
+  font-family: 'Fira Code', monospace;
+  outline: none;
+}
+
+.search-bar::placeholder { color: #337733; }
+.search-bar:focus { border-color: var(--pink); box-shadow: 0 0 6px rgba(232,82,122,0.4); }
+
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.movie-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #333;
+  background: #111;
+  cursor: default;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.movie-card:hover {
+  border-color: var(--pink);
+  transform: translateY(-2px);
+}
+
+.movie-poster {
+  width: 100%;
+  aspect-ratio: 2/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: rgba(255,255,255,0.5);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+
+.movie-info {
+  padding: 6px;
+}
+
+.movie-title {
+  font-size: 10px;
+  color: var(--white);
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.movie-year {
+  font-size: 9px;
+  color: var(--gray);
+}
+
+.movie-genre-tag {
+  font-size: 8px;
+  padding: 1px 4px;
+  border-radius: 2px;
+  color: #000;
+  font-weight: 600;
+  display: inline-block;
+  margin-top: 3px;
+}
+
+/* ── Window 2: BOOT_LOG ── */
+#win-boot {
+  width: 320px;
+  height: 220px;
+  top: 3%;
+  left: 2%;
+  z-index: 15;
+}
+
+#win-boot .win-body {
+  color: var(--green);
+}
+
+.boot-line {
+  opacity: 0;
+  animation: boot-appear 0.3s forwards;
+}
+
+@keyframes boot-appear {
+  to { opacity: 1; }
+}
+
+.cursor-blink {
+  animation: blink 0.8s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* ── Window 3: STATS ── */
+#win-stats {
+  width: 280px;
+  height: 180px;
+  top: 3%;
+  right: 2%;
+  left: auto;
+  z-index: 14;
+}
+
+#win-stats .win-body {
+  color: var(--amber);
+}
+
+.stat-line {
+  margin-bottom: 4px;
+}
+
+.stat-label { color: #888; }
+.stat-value { color: var(--amber); font-weight: 700; }
+
+/* ── Window 4: GAMES ── */
+#win-games {
+  width: 280px;
+  height: 210px;
+  bottom: 8%;
+  right: 2%;
+  left: auto;
+  top: auto;
+  z-index: 13;
+}
+
+.game-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  padding: 2px 0;
+}
+
+.game-label {
+  color: var(--pink);
+  font-size: 12px;
+}
+
+.game-launch {
+  background: #111;
+  color: var(--green);
+  border: 1px solid var(--green);
+  padding: 2px 8px;
+  font-size: 10px;
+  font-family: 'Fira Code', monospace;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.game-launch:hover {
+  background: var(--green);
+  color: #000;
+}
+
+/* ── Taskbar ── */
+.taskbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  background: var(--taskbar);
+  border-top: 2px solid var(--win-border-light);
+  display: flex;
+  align-items: center;
+  z-index: 100;
+  padding: 0 4px;
+  gap: 4px;
+}
+
+.start-btn {
+  background: #222;
+  color: var(--green);
+  border: 2px outset var(--gray);
+  padding: 3px 12px;
+  font-family: 'Fira Code', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.start-btn:active { border-style: inset; }
+
+.taskbar-windows {
+  display: flex;
+  gap: 3px;
+  flex: 1;
+  overflow-x: auto;
+}
+
+.taskbar-btn {
+  background: #555;
+  color: var(--white);
+  border: 2px outset var(--gray);
+  padding: 2px 8px;
+  font-family: 'Fira Code', monospace;
+  font-size: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.taskbar-btn:active, .taskbar-btn.active {
+  border-style: inset;
+  background: #444;
+}
+
+.taskbar-clock {
+  color: var(--green);
+  font-size: 12px;
+  font-family: 'Fira Code', monospace;
+  flex-shrink: 0;
+  padding: 0 8px;
+  border: 2px inset var(--gray);
+  background: #222;
+  height: 28px;
+  display: flex;
+  align-items: center;
+}
+
+.clock-colon {
+  animation: blink 1s step-end infinite;
+}
+
+/* ── Genre Colors ── */
+.genre-action { background: linear-gradient(135deg, #d4380d, #ff7a45); }
+.genre-comedy { background: linear-gradient(135deg, #faad14, #ffc53d); }
+.genre-drama { background: linear-gradient(135deg, #1890ff, #69c0ff); }
+.genre-horror { background: linear-gradient(135deg, #722ed1, #b37feb); }
+.genre-teen { background: linear-gradient(135deg, #e8527a, #ff85a2); }
+.genre-sci-fi { background: linear-gradient(135deg, #13c2c2, #5cdbd3); }
+.genre-romance { background: linear-gradient(135deg, #eb2f96, #ff85c0); }
+
+.tag-action { background: #d4380d; }
+.tag-comedy { background: #faad14; color: #000; }
+.tag-drama { background: #1890ff; }
+.tag-horror { background: #722ed1; }
+.tag-teen { background: #e8527a; }
+.tag-sci-fi { background: #13c2c2; color: #000; }
+.tag-romance { background: #eb2f96; }
+
+/* ── No Results ── */
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--pink);
+  font-size: 14px;
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .desktop {
+    height: auto;
+    min-height: calc(100vh - 40px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .win {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+  }
+
+  .win-body {
+    max-height: 400px;
+  }
+
+  #win-db .win-body {
+    max-height: 60vh;
+  }
+
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .taskbar {
+    position: fixed;
+  }
+
+  .desktop {
+    padding-bottom: 48px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Matrix Rain -->
+<div class="matrix-rain" id="matrixRain"></div>
+
+<!-- CRT Overlay -->
+<div class="crt-overlay"></div>
+
+<!-- Desktop -->
+<div class="desktop" id="desktop">
+
+  <!-- Window 2: BOOT_LOG -->
+  <div class="win" id="win-boot" onclick="focusWin('win-boot')">
+    <div class="win-titlebar">
+      <span>[&#9632;] BOOT_LOG.txt</span>
+      <button class="win-close">X</button>
+    </div>
+    <div class="win-body" id="bootBody">
+      <div class="boot-line" style="animation-delay:0.2s">&gt; INITIALIZING AMY'S 80s MOVIE VAULT...</div>
+      <div class="boot-line" style="animation-delay:0.6s">&gt; LOADING 296 FILMS [&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;] 100%</div>
+      <div class="boot-line" style="animation-delay:1.0s">&gt; GENRES DETECTED: 7</div>
+      <div class="boot-line" style="animation-delay:1.4s">&gt; STATUS: ALL SYSTEMS ONLINE</div>
+      <div class="boot-line" style="animation-delay:1.8s">&gt; ACCESS GRANTED<span class="cursor-blink">_</span></div>
+    </div>
+  </div>
+
+  <!-- Window 3: STATS -->
+  <div class="win" id="win-stats" onclick="focusWin('win-stats')">
+    <div class="win-titlebar">
+      <span>[&#9632;] STATS.sys</span>
+      <button class="win-close">X</button>
+    </div>
+    <div class="win-body">
+      <div class="stat-line"><span class="stat-label">TOTAL FILMS:</span> <span class="stat-value">296</span></div>
+      <div class="stat-line"><span class="stat-label">GENRES:</span> <span class="stat-value">7</span></div>
+      <div class="stat-line"><span class="stat-label">DECADES:</span> <span class="stat-value">1980-1989</span></div>
+      <div class="stat-line"><span class="stat-label">VAULT STATUS:</span> <span class="stat-value">ACTIVE</span></div>
+    </div>
+  </div>
+
+  <!-- Window 1: MOVIE_DATABASE (largest) -->
+  <div class="win focused" id="win-db" onclick="focusWin('win-db')">
+    <div class="win-titlebar">
+      <span>[&#9632;] MOVIE_DATABASE.exe &mdash; 296 records</span>
+      <button class="win-close">X</button>
+    </div>
+    <div class="win-body">
+      <div class="filter-bar">
+        <button class="genre-tab active" data-genre="ALL">[ALL]</button>
+        <button class="genre-tab" data-genre="Action">[ACTION]</button>
+        <button class="genre-tab" data-genre="Comedy">[COMEDY]</button>
+        <button class="genre-tab" data-genre="Drama">[DRAMA]</button>
+        <button class="genre-tab" data-genre="Horror">[HORROR]</button>
+        <button class="genre-tab" data-genre="Teen">[TEEN]</button>
+        <button class="genre-tab" data-genre="Sci-Fi">[SCI-FI]</button>
+        <button class="genre-tab" data-genre="Romance">[ROMANCE]</button>
+        <input type="text" class="search-bar" id="searchInput" placeholder="C:\SEARCH>_">
+      </div>
+      <div class="movie-grid" id="movieGrid"></div>
+    </div>
+  </div>
+
+  <!-- Window 4: GAMES -->
+  <div class="win" id="win-games" onclick="focusWin('win-games')">
+    <div class="win-titlebar">
+      <span>[&#9632;] GAMES.exe</span>
+      <button class="win-close">X</button>
+    </div>
+    <div class="win-body">
+      <div class="game-row"><span class="game-label">QUIZ_MODE.exe</span><button class="game-launch">[LAUNCH]</button></div>
+      <div class="game-row"><span class="game-label">TIER_LIST.exe</span><button class="game-launch">[LAUNCH]</button></div>
+      <div class="game-row"><span class="game-label">RANDOMIZER.exe</span><button class="game-launch">[LAUNCH]</button></div>
+      <div class="game-row"><span class="game-label">TRACKER.exe</span><button class="game-launch">[LAUNCH]</button></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Taskbar -->
+<div class="taskbar">
+  <button class="start-btn" id="startBtn">START</button>
+  <div class="taskbar-windows">
+    <button class="taskbar-btn" data-win="win-boot">BOOT_LOG</button>
+    <button class="taskbar-btn active" data-win="win-db">MOVIE_DB</button>
+    <button class="taskbar-btn" data-win="win-stats">STATS</button>
+    <button class="taskbar-btn" data-win="win-games">GAMES</button>
+  </div>
+  <div class="taskbar-clock" id="clock"></div>
+</div>
+
+<script>
+// ── Movie Data ──
+const movies = [
+  // Action
+  { title: "Raiders of the Lost Ark", year: 1981, genre: "Action" },
+  { title: "Die Hard", year: 1988, genre: "Action" },
+  { title: "The Terminator", year: 1984, genre: "Action" },
+  { title: "RoboCop", year: 1987, genre: "Action" },
+  { title: "Beverly Hills Cop", year: 1984, genre: "Action" },
+  { title: "Top Gun", year: 1986, genre: "Action" },
+  { title: "Lethal Weapon", year: 1987, genre: "Action" },
+  { title: "Aliens", year: 1986, genre: "Action" },
+  { title: "First Blood", year: 1982, genre: "Action" },
+  { title: "Predator", year: 1987, genre: "Action" },
+  // Comedy
+  { title: "Ghostbusters", year: 1984, genre: "Comedy" },
+  { title: "Ferris Bueller's Day Off", year: 1986, genre: "Comedy" },
+  { title: "Tootsie", year: 1982, genre: "Comedy" },
+  { title: "Coming to America", year: 1988, genre: "Comedy" },
+  { title: "Airplane!", year: 1980, genre: "Comedy" },
+  { title: "Beetlejuice", year: 1988, genre: "Comedy" },
+  { title: "Trading Places", year: 1983, genre: "Comedy" },
+  { title: "National Lampoon's Vacation", year: 1983, genre: "Comedy" },
+  { title: "Spaceballs", year: 1987, genre: "Comedy" },
+  { title: "9 to 5", year: 1980, genre: "Comedy" },
+  // Drama
+  { title: "Stand By Me", year: 1986, genre: "Drama" },
+  { title: "Scarface", year: 1983, genre: "Drama" },
+  { title: "Rain Man", year: 1988, genre: "Drama" },
+  { title: "The Color Purple", year: 1985, genre: "Drama" },
+  { title: "Platoon", year: 1986, genre: "Drama" },
+  { title: "Full Metal Jacket", year: 1987, genre: "Drama" },
+  { title: "Ordinary People", year: 1980, genre: "Drama" },
+  { title: "Driving Miss Daisy", year: 1989, genre: "Drama" },
+  { title: "Blue Velvet", year: 1986, genre: "Drama" },
+  { title: "Do the Right Thing", year: 1989, genre: "Drama" },
+  // Horror
+  { title: "The Shining", year: 1980, genre: "Horror" },
+  { title: "A Nightmare on Elm Street", year: 1984, genre: "Horror" },
+  { title: "The Thing", year: 1982, genre: "Horror" },
+  { title: "Poltergeist", year: 1982, genre: "Horror" },
+  { title: "Gremlins", year: 1984, genre: "Horror" },
+  { title: "The Fly", year: 1986, genre: "Horror" },
+  { title: "Friday the 13th", year: 1980, genre: "Horror" },
+  { title: "Halloween II", year: 1981, genre: "Horror" },
+  { title: "Christine", year: 1983, genre: "Horror" },
+  { title: "Hellraiser", year: 1987, genre: "Horror" },
+  // Teen
+  { title: "The Breakfast Club", year: 1985, genre: "Teen" },
+  { title: "Sixteen Candles", year: 1984, genre: "Teen" },
+  { title: "Pretty in Pink", year: 1986, genre: "Teen" },
+  { title: "Fast Times at Ridgemont High", year: 1982, genre: "Teen" },
+  { title: "Heathers", year: 1988, genre: "Teen" },
+  { title: "Say Anything", year: 1989, genre: "Teen" },
+  { title: "Valley Girl", year: 1983, genre: "Teen" },
+  { title: "Some Kind of Wonderful", year: 1987, genre: "Teen" },
+  { title: "Weird Science", year: 1985, genre: "Teen" },
+  // Sci-Fi
+  { title: "Back to the Future", year: 1985, genre: "Sci-Fi" },
+  { title: "E.T.", year: 1982, genre: "Sci-Fi" },
+  { title: "Blade Runner", year: 1982, genre: "Sci-Fi" },
+  { title: "Tron", year: 1982, genre: "Sci-Fi" },
+  { title: "WarGames", year: 1983, genre: "Sci-Fi" },
+  { title: "The Last Starfighter", year: 1984, genre: "Sci-Fi" },
+  { title: "Cocoon", year: 1985, genre: "Sci-Fi" },
+  { title: "Short Circuit", year: 1986, genre: "Sci-Fi" },
+  { title: "They Live", year: 1988, genre: "Sci-Fi" },
+  // Romance
+  { title: "Dirty Dancing", year: 1987, genre: "Romance" },
+  { title: "Flashdance", year: 1983, genre: "Romance" },
+  { title: "An Officer and a Gentleman", year: 1982, genre: "Romance" },
+  { title: "When Harry Met Sally", year: 1989, genre: "Romance" },
+  { title: "Moonstruck", year: 1987, genre: "Romance" },
+  { title: "The Princess Bride", year: 1987, genre: "Romance" }
+];
+
+const genreClasses = {
+  "Action": "genre-action",
+  "Comedy": "genre-comedy",
+  "Drama": "genre-drama",
+  "Horror": "genre-horror",
+  "Teen": "genre-teen",
+  "Sci-Fi": "genre-sci-fi",
+  "Romance": "genre-romance"
+};
+
+const tagClasses = {
+  "Action": "tag-action",
+  "Comedy": "tag-comedy",
+  "Drama": "tag-drama",
+  "Horror": "tag-horror",
+  "Teen": "tag-teen",
+  "Sci-Fi": "tag-sci-fi",
+  "Romance": "tag-romance"
+};
+
+const genreIcons = {
+  "Action": "\u{1F4A5}",
+  "Comedy": "\u{1F923}",
+  "Drama": "\u{1F3AD}",
+  "Horror": "\u{1F480}",
+  "Teen": "\u{1F393}",
+  "Sci-Fi": "\u{1F680}",
+  "Romance": "\u{1F496}"
+};
+
+// ── Render Movies ──
+let currentGenre = "ALL";
+let currentSearch = "";
+
+function renderMovies() {
+  const grid = document.getElementById("movieGrid");
+  let filtered = movies;
+
+  if (currentGenre !== "ALL") {
+    filtered = filtered.filter(m => m.genre === currentGenre);
+  }
+
+  if (currentSearch) {
+    const q = currentSearch.toLowerCase();
+    filtered = filtered.filter(m => m.title.toLowerCase().includes(q));
+  }
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="no-results">&gt; NO RECORDS FOUND_</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(m => `
+    <div class="movie-card">
+      <div class="movie-poster ${genreClasses[m.genre]}">${genreIcons[m.genre] || ""}</div>
+      <div class="movie-info">
+        <div class="movie-title">${m.title}</div>
+        <div class="movie-year">${m.year}</div>
+        <span class="movie-genre-tag ${tagClasses[m.genre]}">${m.genre.toUpperCase()}</span>
+      </div>
+    </div>
+  `).join("");
+}
+
+// ── Genre Tabs ──
+document.querySelectorAll(".genre-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".genre-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    currentGenre = tab.dataset.genre;
+    renderMovies();
+  });
+});
+
+// ── Search ──
+document.getElementById("searchInput").addEventListener("input", e => {
+  currentSearch = e.target.value;
+  renderMovies();
+});
+
+// ── Window Focus ──
+function focusWin(id) {
+  document.querySelectorAll(".win").forEach(w => w.classList.remove("focused"));
+  document.getElementById(id).classList.add("focused");
+  document.querySelectorAll(".taskbar-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.win === id);
+  });
+}
+
+// Taskbar buttons
+document.querySelectorAll(".taskbar-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const winId = btn.dataset.win;
+    focusWin(winId);
+    const el = document.getElementById(winId);
+    if (window.innerWidth <= 768) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  });
+});
+
+// ── Clock ──
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, "0");
+  const m = String(now.getMinutes()).padStart(2, "0");
+  const s = String(now.getSeconds()).padStart(2, "0");
+  document.getElementById("clock").innerHTML =
+    `${h}<span class="clock-colon">:</span>${m}<span class="clock-colon">:</span>${s}`;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ── Matrix Rain ──
+(function initMatrix() {
+  const container = document.getElementById("matrixRain");
+  const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const colCount = Math.floor(window.innerWidth / 20);
+
+  for (let i = 0; i < colCount; i++) {
+    const col = document.createElement("div");
+    col.className = "matrix-column";
+    col.style.left = (i * 20) + "px";
+    col.style.animationDuration = (4 + Math.random() * 8) + "s";
+    col.style.animationDelay = (Math.random() * 5) + "s";
+    col.style.opacity = (0.04 + Math.random() * 0.1).toFixed(2);
+
+    let text = "";
+    const len = 15 + Math.floor(Math.random() * 25);
+    for (let j = 0; j < len; j++) {
+      text += chars[Math.floor(Math.random() * chars.length)] + "\n";
+    }
+    col.textContent = text;
+    container.appendChild(col);
+  }
+})();
+
+// ── Init ──
+renderMovies();
+</script>
+</body>
+</html>

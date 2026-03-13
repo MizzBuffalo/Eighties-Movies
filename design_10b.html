@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMY'S VAULT — DOS File Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --pink: #e8527a;
+  --green: #33ff33;
+  --amber: #ffaa00;
+  --white: #fff;
+  --dos-blue: #000080;
+  --dos-blue-light: #0000aa;
+  --cyan: #00ffff;
+  --black: #000;
+  --gray-dark: #333;
+  --gray-bar: #444;
+  --highlight-bg: #00aaaa;
+  --highlight-text: #000;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--black);
+  font-family: 'Fira Code', monospace;
+  color: var(--white);
+  overflow: hidden;
+}
+
+/* CRT Scanline Overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,0.15) 0px,
+    rgba(0,0,0,0.15) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* CRT Vignette */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* === TOP PATH BAR === */
+.path-bar {
+  background: var(--black);
+  border-bottom: 2px solid var(--gray-dark);
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.path-bar span {
+  color: var(--pink);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.cursor-blink {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background: var(--pink);
+  margin-left: 2px;
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* === MAIN LAYOUT === */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.main-area {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  padding: 4px;
+  gap: 4px;
+}
+
+/* === DOS-STYLE PANE === */
+.pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+}
+
+.pane-border {
+  border: 2px solid var(--cyan);
+  box-shadow: inset 1px 1px 0 var(--cyan), inset -1px -1px 0 var(--cyan);
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  background: var(--dos-blue);
+  position: relative;
+}
+
+.pane-border::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border: 1px solid rgba(0,255,255,0.3);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pane-title {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  background: var(--dos-blue);
+  padding: 0 8px;
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 2;
+  white-space: nowrap;
+  letter-spacing: 1px;
+}
+
+/* === LEFT PANE: DIRECTORY LISTING === */
+.dir-header {
+  display: flex;
+  padding: 4px 8px;
+  color: var(--amber);
+  font-size: 13px;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(0,255,255,0.3);
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.2);
+}
+
+.dir-header span:nth-child(1) { flex: 1; }
+.dir-header span:nth-child(2) { width: 60px; text-align: center; }
+.dir-header span:nth-child(3) { width: 50px; text-align: right; }
+
+.dir-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2px 0;
+}
+
+.dir-row {
+  display: flex;
+  padding: 3px 8px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--white);
+  transition: none;
+  align-items: center;
+  user-select: none;
+}
+
+.dir-row:hover {
+  background: rgba(0,170,170,0.3);
+}
+
+.dir-row.selected {
+  background: var(--highlight-bg);
+  color: var(--highlight-text);
+}
+
+.dir-row.selected .dir-type {
+  color: var(--highlight-text);
+}
+
+.dir-row .dir-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.dir-row .dir-type {
+  width: 60px;
+  text-align: center;
+  color: var(--green);
+  font-size: 12px;
+}
+
+.dir-row .dir-count {
+  width: 50px;
+  text-align: right;
+}
+
+/* === RIGHT PANE: MOVIE GRID === */
+.movies-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+  align-content: start;
+}
+
+.movie-card {
+  cursor: pointer;
+  transition: none;
+  position: relative;
+}
+
+.movie-card:hover .movie-info {
+  background: var(--highlight-bg);
+  color: var(--highlight-text);
+}
+
+.movie-poster {
+  width: 100%;
+  aspect-ratio: 3 / 4.5;
+  border: 1px solid rgba(0,255,255,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.movie-poster .year-overlay {
+  font-size: 28px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 2px;
+}
+
+.movie-info {
+  padding: 4px 2px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(0,255,255,0.2);
+  border-top: none;
+}
+
+.movie-title {
+  font-size: 10px;
+  color: var(--white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.movie-year {
+  font-size: 10px;
+  color: var(--green);
+}
+
+/* === SEARCH OVERLAY === */
+.search-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 5000;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-overlay.active { display: flex; }
+
+.search-box {
+  background: var(--dos-blue);
+  border: 2px solid var(--cyan);
+  box-shadow: inset 1px 1px 0 var(--cyan), inset -1px -1px 0 var(--cyan);
+  padding: 16px;
+  width: 420px;
+  max-width: 90vw;
+  position: relative;
+}
+
+.search-box::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border: 1px solid rgba(0,255,255,0.3);
+  pointer-events: none;
+}
+
+.search-box-title {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  background: var(--dos-blue);
+  padding: 0 8px;
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.search-box label {
+  display: block;
+  color: var(--amber);
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.search-box input {
+  width: 100%;
+  background: var(--black);
+  border: 1px solid var(--cyan);
+  color: var(--green);
+  font-family: 'Fira Code', monospace;
+  font-size: 14px;
+  padding: 6px 8px;
+  outline: none;
+}
+
+.search-box input::placeholder {
+  color: rgba(51,255,51,0.4);
+}
+
+.search-results {
+  margin-top: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.search-result-row {
+  padding: 3px 6px;
+  font-size: 12px;
+  color: var(--white);
+  cursor: pointer;
+}
+
+.search-result-row:hover {
+  background: var(--highlight-bg);
+  color: var(--highlight-text);
+}
+
+.search-result-row .sr-genre {
+  color: var(--pink);
+}
+
+/* === BOTTOM FUNCTION KEY BAR === */
+.fn-bar {
+  display: flex;
+  background: var(--black);
+  border-top: 1px solid var(--gray-dark);
+  flex-shrink: 0;
+  height: 28px;
+}
+
+.fn-key {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0 2px;
+  border-right: 1px solid #222;
+  font-size: 12px;
+  user-select: none;
+  transition: background 0.1s;
+}
+
+.fn-key:hover {
+  background: rgba(0,170,170,0.3);
+}
+
+.fn-key:last-child { border-right: none; }
+
+.fn-num {
+  color: var(--amber);
+  font-weight: 700;
+  margin-right: 1px;
+}
+
+.fn-label {
+  color: var(--white);
+}
+
+/* === QUIZ OVERLAY === */
+.quiz-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 5000;
+  align-items: center;
+  justify-content: center;
+}
+
+.quiz-overlay.active { display: flex; }
+
+.quiz-box {
+  background: var(--dos-blue);
+  border: 2px solid var(--cyan);
+  box-shadow: inset 1px 1px 0 var(--cyan), inset -1px -1px 0 var(--cyan);
+  padding: 20px;
+  width: 480px;
+  max-width: 90vw;
+  position: relative;
+}
+
+.quiz-box::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border: 1px solid rgba(0,255,255,0.3);
+  pointer-events: none;
+}
+
+.quiz-box-title {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  background: var(--dos-blue);
+  padding: 0 8px;
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.quiz-question {
+  color: var(--amber);
+  font-size: 14px;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.quiz-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(0,255,255,0.3);
+  color: var(--white);
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+.quiz-option:hover {
+  background: var(--highlight-bg);
+  color: var(--highlight-text);
+}
+
+.quiz-option.correct {
+  background: rgba(51,255,51,0.3);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.quiz-option.wrong {
+  background: rgba(232,82,122,0.3);
+  border-color: var(--pink);
+  color: var(--pink);
+}
+
+.quiz-feedback {
+  margin-top: 10px;
+  font-size: 13px;
+  min-height: 20px;
+}
+
+.quiz-next {
+  margin-top: 10px;
+  display: none;
+  background: var(--highlight-bg);
+  border: 1px solid var(--cyan);
+  color: var(--highlight-text);
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  padding: 6px 16px;
+  cursor: pointer;
+}
+
+.quiz-score {
+  color: var(--green);
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.quiz-close {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--pink);
+  font-family: 'Fira Code', monospace;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.search-close {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--pink);
+  font-family: 'Fira Code', monospace;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* === RANDOM MOVIE TOAST === */
+.random-toast {
+  display: none;
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--dos-blue);
+  border: 2px solid var(--cyan);
+  padding: 12px 20px;
+  color: var(--green);
+  font-size: 14px;
+  z-index: 6000;
+  white-space: nowrap;
+  max-width: 90vw;
+  text-align: center;
+}
+
+.random-toast.active { display: block; }
+
+/* === SCROLLBAR === */
+.dir-list::-webkit-scrollbar,
+.movies-content::-webkit-scrollbar,
+.search-results::-webkit-scrollbar {
+  width: 10px;
+}
+
+.dir-list::-webkit-scrollbar-track,
+.movies-content::-webkit-scrollbar-track,
+.search-results::-webkit-scrollbar-track {
+  background: var(--dos-blue);
+  border-left: 1px solid rgba(0,255,255,0.2);
+}
+
+.dir-list::-webkit-scrollbar-thumb,
+.movies-content::-webkit-scrollbar-thumb,
+.search-results::-webkit-scrollbar-thumb {
+  background: rgba(0,255,255,0.4);
+  border: 1px solid var(--cyan);
+}
+
+/* === MOBILE TOGGLE === */
+.mobile-toggle {
+  display: none;
+  background: var(--black);
+  padding: 4px 8px;
+  flex-shrink: 0;
+}
+
+.mobile-toggle button {
+  background: var(--dos-blue);
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  font-family: 'Fira Code', monospace;
+  font-size: 12px;
+  padding: 4px 12px;
+  cursor: pointer;
+  margin-right: 4px;
+}
+
+.mobile-toggle button.active {
+  background: var(--highlight-bg);
+  color: var(--highlight-text);
+}
+
+/* === EMPTY STATE === */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: rgba(0,255,255,0.4);
+  font-size: 13px;
+  text-align: center;
+  padding: 20px;
+  line-height: 1.8;
+}
+
+/* === MOBILE === */
+@media (max-width: 767px) {
+  .mobile-toggle { display: flex; }
+
+  .main-area {
+    flex-direction: column;
+  }
+
+  .pane { display: none; }
+  .pane.mobile-visible { display: flex; }
+
+  .movies-content {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  }
+
+  .fn-key { font-size: 10px; }
+  .fn-num { font-size: 10px; }
+
+  .path-bar span { font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="app-container">
+  <!-- Top Path Bar -->
+  <div class="path-bar">
+    <span>C:\AMYS_VAULT\MOVIES\&gt;</span><span class="cursor-blink"></span>
+  </div>
+
+  <!-- Mobile Toggle -->
+  <div class="mobile-toggle">
+    <button class="active" onclick="showMobilePane('dir')">Directory</button>
+    <button onclick="showMobilePane('movies')">Movies</button>
+  </div>
+
+  <!-- Main Dual Pane -->
+  <div class="main-area">
+    <!-- Left Pane: Directory Listing -->
+    <div class="pane mobile-visible" id="leftPane">
+      <div class="pane-border">
+        <span class="pane-title">[ DIRECTORY ]</span>
+        <div class="dir-header">
+          <span>Name</span>
+          <span>Type</span>
+          <span>Files</span>
+        </div>
+        <div class="dir-list" id="dirList"></div>
+      </div>
+    </div>
+
+    <!-- Right Pane: Movies -->
+    <div class="pane" id="rightPane">
+      <div class="pane-border">
+        <span class="pane-title" id="rightPaneTitle">[ MOVIES ]</span>
+        <div class="movies-content" id="moviesGrid">
+          <div class="empty-state">Select a directory<br>from the left pane<br>to browse movies</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Function Key Bar -->
+  <div class="fn-bar">
+    <div class="fn-key" onclick="showHelp()"><span class="fn-num">1</span><span class="fn-label">Help</span></div>
+    <div class="fn-key" onclick="startQuiz()"><span class="fn-num">2</span><span class="fn-label">Quiz</span></div>
+    <div class="fn-key" onclick="randomMovie()"><span class="fn-num">3</span><span class="fn-label">Random</span></div>
+    <div class="fn-key" onclick="tierSort()"><span class="fn-num">4</span><span class="fn-label">Tier</span></div>
+    <div class="fn-key" onclick="openSearch()"><span class="fn-num">5</span><span class="fn-label">Search</span></div>
+    <div class="fn-key" onclick="sortMovies()"><span class="fn-num">6</span><span class="fn-label">Sort</span></div>
+    <div class="fn-key" onclick="openSearch()"><span class="fn-num">7</span><span class="fn-label">Find</span></div>
+    <div class="fn-key" onclick="void(0)"><span class="fn-num">8</span><span class="fn-label">Delete</span></div>
+    <div class="fn-key" onclick="void(0)"><span class="fn-num">9</span><span class="fn-label">Setup</span></div>
+    <div class="fn-key" onclick="void(0)"><span class="fn-num">10</span><span class="fn-label">Quit</span></div>
+  </div>
+</div>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-box">
+    <span class="search-box-title">[ SEARCH FILES ]</span>
+    <button class="search-close" onclick="closeSearch()">&times;</button>
+    <label>Enter search pattern:</label>
+    <input type="text" id="searchInput" placeholder="*.mov" autocomplete="off">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<!-- Quiz Overlay -->
+<div class="quiz-overlay" id="quizOverlay">
+  <div class="quiz-box">
+    <span class="quiz-box-title">[ MOVIE QUIZ ]</span>
+    <button class="quiz-close" onclick="closeQuiz()">&times;</button>
+    <div class="quiz-score" id="quizScore"></div>
+    <div class="quiz-question" id="quizQuestion"></div>
+    <div id="quizOptions"></div>
+    <div class="quiz-feedback" id="quizFeedback"></div>
+    <button class="quiz-next" id="quizNext" onclick="nextQuestion()">Next &gt;</button>
+  </div>
+</div>
+
+<!-- Random Toast -->
+<div class="random-toast" id="randomToast"></div>
+
+<script>
+const MOVIES = {
+  ACTION: {
+    gradient: 'linear-gradient(135deg, #d4380d, #ff7a45)',
+    movies: [
+      { title: 'Raiders of the Lost Ark', year: 1981 },
+      { title: 'Die Hard', year: 1988 },
+      { title: 'The Terminator', year: 1984 },
+      { title: 'RoboCop', year: 1987 },
+      { title: 'Beverly Hills Cop', year: 1984 },
+      { title: 'Top Gun', year: 1986 },
+      { title: 'Lethal Weapon', year: 1987 },
+      { title: 'Aliens', year: 1986 },
+      { title: 'First Blood', year: 1982 },
+      { title: 'Predator', year: 1987 }
+    ]
+  },
+  COMEDY: {
+    gradient: 'linear-gradient(135deg, #faad14, #ffc53d)',
+    movies: [
+      { title: 'Ghostbusters', year: 1984 },
+      { title: "Ferris Bueller's Day Off", year: 1986 },
+      { title: 'Tootsie', year: 1982 },
+      { title: 'Coming to America', year: 1988 },
+      { title: 'Airplane!', year: 1980 },
+      { title: 'Beetlejuice', year: 1988 },
+      { title: 'Trading Places', year: 1983 },
+      { title: "National Lampoon's Vacation", year: 1983 },
+      { title: 'Spaceballs', year: 1987 },
+      { title: '9 to 5', year: 1980 }
+    ]
+  },
+  DRAMA: {
+    gradient: 'linear-gradient(135deg, #1890ff, #69c0ff)',
+    movies: [
+      { title: 'Stand By Me', year: 1986 },
+      { title: 'Scarface', year: 1983 },
+      { title: 'Rain Man', year: 1988 },
+      { title: 'The Color Purple', year: 1985 },
+      { title: 'Platoon', year: 1986 },
+      { title: 'Full Metal Jacket', year: 1987 },
+      { title: 'Ordinary People', year: 1980 },
+      { title: 'Driving Miss Daisy', year: 1989 },
+      { title: 'Blue Velvet', year: 1986 },
+      { title: 'Do the Right Thing', year: 1989 }
+    ]
+  },
+  HORROR_VAULT: {
+    gradient: 'linear-gradient(135deg, #722ed1, #b37feb)',
+    movies: [
+      { title: 'The Shining', year: 1980 },
+      { title: 'A Nightmare on Elm Street', year: 1984 },
+      { title: 'The Thing', year: 1982 },
+      { title: 'Poltergeist', year: 1982 },
+      { title: 'Gremlins', year: 1984 },
+      { title: 'The Fly', year: 1986 },
+      { title: 'Friday the 13th', year: 1980 },
+      { title: 'Halloween II', year: 1981 },
+      { title: 'Christine', year: 1983 },
+      { title: 'Hellraiser', year: 1987 }
+    ]
+  },
+  TEEN_FLICKS: {
+    gradient: 'linear-gradient(135deg, #e8527a, #ff85a2)',
+    movies: [
+      { title: 'The Breakfast Club', year: 1985 },
+      { title: 'Sixteen Candles', year: 1984 },
+      { title: 'Pretty in Pink', year: 1986 },
+      { title: 'Fast Times at Ridgemont High', year: 1982 },
+      { title: 'Heathers', year: 1988 },
+      { title: 'Say Anything', year: 1989 },
+      { title: 'Valley Girl', year: 1983 },
+      { title: 'Some Kind of Wonderful', year: 1987 },
+      { title: 'Weird Science', year: 1985 }
+    ]
+  },
+  QUEER_CINEMA: {
+    gradient: 'linear-gradient(135deg, #13c2c2, #5cdbd3)',
+    movies: [
+      { title: 'Back to the Future', year: 1985 },
+      { title: 'E.T.', year: 1982 },
+      { title: 'Blade Runner', year: 1982 },
+      { title: 'Tron', year: 1982 },
+      { title: 'WarGames', year: 1983 },
+      { title: 'The Last Starfighter', year: 1984 },
+      { title: 'Cocoon', year: 1985 },
+      { title: 'Short Circuit', year: 1986 },
+      { title: 'They Live', year: 1988 }
+    ]
+  },
+  SPIELBERG: {
+    gradient: 'linear-gradient(135deg, #eb2f96, #ff85c0)',
+    movies: [
+      { title: 'Dirty Dancing', year: 1987 },
+      { title: 'Flashdance', year: 1983 },
+      { title: 'An Officer and a Gentleman', year: 1982 },
+      { title: 'When Harry Met Sally', year: 1989 },
+      { title: 'Moonstruck', year: 1987 },
+      { title: 'The Princess Bride', year: 1987 }
+    ]
+  }
+};
+
+// Map display names for directory listing
+const DIR_DISPLAY = {
+  ACTION:       { name: 'ACTION\\',        label: 'Action' },
+  COMEDY:       { name: 'COMEDY\\',        label: 'Comedy' },
+  DRAMA:        { name: 'DRAMA\\',         label: 'Drama' },
+  HORROR_VAULT: { name: 'HORROR_VAULT\\',  label: 'Horror' },
+  TEEN_FLICKS:  { name: 'TEEN_FLICKS\\',   label: 'Teen' },
+  QUEER_CINEMA: { name: 'QUEER_CINEMA\\',  label: 'Sci-Fi' },
+  SPIELBERG:    { name: 'SPIELBERG\\',      label: 'Romance' }
+};
+
+let selectedGenre = null;
+let currentSort = 'title'; // 'title' | 'year'
+let allMoviesFlat = [];
+
+// Build flat list for search/quiz
+Object.keys(MOVIES).forEach(key => {
+  MOVIES[key].movies.forEach(m => {
+    allMoviesFlat.push({ ...m, genre: key, genreLabel: DIR_DISPLAY[key].label, gradient: MOVIES[key].gradient });
+  });
+});
+
+// === BUILD DIRECTORY LISTING ===
+function buildDirList() {
+  const list = document.getElementById('dirList');
+  list.innerHTML = '';
+
+  // Parent directory row
+  const upRow = document.createElement('div');
+  upRow.className = 'dir-row';
+  upRow.innerHTML = `<span class="dir-name">..</span><span class="dir-type">&lt;UP&gt;</span><span class="dir-count"></span>`;
+  list.appendChild(upRow);
+
+  Object.keys(MOVIES).forEach(key => {
+    const row = document.createElement('div');
+    row.className = 'dir-row';
+    if (selectedGenre === key) row.classList.add('selected');
+
+    const nameStr = DIR_DISPLAY[key].name.padEnd(18, ' ');
+    row.innerHTML = `<span class="dir-name">${nameStr}</span><span class="dir-type">&lt;DIR&gt;</span><span class="dir-count">${MOVIES[key].movies.length}</span>`;
+
+    row.addEventListener('click', () => selectGenre(key));
+    list.appendChild(row);
+  });
+}
+
+function selectGenre(key) {
+  selectedGenre = key;
+  buildDirList();
+  renderMovies();
+  document.getElementById('rightPaneTitle').textContent = `[ ${DIR_DISPLAY[key].label.toUpperCase()} ]`;
+
+  // Update path bar
+  document.querySelector('.path-bar span').textContent = `C:\\AMYS_VAULT\\MOVIES\\${key}\\>`;
+
+  // On mobile, switch to movies pane
+  if (window.innerWidth < 768) {
+    showMobilePane('movies');
+  }
+}
+
+// === RENDER MOVIES ===
+function renderMovies() {
+  const grid = document.getElementById('moviesGrid');
+  if (!selectedGenre) {
+    grid.innerHTML = '<div class="empty-state">Select a directory<br>from the left pane<br>to browse movies</div>';
+    return;
+  }
+
+  const data = MOVIES[selectedGenre];
+  let movies = [...data.movies];
+
+  if (currentSort === 'year') {
+    movies.sort((a, b) => a.year - b.year);
+  } else {
+    movies.sort((a, b) => a.title.localeCompare(b.title));
+  }
+
+  grid.innerHTML = '';
+  movies.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'movie-card';
+    card.innerHTML = `
+      <div class="movie-poster" style="background: ${data.gradient};">
+        <span class="year-overlay">${m.year}</span>
+      </div>
+      <div class="movie-info">
+        <div class="movie-title">${m.title}</div>
+        <div class="movie-year">${m.year}</div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// === SEARCH ===
+function openSearch() {
+  document.getElementById('searchOverlay').classList.add('active');
+  const input = document.getElementById('searchInput');
+  input.value = '';
+  input.focus();
+  document.getElementById('searchResults').innerHTML = '';
+}
+
+function closeSearch() {
+  document.getElementById('searchOverlay').classList.remove('active');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeSearch();
+    closeQuiz();
+  }
+  // F5 = search
+  if (e.key === 'F5') {
+    e.preventDefault();
+    openSearch();
+  }
+});
+
+document.getElementById('searchInput').addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  const results = document.getElementById('searchResults');
+  if (!q) { results.innerHTML = ''; return; }
+
+  const matches = allMoviesFlat.filter(m =>
+    m.title.toLowerCase().includes(q)
+  ).slice(0, 15);
+
+  results.innerHTML = matches.map(m =>
+    `<div class="search-result-row" onclick="jumpToMovie('${m.genre}', '${m.title.replace(/'/g, "\\'")}')">
+      ${m.title} (${m.year}) <span class="sr-genre">[${m.genreLabel}]</span>
+    </div>`
+  ).join('');
+});
+
+function jumpToMovie(genre, title) {
+  closeSearch();
+  selectGenre(genre);
+}
+
+// === RANDOM MOVIE ===
+function randomMovie() {
+  const m = allMoviesFlat[Math.floor(Math.random() * allMoviesFlat.length)];
+  const toast = document.getElementById('randomToast');
+  toast.textContent = `>> ${m.title} (${m.year}) [${m.genreLabel}] <<`;
+  toast.classList.add('active');
+  selectGenre(m.genre);
+  setTimeout(() => toast.classList.remove('active'), 3000);
+}
+
+// === SORT ===
+function sortMovies() {
+  currentSort = currentSort === 'title' ? 'year' : 'title';
+  renderMovies();
+}
+
+// === TIER SORT (year) ===
+function tierSort() {
+  currentSort = 'year';
+  renderMovies();
+}
+
+// === HELP ===
+function showHelp() {
+  alert("AMY'S VAULT — DOS File Manager\n\nNavigate the left pane to select a genre directory.\nMovies appear in the right pane.\n\nF1=Help  F2=Quiz  F3=Random  F5=Search  F6=Sort");
+}
+
+// === QUIZ ===
+let quizState = { score: 0, total: 0, answered: false };
+
+function startQuiz() {
+  quizState = { score: 0, total: 0, answered: false };
+  document.getElementById('quizOverlay').classList.add('active');
+  generateQuestion();
+}
+
+function closeQuiz() {
+  document.getElementById('quizOverlay').classList.remove('active');
+}
+
+function generateQuestion() {
+  quizState.answered = false;
+  document.getElementById('quizFeedback').textContent = '';
+  document.getElementById('quizNext').style.display = 'none';
+  document.getElementById('quizScore').textContent = `Score: ${quizState.score}/${quizState.total}`;
+
+  const movie = allMoviesFlat[Math.floor(Math.random() * allMoviesFlat.length)];
+  const questionType = Math.random() > 0.5 ? 'year' : 'genre';
+
+  const qEl = document.getElementById('quizQuestion');
+  const optEl = document.getElementById('quizOptions');
+  optEl.innerHTML = '';
+
+  if (questionType === 'year') {
+    qEl.textContent = `What year was "${movie.title}" released?`;
+    const correctYear = movie.year;
+    let options = new Set([correctYear]);
+    while (options.size < 4) {
+      options.add(1980 + Math.floor(Math.random() * 10));
+    }
+    const shuffled = [...options].sort(() => Math.random() - 0.5);
+    shuffled.forEach(y => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-option';
+      btn.textContent = y;
+      btn.addEventListener('click', () => answerQuiz(btn, String(y) === String(correctYear), correctYear));
+      optEl.appendChild(btn);
+    });
+  } else {
+    qEl.textContent = `What genre is "${movie.title}" (${movie.year})?`;
+    const correctGenre = movie.genreLabel;
+    const allGenres = [...new Set(allMoviesFlat.map(m => m.genreLabel))];
+    let options = new Set([correctGenre]);
+    while (options.size < 4) {
+      options.add(allGenres[Math.floor(Math.random() * allGenres.length)]);
+    }
+    const shuffled = [...options].sort(() => Math.random() - 0.5);
+    shuffled.forEach(g => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-option';
+      btn.textContent = g;
+      btn.addEventListener('click', () => answerQuiz(btn, g === correctGenre, correctGenre));
+      optEl.appendChild(btn);
+    });
+  }
+}
+
+function answerQuiz(btn, correct, answer) {
+  if (quizState.answered) return;
+  quizState.answered = true;
+  quizState.total++;
+
+  const feedback = document.getElementById('quizFeedback');
+  if (correct) {
+    quizState.score++;
+    btn.classList.add('correct');
+    feedback.innerHTML = `<span style="color:var(--green)">CORRECT!</span>`;
+  } else {
+    btn.classList.add('wrong');
+    feedback.innerHTML = `<span style="color:var(--pink)">WRONG — Answer: ${answer}</span>`;
+    // Highlight correct
+    document.querySelectorAll('.quiz-option').forEach(b => {
+      if (b.textContent == answer) b.classList.add('correct');
+    });
+  }
+  document.getElementById('quizScore').textContent = `Score: ${quizState.score}/${quizState.total}`;
+  document.getElementById('quizNext').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+  generateQuestion();
+}
+
+// === MOBILE PANE TOGGLE ===
+function showMobilePane(which) {
+  const left = document.getElementById('leftPane');
+  const right = document.getElementById('rightPane');
+  const btns = document.querySelectorAll('.mobile-toggle button');
+
+  if (which === 'dir') {
+    left.classList.add('mobile-visible');
+    right.classList.remove('mobile-visible');
+    btns[0].classList.add('active');
+    btns[1].classList.remove('active');
+  } else {
+    right.classList.add('mobile-visible');
+    left.classList.remove('mobile-visible');
+    btns[1].classList.add('active');
+    btns[0].classList.remove('active');
+  }
+}
+
+// === INIT ===
+buildDirList();
+</script>
+</body>
+</html>

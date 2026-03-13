@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amy's 80s Movie Vault — Split Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --pink: #e8527a;
+  --green: #33ff33;
+  --amber: #ffaa00;
+  --white: #fff;
+  --bg: #000;
+  --card-bg: #111;
+  --border: #333;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+/* CRT Scanline Overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15) 0px,
+    rgba(0, 0, 0, 0.15) 2px,
+    transparent 2px,
+    transparent 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* CRT Vignette */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  box-shadow:
+    inset 0 0 120px 60px rgba(0, 0, 0, 0.9),
+    inset 0 0 40px 10px rgba(232, 82, 122, 0.03),
+    inset 0 0 60px 20px rgba(51, 255, 51, 0.02);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* Layout */
+.layout {
+  display: flex;
+  height: calc(100vh - 32px);
+}
+
+/* LEFT PANEL */
+.left-panel {
+  width: 35%;
+  min-width: 300px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.left-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.left-panel::-webkit-scrollbar-track {
+  background: #111;
+}
+
+.left-panel::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+
+/* Boot Sequence */
+.boot-sequence {
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+
+.boot-line {
+  opacity: 0;
+  animation: bootIn 0.3s forwards;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.boot-line .prompt { color: var(--green); }
+.boot-line .text { color: var(--green); }
+.boot-line .highlight { color: var(--amber); }
+.boot-line .pink { color: var(--pink); }
+.boot-line .progress-bar { color: var(--green); }
+
+.boot-line:nth-child(1) { animation-delay: 0.2s; }
+.boot-line:nth-child(2) { animation-delay: 0.7s; }
+.boot-line:nth-child(3) { animation-delay: 1.2s; }
+.boot-line:nth-child(4) { animation-delay: 1.7s; }
+.boot-line:nth-child(5) { animation-delay: 2.2s; }
+
+@keyframes bootIn {
+  0% { opacity: 0; transform: translateX(-10px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.blink-cursor {
+  animation: cursorBlink 1s step-end infinite;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* System Stats */
+.sys-stats {
+  margin-bottom: 20px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--amber);
+  letter-spacing: 0.5px;
+}
+
+.sys-stats span {
+  margin-right: 8px;
+}
+
+.sys-stats .val {
+  color: var(--green);
+}
+
+/* Section Labels */
+.section-label {
+  text-transform: uppercase;
+  color: var(--pink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  margin-top: 16px;
+}
+
+/* Command Menu */
+.cmd-menu {
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+
+.cmd-item {
+  display: block;
+  padding: 6px 10px;
+  color: var(--white);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  text-transform: uppercase;
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.cmd-item:hover {
+  color: var(--pink);
+  background: rgba(232, 82, 122, 0.08);
+}
+
+.cmd-item .gt { color: var(--green); margin-right: 6px; }
+
+/* Search */
+.search-wrap {
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+
+.search-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.search-input-row .gt { color: var(--green); }
+.search-input-row .label { color: var(--amber); text-transform: uppercase; }
+
+.search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--white);
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  caret-color: var(--green);
+}
+
+.search-input::placeholder {
+  color: #555;
+}
+
+/* Genre Filters */
+.genre-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.genre-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: #aaa;
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  padding: 4px 10px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+
+.genre-btn:hover {
+  color: var(--pink);
+  border-color: var(--pink);
+}
+
+.genre-btn.active {
+  color: var(--bg);
+  background: var(--pink);
+  border-color: var(--pink);
+}
+
+/* RIGHT PANEL */
+.right-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.right-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.right-panel::-webkit-scrollbar-track {
+  background: #111;
+}
+
+.right-panel::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+
+.grid-header {
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--amber);
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+
+/* Movie Grid */
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 14px;
+}
+
+.movie-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.movie-card:hover {
+  border-color: var(--pink);
+  transform: translateY(-2px);
+}
+
+.poster-placeholder {
+  width: 100%;
+  aspect-ratio: 3 / 4.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.poster-placeholder .year-overlay {
+  font-size: 28px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.25);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.card-info {
+  padding: 8px;
+}
+
+.card-title {
+  font-size: 11px;
+  color: var(--white);
+  text-transform: uppercase;
+  line-height: 1.3;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.card-year {
+  font-size: 10px;
+  color: #666;
+}
+
+.card-genre-tag {
+  display: inline-block;
+  font-size: 9px;
+  padding: 1px 5px;
+  margin-top: 4px;
+  border: 1px solid;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.genre-action .card-genre-tag { color: #ff7a45; border-color: #ff7a45; }
+.genre-comedy .card-genre-tag { color: #ffc53d; border-color: #ffc53d; }
+.genre-drama .card-genre-tag { color: #69c0ff; border-color: #69c0ff; }
+.genre-horror .card-genre-tag { color: #b37feb; border-color: #b37feb; }
+.genre-teen .card-genre-tag { color: #ff85a2; border-color: #ff85a2; }
+.genre-scifi .card-genre-tag { color: #5cdbd3; border-color: #5cdbd3; }
+.genre-romance .card-genre-tag { color: #ff85c0; border-color: #ff85c0; }
+
+/* No Results */
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: #555;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.no-results .err { color: var(--pink); font-size: 14px; margin-bottom: 8px; }
+
+/* BOTTOM STATUS BAR */
+.status-bar {
+  height: 32px;
+  background: #0a0a0a;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  font-size: 11px;
+  text-transform: uppercase;
+  gap: 24px;
+  flex-shrink: 0;
+}
+
+.status-bar .label { color: #666; }
+.status-bar .val { color: var(--green); }
+.status-bar .pink { color: var(--pink); }
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+  }
+
+  body {
+    overflow: auto;
+  }
+
+  .left-panel {
+    width: 100%;
+    min-width: unset;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.95);
+    max-height: none;
+    padding: 12px 16px;
+    overflow: visible;
+  }
+
+  .boot-sequence {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+  }
+
+  .boot-line {
+    font-size: 10px;
+  }
+
+  .cmd-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+  }
+
+  .cmd-item {
+    width: auto;
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .section-label {
+    margin-top: 8px;
+    margin-bottom: 6px;
+  }
+
+  .right-panel {
+    padding: 12px;
+    overflow: visible;
+  }
+
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+
+  .status-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <!-- Boot Sequence -->
+    <div class="boot-sequence">
+      <div class="boot-line"><span class="prompt">&gt;</span> <span class="text">INITIALIZING AMY'S 80s MOVIE VAULT...</span></div>
+      <div class="boot-line"><span class="prompt">&gt;</span> <span class="text">LOADING 296 FILMS </span><span class="progress-bar">[████████████████]</span> <span class="highlight">100%</span></div>
+      <div class="boot-line"><span class="prompt">&gt;</span> <span class="text">GENRES DETECTED: </span><span class="highlight">7</span></div>
+      <div class="boot-line"><span class="prompt">&gt;</span> <span class="text">STATUS: </span><span class="pink">ALL SYSTEMS ONLINE</span></div>
+      <div class="boot-line"><span class="prompt">&gt;</span> <span class="text">ACCESS GRANTED</span><span class="blink-cursor">_</span></div>
+    </div>
+
+    <!-- System Stats -->
+    <div class="sys-stats">
+      <span>FILMS_LOADED: <span class="val">64</span></span>
+      <span>GENRES: <span class="val">7</span></span>
+      <span>STATUS: <span class="val">ONLINE</span></span>
+    </div>
+
+    <!-- Command Menu -->
+    <div class="section-label">// COMMANDS</div>
+    <div class="cmd-menu">
+      <button class="cmd-item" onclick="document.getElementById('searchInput').focus()"><span class="gt">&gt;</span> BROWSE</button>
+      <button class="cmd-item" onclick="showRandom()"><span class="gt">&gt;</span> RANDOM</button>
+      <button class="cmd-item" onclick="resetFilters()"><span class="gt">&gt;</span> RESET</button>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <div class="section-label">// SEARCH</div>
+      <div class="search-input-row">
+        <span class="gt">&gt;</span>
+        <span class="label">SEARCH:</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="_" autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+
+    <!-- Genre Filters -->
+    <div class="section-label">// FILTER BY GENRE</div>
+    <div class="genre-filters" id="genreFilters">
+      <button class="genre-btn active" data-genre="all">[ALL]</button>
+      <button class="genre-btn" data-genre="action">[ACTION]</button>
+      <button class="genre-btn" data-genre="comedy">[COMEDY]</button>
+      <button class="genre-btn" data-genre="drama">[DRAMA]</button>
+      <button class="genre-btn" data-genre="horror">[HORROR]</button>
+      <button class="genre-btn" data-genre="teen">[TEEN]</button>
+      <button class="genre-btn" data-genre="scifi">[SCI-FI]</button>
+      <button class="genre-btn" data-genre="romance">[ROMANCE]</button>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="grid-header" id="gridHeader">&gt; DISPLAYING ALL FILMS</div>
+    <div class="movie-grid" id="movieGrid"></div>
+  </div>
+</div>
+
+<!-- BOTTOM STATUS BAR -->
+<div class="status-bar">
+  <div><span class="label">FILTER: </span><span class="val" id="statusFilter">ALL</span></div>
+  <div><span class="label">VISIBLE: </span><span class="val" id="statusCount">64</span></div>
+  <div><span class="label">SEARCH: </span><span class="pink" id="statusSearch">—</span></div>
+  <div style="margin-left:auto;"><span class="label">AMY'S 80s VAULT </span><span class="pink">v1.0</span></div>
+</div>
+
+<script>
+const movies = [
+  // Action
+  { title: "Raiders of the Lost Ark", year: 1981, genre: "action" },
+  { title: "Die Hard", year: 1988, genre: "action" },
+  { title: "The Terminator", year: 1984, genre: "action" },
+  { title: "RoboCop", year: 1987, genre: "action" },
+  { title: "Beverly Hills Cop", year: 1984, genre: "action" },
+  { title: "Top Gun", year: 1986, genre: "action" },
+  { title: "Lethal Weapon", year: 1987, genre: "action" },
+  { title: "Aliens", year: 1986, genre: "action" },
+  { title: "First Blood", year: 1982, genre: "action" },
+  { title: "Predator", year: 1987, genre: "action" },
+  // Comedy
+  { title: "Ghostbusters", year: 1984, genre: "comedy" },
+  { title: "Ferris Bueller's Day Off", year: 1986, genre: "comedy" },
+  { title: "Tootsie", year: 1982, genre: "comedy" },
+  { title: "Coming to America", year: 1988, genre: "comedy" },
+  { title: "Airplane!", year: 1980, genre: "comedy" },
+  { title: "Beetlejuice", year: 1988, genre: "comedy" },
+  { title: "Trading Places", year: 1983, genre: "comedy" },
+  { title: "National Lampoon's Vacation", year: 1983, genre: "comedy" },
+  { title: "Spaceballs", year: 1987, genre: "comedy" },
+  { title: "9 to 5", year: 1980, genre: "comedy" },
+  // Drama
+  { title: "Stand By Me", year: 1986, genre: "drama" },
+  { title: "Scarface", year: 1983, genre: "drama" },
+  { title: "Rain Man", year: 1988, genre: "drama" },
+  { title: "The Color Purple", year: 1985, genre: "drama" },
+  { title: "Platoon", year: 1986, genre: "drama" },
+  { title: "Full Metal Jacket", year: 1987, genre: "drama" },
+  { title: "Ordinary People", year: 1980, genre: "drama" },
+  { title: "Driving Miss Daisy", year: 1989, genre: "drama" },
+  { title: "Blue Velvet", year: 1986, genre: "drama" },
+  { title: "Do the Right Thing", year: 1989, genre: "drama" },
+  // Horror
+  { title: "The Shining", year: 1980, genre: "horror" },
+  { title: "A Nightmare on Elm Street", year: 1984, genre: "horror" },
+  { title: "The Thing", year: 1982, genre: "horror" },
+  { title: "Poltergeist", year: 1982, genre: "horror" },
+  { title: "Gremlins", year: 1984, genre: "horror" },
+  { title: "The Fly", year: 1986, genre: "horror" },
+  { title: "Friday the 13th", year: 1980, genre: "horror" },
+  { title: "Halloween II", year: 1981, genre: "horror" },
+  { title: "Christine", year: 1983, genre: "horror" },
+  { title: "Hellraiser", year: 1987, genre: "horror" },
+  // Teen
+  { title: "The Breakfast Club", year: 1985, genre: "teen" },
+  { title: "Sixteen Candles", year: 1984, genre: "teen" },
+  { title: "Pretty in Pink", year: 1986, genre: "teen" },
+  { title: "Fast Times at Ridgemont High", year: 1982, genre: "teen" },
+  { title: "Heathers", year: 1988, genre: "teen" },
+  { title: "Say Anything", year: 1989, genre: "teen" },
+  { title: "Valley Girl", year: 1983, genre: "teen" },
+  { title: "Some Kind of Wonderful", year: 1987, genre: "teen" },
+  { title: "Weird Science", year: 1985, genre: "teen" },
+  // Sci-Fi
+  { title: "Back to the Future", year: 1985, genre: "scifi" },
+  { title: "E.T.", year: 1982, genre: "scifi" },
+  { title: "Blade Runner", year: 1982, genre: "scifi" },
+  { title: "Tron", year: 1982, genre: "scifi" },
+  { title: "WarGames", year: 1983, genre: "scifi" },
+  { title: "The Last Starfighter", year: 1984, genre: "scifi" },
+  { title: "Cocoon", year: 1985, genre: "scifi" },
+  { title: "Short Circuit", year: 1986, genre: "scifi" },
+  { title: "They Live", year: 1988, genre: "scifi" },
+  // Romance
+  { title: "Dirty Dancing", year: 1987, genre: "romance" },
+  { title: "Flashdance", year: 1983, genre: "romance" },
+  { title: "An Officer and a Gentleman", year: 1982, genre: "romance" },
+  { title: "When Harry Met Sally", year: 1989, genre: "romance" },
+  { title: "Moonstruck", year: 1987, genre: "romance" },
+  { title: "The Princess Bride", year: 1987, genre: "romance" }
+];
+
+const gradients = {
+  action: "linear-gradient(135deg, #d4380d, #ff7a45)",
+  comedy: "linear-gradient(135deg, #faad14, #ffc53d)",
+  drama: "linear-gradient(135deg, #1890ff, #69c0ff)",
+  horror: "linear-gradient(135deg, #722ed1, #b37feb)",
+  teen: "linear-gradient(135deg, #e8527a, #ff85a2)",
+  scifi: "linear-gradient(135deg, #13c2c2, #5cdbd3)",
+  romance: "linear-gradient(135deg, #eb2f96, #ff85c0)"
+};
+
+const genreLabels = {
+  action: "ACTION",
+  comedy: "COMEDY",
+  drama: "DRAMA",
+  horror: "HORROR",
+  teen: "TEEN",
+  scifi: "SCI-FI",
+  romance: "ROMANCE"
+};
+
+let currentGenre = "all";
+let currentSearch = "";
+
+const grid = document.getElementById("movieGrid");
+const searchInput = document.getElementById("searchInput");
+const gridHeader = document.getElementById("gridHeader");
+const statusFilter = document.getElementById("statusFilter");
+const statusCount = document.getElementById("statusCount");
+const statusSearch = document.getElementById("statusSearch");
+
+function renderMovies() {
+  const filtered = movies.filter(m => {
+    const matchGenre = currentGenre === "all" || m.genre === currentGenre;
+    const matchSearch = currentSearch === "" || m.title.toLowerCase().includes(currentSearch.toLowerCase());
+    return matchGenre && matchSearch;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="no-results"><div class="err">&gt; ERROR 404</div>NO FILMS MATCH CURRENT QUERY</div>';
+  } else {
+    grid.innerHTML = filtered.map(m => `
+      <div class="movie-card genre-${m.genre}">
+        <div class="poster-placeholder" style="background:${gradients[m.genre]}">
+          <span class="year-overlay">${m.year}</span>
+        </div>
+        <div class="card-info">
+          <div class="card-title">${m.title}</div>
+          <div class="card-year">${m.year}</div>
+          <div class="card-genre-tag">[${genreLabels[m.genre]}]</div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  // Update header
+  const genreDisplay = currentGenre === "all" ? "ALL" : genreLabels[currentGenre];
+  const searchSuffix = currentSearch ? ` — QUERY: "${currentSearch.toUpperCase()}"` : "";
+  gridHeader.textContent = `> DISPLAYING ${genreDisplay} FILMS${searchSuffix} (${filtered.length})`;
+
+  // Update status bar
+  statusFilter.textContent = genreDisplay;
+  statusCount.textContent = filtered.length;
+  statusSearch.textContent = currentSearch || "—";
+}
+
+// Genre filter buttons
+document.getElementById("genreFilters").addEventListener("click", e => {
+  const btn = e.target.closest(".genre-btn");
+  if (!btn) return;
+  document.querySelectorAll(".genre-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  currentGenre = btn.dataset.genre;
+  renderMovies();
+});
+
+// Search
+searchInput.addEventListener("input", e => {
+  currentSearch = e.target.value.trim();
+  renderMovies();
+});
+
+// Random movie
+function showRandom() {
+  const pool = movies.filter(m => {
+    const matchGenre = currentGenre === "all" || m.genre === currentGenre;
+    return matchGenre;
+  });
+  if (pool.length === 0) return;
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  searchInput.value = pick.title;
+  currentSearch = pick.title;
+  renderMovies();
+}
+
+// Reset
+function resetFilters() {
+  currentGenre = "all";
+  currentSearch = "";
+  searchInput.value = "";
+  document.querySelectorAll(".genre-btn").forEach(b => b.classList.remove("active"));
+  document.querySelector('[data-genre="all"]').classList.add("active");
+  renderMovies();
+}
+
+// Initial render
+renderMovies();
+</script>
+</body>
+</html>

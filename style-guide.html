@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Style Guide — Amy's 80s Movie Vault</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&family=Bungee+Shade&family=Permanent+Marker&family=Rubik+Glitch&family=Silkscreen&family=Major+Mono+Display&family=Orbitron:wght@400;700;900&family=Monoton&family=Audiowide&family=Russo+One&family=Tourney:wght@400;700;900&family=Nabla&family=Righteous&family=Staatliches&family=Lexend+Mega:wght@400;700&family=Bebas+Neue&family=Tilt+Neon&family=Faster+One&family=Bungee&family=Bungee+Inline&family=Concert+One&family=Fredoka:wght@400;600;700&family=Satisfy&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #1a1520;
+  --bg2: #2a2030;
+  --bg3: #3a3040;
+  --pink: #e8527a;
+  --cyan: #00f0ff;
+  --yellow: #f0ff00;
+  --text: #f0e6d3;
+  --text-dim: rgba(240,230,211,0.5);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Page Header ── */
+.page-header {
+  text-align: center;
+  padding: 50px 24px 30px;
+  border-bottom: 1px solid var(--bg3);
+  margin-bottom: 0;
+}
+.page-header h1 {
+  font-family: 'Press Start 2P', cursive;
+  font-size: clamp(14px, 3vw, 22px);
+  color: var(--pink);
+  text-shadow: 0 0 8px rgba(232,82,122,0.5);
+  margin-bottom: 10px;
+}
+.page-header p {
+  color: var(--text-dim);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+/* ── Nav ── */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(26,21,32,0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--bg3);
+  padding: 10px 24px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.nav a {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--cyan);
+  text-decoration: none;
+  padding: 6px 14px;
+  border: 1px solid rgba(0,240,255,0.3);
+  border-radius: 20px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.nav a:hover {
+  background: rgba(0,240,255,0.1);
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px rgba(0,240,255,0.2);
+}
+
+/* ── Section ── */
+.section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 24px 40px;
+  border-bottom: 1px solid var(--bg3);
+}
+.section-label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 9px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 4px;
+}
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(28px, 5vw, 48px);
+  color: var(--pink);
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+.section-desc {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin-bottom: 36px;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+/* ── Font Samples ── */
+.font-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+.font-card {
+  background: var(--bg2);
+  border: 1px solid var(--bg3);
+  border-radius: 12px;
+  padding: 28px 24px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.font-card:hover {
+  border-color: var(--pink);
+  box-shadow: 0 4px 24px rgba(232,82,122,0.15);
+  transform: translateY(-2px);
+}
+.font-card .font-name {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.font-card .font-name::before {
+  content: '';
+  width: 8px; height: 8px;
+  background: var(--pink);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.font-card .font-vibe {
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+  padding: 3px 8px;
+  border: 1px solid var(--bg3);
+  border-radius: 4px;
+  display: inline-block;
+}
+.font-card .font-title {
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+.font-card .font-subtitle {
+  line-height: 1.4;
+}
+
+/* ── Button Samples ── */
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+.button-sample {
+  background: var(--bg2);
+  border: 1px solid var(--bg3);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s;
+}
+.button-sample:hover {
+  border-color: rgba(232,82,122,0.3);
+}
+.button-sample .btn-label {
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-family: 'Space Mono', monospace;
+}
+.button-sample .btn-states {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.button-sample .state-label {
+  font-size: 8px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+/* ── Dropdown Samples ── */
+.dropdown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+.dropdown-sample {
+  background: var(--bg2);
+  border: 1px solid var(--bg3);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.dropdown-sample .dd-label {
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-family: 'Space Mono', monospace;
+}
+
+/* ── Scroll Headers ── */
+.header-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+.header-sample {
+  background: var(--bg2);
+  border: 1px solid var(--bg3);
+  border-radius: 12px;
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.3s;
+}
+.header-sample:hover {
+  border-color: rgba(232,82,122,0.3);
+}
+.header-sample .hdr-label {
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-family: 'Space Mono', monospace;
+  min-width: 160px;
+  flex-shrink: 0;
+}
+.header-sample .hdr-display {
+  flex: 1;
+}
+
+/* ── Card Samples ── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+}
+.card-sample {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.card-sample .card-label {
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-family: 'Space Mono', monospace;
+  text-align: center;
+}
+
+/* ── Palette Samples ── */
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+.palette-card {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--bg3);
+  transition: all 0.3s;
+}
+.palette-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.palette-preview {
+  padding: 28px 24px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.palette-preview .pal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+.palette-preview .pal-sub {
+  font-size: 12px;
+  opacity: 0.7;
+}
+.palette-swatches {
+  display: flex;
+}
+.palette-swatches .swatch {
+  flex: 1;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.palette-info {
+  background: var(--bg2);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.palette-info .pal-name {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 9px;
+  color: var(--text);
+}
+.palette-info .pal-vibe {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .font-grid { grid-template-columns: 1fr; }
+  .button-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .header-sample { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .header-sample .hdr-label { min-width: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- Page Header -->
+<div class="page-header">
+  <h1>Style Guide</h1>
+  <p>Visual design reference for Amy's 80s Movie Vault</p>
+</div>
+
+<!-- Navigation -->
+<nav class="nav">
+  <a href="#fonts">Fonts</a>
+  <a href="#buttons">Genre Buttons</a>
+  <a href="#dropdowns">Dropdowns</a>
+  <a href="#headers">Row Headers</a>
+  <a href="#cards">Card Styles</a>
+  <a href="#palettes">Color Palettes</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 1 — FONTS
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="fonts">
+  <div class="section-label">Section 1</div>
+  <div class="section-title">Font Combinations</div>
+  <div class="section-desc">The site title and subtitle shown in 14 different Google Font pairings. Each pairing sets a different tone — from retro arcade to punk zine.</div>
+
+  <div class="font-grid">
+
+    <!-- 1. Press Start 2P + Space Mono (current) -->
+    <div class="font-card">
+      <div class="font-name">Press Start 2P + Space Mono</div>
+      <div class="font-vibe">Retro Arcade</div>
+      <div class="font-title" style="font-family:'Press Start 2P',cursive; font-size:clamp(11px,2vw,16px); color:var(--pink); text-shadow:0 0 8px rgba(232,82,122,0.5);">Amy's 80s Movie Vault</div>
+      <div class="font-subtitle" style="font-family:'Space Mono',monospace; font-size:13px; color:var(--text-dim);">296 Films — The Ultimate Collection</div>
+    </div>
+
+    <!-- 2. Bungee Shade + Fredoka -->
+    <div class="font-card">
+      <div class="font-name">Bungee Shade + Fredoka</div>
+      <div class="font-vibe">Movie Marquee</div>
+      <div class="font-title" style="font-family:'Bungee Shade',cursive; font-size:clamp(16px,2.5vw,26px); color:var(--yellow); text-shadow:2px 2px 0 var(--pink);">Amy's 80s Movie Vault</div>
+      <div class="font-subtitle" style="font-family:'Fredoka',sans-serif; font-size:14px; color:var(--text); font-weight:600;">296 Films — The Ultimate Collection</div>
+    </div>
+
+    <!-- 3. Monoton + Audiowide -->
+    <div class="font-card">
+      <div class="font-name">Monoton + Audiowide</div>
+      <div class="font-vibe">Neon Sign</div>
+      <div class="font-title" style="font-family:'Monoton',cursive; font-size:clamp(20px,3vw,36px); color:var(--pink); text-shadow:0 0 10px var(--pink), 0 0 30px rgba(232,82,122,0.4), 0 0 60px rgba(232,82,122,0.2);">Amy's 80s Movie Vault</div>
+      <div class="font-subtitle" style="font-family:'Audiowide',cursive; font-size:12px; color:var(--cyan); letter-spacing:3px; text-transform:uppercase;">296 Films — The Ultimate Collection</div>
+    </div>
+
+    <!-- 4. Permanent Marker + Concert One -->
+    <div class="font-card">
+      <div class="font-name">Permanent Marker + Concert One</div>
+      <div class="font-vibe">Punk Zine</div>
+      <div class="font-title" style="font-family:'Permanent Marker',cursive; font-size:clamp(18px,3vw,32px); color:var(--yellow); transform:rotate(-1deg); display:inline-block; background:var(--pink); padding:4px 12px;">Amy's 80s Movie Vault</div>
+      <div class="font-subtitle" style="font-family:'Concert One',cursive; font-size:15px; color:var(--text); margin-top:8px;">296 Films — The Ultimate Collection</div>
+    </div>
+
+    <!-- 5. Rubik Glitch + Silkscreen -->
+    <div class="font-card">
+      <div class="font-name">Rubik Glitch + Silkscreen</div>
+      <div class="font-vibe">Glitch / Digital</div>
+      <div class="font-title" style="font-family:'Rubik Glitch',cursive; font-size:clamp(18px,3vw,30px); color:var(--cyan); text-shadow:2px 0 var(--pink), -2px 0 var(--yellow);">Amy's 80s Movie Vault</div>
+      <div class="font-subtitle" style="font-family:'Silkscreen',cursive; font-size:12px; color:var(--text-dim); letter-spacing:1px;">296 Films — The Ultimate Collection</div>
+    </div>
+
+    <!-- 6. Orbitron + Space Mono -->
+    <div class="font-card">
+      <div class="font-name">Orbitron + Space Mono</div>
+      <div class="font-vibe">Sci-Fi Terminal</div>
+      <div class="font-title" style="font-family:'Orbitron',sans-serif; font-size:clamp(14px,2.5vw,24px); font-weight:900; color:var(--text); letter-spacing:4px; text-transform:uppercase;">Amy's 80s Movie Vault</div>
+      <div class="font-subtitle" style="font-family:'Space Mono',monospace; font-size:12px; color:var(--cyan); letter-spacing:2px;">296 Films — The Ultimate Collection</div>
+    </div>
+
+    <!-- 7. Tourney + Righteous -->
+    <div class="font-card">
+      <div class="font-name">Tourney + Righteous</div>
+      <div class="font-vibe">Sports / Bold Editorial</div>
+      <div class="font-title" style="font-family:'Tourney',cursive; font-size:clamp(18px,3vw,34px); font-weight:900; color:var(--pink); letter-spacing:2px; text-transform:uppercase;">Amy's 80s Movie Vault</div>
+      <div class="font-subtitle" style="font-family:'Righteous',cursive; font-size:14px; color:var(--text); letter-spacing:1px;">296 Films — The Ultimate Collection</div>
+    </div>
+
+    <!-- 8. Bebas Neue + Lexend Mega -->
+    <div class="font-card">
+      <div class="font-name">Bebas Neue + Lexend Mega</div>
+      <div class="font-vibe">Bold Editorial</div>
+      <div class="font-title" style="font-family:'Bebas Neue',sans-serif; font-size:clamp(24px,4vw,44px); color:var(--text); letter-spacing:4px;">AMY'S 80s MOVIE VAULT</div>
+      <div class="font-subtitle" style="font-family:'Lexend Mega',sans-serif; font-size:11px; color:var(--pink); letter-spacing:3px; text-transform:uppercase; font-weight:700;">296 Films — The Ultimate Collection</div>
+    </div>
+
+    <!-- 9. Russo One + Audiowide -->
+    <div class="font-card">
+      <div class="font-name">Russo One + Audiowide</div>
+      <div class="font-vibe">VHS Label</div>
+      <div class="font-title" style="font-family:'Russo One',sans-serif; font-size:clamp(16px,2.8vw,28px); color:var(--text); background:linear-gradient(90deg,var(--pink),#ff8855); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-transform:uppercase;">Amy's 80s Movie Vault</div>
+      <div class="font-subtitle" style="font-family:'Audiowide',cursive; font-size:11px; color:var(--text-dim); letter-spacing:2px; text-transform:uppercase;">296 Films — The Ultimate Collection</div>
+    </div>
+
+    <!-- 10. Tilt Neon + Fredoka -->
+    <div class="font-card">
+      <div class="font-name">Tilt Neon + Fredoka</div>
+      <div class="font-vibe">Neon Diner</div>
+      <div class="font-title" style="font-family:'Tilt Neon',cursive; font-size:clamp(20px,3.5vw,38px); color:var(--pink); text-shadow:0 0 12px var(--pink), 0 0 40px rgba(232,82,122,0.3);">Amy's 80s Movie Vault</div>
+      <div class="font-subtitle" style="font-family:'Fredoka',sans-serif; font-size:14px; color:var(--yellow); font-weight:600;">296 Films — The Ultimate Collection</div>
+    </div>
+
+    <!-- 11. Faster One + Staatliches -->
+    <div class="font-card">
+      <div class="font-name">Faster One + Staatliches</div>
+      <div class="font-vibe">Speed / Action</div>
+      <div class="font-title" style="font-family:'Faster One',cursive; font-size:clamp(22px,3.5vw,40px); color:var(--yellow); text-shadow:3px 3px 0 rgba(232,82,122,0.6);">Amy's 80s Movie Vault</div>
+      <div class="font-subtitle" style="font-family:'Staatliches',cursive; font-size:16px; color:var(--text); letter-spacing:4px;">296 FILMS — THE ULTIMATE COLLECTION</div>
+    </div>
+
+    <!-- 12. Bungee + Space Mono -->
+    <div class="font-card">
+      <div class="font-name">Bungee + Space Mono</div>
+      <div class="font-vibe">Block / Industrial</div>
+      <div class="font-title" style="font-family:'Bungee',cursive; font-size:clamp(14px,2.5vw,24px); color:var(--cyan); text-shadow:2px 2px 0 var(--bg3);">Amy's 80s Movie Vault</div>
+      <div class="font-subtitle" style="font-family:'Space Mono',monospace; font-size:12px; color:var(--text-dim);">296 Films — The Ultimate Collection</div>
+    </div>
+
+    <!-- 13. Bungee Inline + Righteous -->
+    <div class="font-card">
+      <div class="font-name">Bungee Inline + Righteous</div>
+      <div class="font-vibe">Retro Marquee</div>
+      <div class="font-title" style="font-family:'Bungee Inline',cursive; font-size:clamp(14px,2.5vw,24px); color:var(--yellow); text-shadow:0 0 6px rgba(240,255,0,0.4);">Amy's 80s Movie Vault</div>
+      <div class="font-subtitle" style="font-family:'Righteous',cursive; font-size:14px; color:var(--pink);">296 Films — The Ultimate Collection</div>
+    </div>
+
+    <!-- 14. Major Mono Display + Silkscreen -->
+    <div class="font-card">
+      <div class="font-name">Major Mono Display + Silkscreen</div>
+      <div class="font-vibe">Avant-Garde / Minimal</div>
+      <div class="font-title" style="font-family:'Major Mono Display',monospace; font-size:clamp(12px,2vw,20px); color:var(--text); letter-spacing:2px;">Amy's 80s Movie Vault</div>
+      <div class="font-subtitle" style="font-family:'Silkscreen',cursive; font-size:11px; color:var(--pink); letter-spacing:1px;">296 Films — The Ultimate Collection</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 2 — GENRE BUTTONS
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="buttons">
+  <div class="section-label">Section 2</div>
+  <div class="section-title">Genre Buttons</div>
+  <div class="section-desc">The word "Horror" rendered as a clickable button in 15 different styles. Hover over each to see the active state.</div>
+
+  <div class="button-grid">
+
+    <!-- 1. Pill -->
+    <div class="button-sample">
+      <div class="btn-label">Pill Shape</div>
+      <style>
+        .btn-pill { font-family:'Space Mono',monospace; font-size:13px; padding:8px 22px; border-radius:50px; background:var(--pink); color:var(--text); border:none; cursor:pointer; transition:all 0.2s; letter-spacing:1px; }
+        .btn-pill:hover { background:#ff6b91; transform:scale(1.05); box-shadow:0 4px 16px rgba(232,82,122,0.4); }
+      </style>
+      <button class="btn-pill">Horror</button>
+    </div>
+
+    <!-- 2. Square -->
+    <div class="button-sample">
+      <div class="btn-label">Square</div>
+      <style>
+        .btn-square { font-family:'Press Start 2P',cursive; font-size:10px; padding:12px 20px; border-radius:0; background:var(--bg3); color:var(--text); border:2px solid var(--pink); cursor:pointer; transition:all 0.2s; text-transform:uppercase; }
+        .btn-square:hover { background:var(--pink); color:#fff; box-shadow:4px 4px 0 var(--bg3); }
+      </style>
+      <button class="btn-square">Horror</button>
+    </div>
+
+    <!-- 3. Outlined Only -->
+    <div class="button-sample">
+      <div class="btn-label">Outlined Only</div>
+      <style>
+        .btn-outline { font-family:'Space Mono',monospace; font-size:13px; padding:8px 22px; border-radius:6px; background:transparent; color:var(--pink); border:1.5px solid var(--pink); cursor:pointer; transition:all 0.2s; }
+        .btn-outline:hover { background:rgba(232,82,122,0.12); box-shadow:0 0 12px rgba(232,82,122,0.25); }
+      </style>
+      <button class="btn-outline">Horror</button>
+    </div>
+
+    <!-- 4. Filled with Glow -->
+    <div class="button-sample">
+      <div class="btn-label">Filled + Glow</div>
+      <style>
+        .btn-glow { font-family:'Audiowide',cursive; font-size:13px; padding:10px 24px; border-radius:8px; background:var(--pink); color:#fff; border:none; cursor:pointer; transition:all 0.2s; box-shadow:0 0 10px rgba(232,82,122,0.3); }
+        .btn-glow:hover { box-shadow:0 0 20px rgba(232,82,122,0.6), 0 0 40px rgba(232,82,122,0.3); transform:translateY(-2px); }
+      </style>
+      <button class="btn-glow">Horror</button>
+    </div>
+
+    <!-- 5. Shadow / 3D -->
+    <div class="button-sample">
+      <div class="btn-label">3D Shadow</div>
+      <style>
+        .btn-shadow { font-family:'Bungee',cursive; font-size:14px; padding:10px 22px; border-radius:4px; background:var(--pink); color:#fff; border:none; cursor:pointer; transition:all 0.1s; box-shadow:0 4px 0 #a83456; }
+        .btn-shadow:hover { transform:translateY(2px); box-shadow:0 2px 0 #a83456; }
+        .btn-shadow:active { transform:translateY(4px); box-shadow:0 0 0 #a83456; }
+      </style>
+      <button class="btn-shadow">Horror</button>
+    </div>
+
+    <!-- 6. Stamp -->
+    <div class="button-sample">
+      <div class="btn-label">Stamp Style</div>
+      <style>
+        .btn-stamp { font-family:'Permanent Marker',cursive; font-size:16px; padding:8px 20px; border-radius:2px; background:transparent; color:#ff4444; border:3px double #ff4444; cursor:pointer; transition:all 0.2s; transform:rotate(-2deg); letter-spacing:2px; text-transform:uppercase; }
+        .btn-stamp:hover { transform:rotate(0deg) scale(1.05); background:rgba(255,68,68,0.1); }
+      </style>
+      <button class="btn-stamp">Horror</button>
+    </div>
+
+    <!-- 7. Ticket Stub -->
+    <div class="button-sample">
+      <div class="btn-label">Ticket Stub</div>
+      <style>
+        .btn-ticket { font-family:'Bebas Neue',sans-serif; font-size:18px; padding:8px 28px; background:#f5e6c8; color:#2a1520; border:none; cursor:pointer; transition:all 0.2s; letter-spacing:3px; position:relative; border-left:3px dashed var(--bg); border-right:3px dashed var(--bg); }
+        .btn-ticket:hover { background:#ffe0a0; transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+      </style>
+      <button class="btn-ticket">HORROR</button>
+    </div>
+
+    <!-- 8. VHS Label -->
+    <div class="button-sample">
+      <div class="btn-label">VHS Label</div>
+      <style>
+        .btn-vhs { font-family:'Russo One',sans-serif; font-size:13px; padding:10px 22px; background:linear-gradient(180deg,#1a1a2e,#0f0f1a); color:var(--cyan); border:1px solid var(--cyan); cursor:pointer; transition:all 0.2s; text-transform:uppercase; letter-spacing:2px; position:relative; }
+        .btn-vhs::before { content:'REC ●'; position:absolute; top:2px; right:6px; font-size:7px; color:#ff4444; }
+        .btn-vhs:hover { background:#0f0f2a; box-shadow:0 0 12px rgba(0,240,255,0.3), inset 0 0 12px rgba(0,240,255,0.05); }
+      </style>
+      <button class="btn-vhs">Horror</button>
+    </div>
+
+    <!-- 9. Marquee Bulb -->
+    <div class="button-sample">
+      <div class="btn-label">Marquee Bulb</div>
+      <style>
+        .btn-marquee { font-family:'Tourney',cursive; font-size:16px; font-weight:700; padding:10px 24px; background:#2a1520; color:var(--yellow); border:3px solid var(--yellow); cursor:pointer; transition:all 0.2s; text-transform:uppercase; letter-spacing:3px; box-shadow:inset 0 0 12px rgba(240,255,0,0.1); border-radius:4px; }
+        .btn-marquee:hover { background:var(--yellow); color:#1a1520; box-shadow:0 0 20px rgba(240,255,0,0.4), 0 0 40px rgba(240,255,0,0.15); }
+      </style>
+      <button class="btn-marquee">Horror</button>
+    </div>
+
+    <!-- 10. Punched Metal -->
+    <div class="button-sample">
+      <div class="btn-label">Punched Metal</div>
+      <style>
+        .btn-metal { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; padding:10px 20px; background:linear-gradient(180deg,#4a4050,#2a2030); color:var(--text); border:2px solid #5a5060; cursor:pointer; transition:all 0.2s; text-transform:uppercase; letter-spacing:3px; border-radius:3px; box-shadow:inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.4); }
+        .btn-metal:hover { background:linear-gradient(180deg,#5a5060,#3a3040); box-shadow:inset 0 1px 0 rgba(255,255,255,0.15), 0 0 12px rgba(232,82,122,0.2); border-color:var(--pink); }
+      </style>
+      <button class="btn-metal">Horror</button>
+    </div>
+
+    <!-- 11. Neon Tube -->
+    <div class="button-sample">
+      <div class="btn-label">Neon Tube</div>
+      <style>
+        .btn-neon { font-family:'Monoton',cursive; font-size:22px; padding:6px 22px; background:transparent; color:var(--pink); border:2px solid var(--pink); cursor:pointer; transition:all 0.3s; border-radius:4px; text-shadow:0 0 8px var(--pink), 0 0 20px rgba(232,82,122,0.4); box-shadow:0 0 8px rgba(232,82,122,0.2), inset 0 0 8px rgba(232,82,122,0.1); }
+        .btn-neon:hover { text-shadow:0 0 12px var(--pink), 0 0 30px var(--pink), 0 0 60px rgba(232,82,122,0.4); box-shadow:0 0 16px rgba(232,82,122,0.4), 0 0 40px rgba(232,82,122,0.15), inset 0 0 16px rgba(232,82,122,0.15); }
+      </style>
+      <button class="btn-neon">Horror</button>
+    </div>
+
+    <!-- 12. Handwritten Border -->
+    <div class="button-sample">
+      <div class="btn-label">Handwritten Border</div>
+      <style>
+        .btn-hand { font-family:'Permanent Marker',cursive; font-size:16px; padding:8px 22px; background:transparent; color:var(--text); border:2px solid var(--text); cursor:pointer; transition:all 0.2s; border-radius:255px 15px 225px 15px/15px 225px 15px 255px; }
+        .btn-hand:hover { color:var(--pink); border-color:var(--pink); transform:scale(1.05); }
+      </style>
+      <button class="btn-hand">Horror</button>
+    </div>
+
+    <!-- 13. Retro Badge -->
+    <div class="button-sample">
+      <div class="btn-label">Retro Badge</div>
+      <style>
+        .btn-badge { font-family:'Staatliches',cursive; font-size:14px; padding:8px 20px; background:var(--pink); color:#fff; border:3px solid #fff; cursor:pointer; transition:all 0.2s; text-transform:uppercase; letter-spacing:3px; border-radius:4px; outline:2px solid var(--pink); outline-offset:2px; }
+        .btn-badge:hover { background:#ff6b91; outline-color:#ff6b91; transform:scale(1.05); }
+      </style>
+      <button class="btn-badge">Horror</button>
+    </div>
+
+    <!-- 14. Film Strip -->
+    <div class="button-sample">
+      <div class="btn-label">Film Strip</div>
+      <style>
+        .btn-film { font-family:'Space Mono',monospace; font-size:12px; padding:14px 24px; background:#1a1a1a; color:var(--text); border:none; cursor:pointer; transition:all 0.2s; letter-spacing:2px; text-transform:uppercase; position:relative; border-top:4px solid #333; border-bottom:4px solid #333; }
+        .btn-film::before, .btn-film::after { content:'◻ ◻ ◻ ◻'; position:absolute; left:0; right:0; font-size:6px; color:#555; letter-spacing:4px; text-align:center; }
+        .btn-film::before { top:-1px; }
+        .btn-film::after { bottom:-1px; }
+        .btn-film:hover { background:#2a2a2a; color:var(--pink); border-color:var(--pink); }
+      </style>
+      <button class="btn-film">Horror</button>
+    </div>
+
+    <!-- 15. Gradient Capsule -->
+    <div class="button-sample">
+      <div class="btn-label">Gradient Capsule</div>
+      <style>
+        .btn-grad { font-family:'Righteous',cursive; font-size:14px; padding:10px 28px; background:linear-gradient(135deg,var(--pink),#ff8855); color:#fff; border:none; cursor:pointer; transition:all 0.2s; border-radius:50px; letter-spacing:1px; }
+        .btn-grad:hover { background:linear-gradient(135deg,#ff6b91,#ffaa77); transform:translateY(-2px); box-shadow:0 6px 20px rgba(232,82,122,0.35); }
+      </style>
+      <button class="btn-grad">Horror</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 3 — DROPDOWNS / SELECTS
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="dropdowns">
+  <div class="section-label">Section 3</div>
+  <div class="section-title">Dropdowns / Selects</div>
+  <div class="section-desc">A "Sort by: Title A-Z" dropdown in 8 different styles. Click each to see the open state.</div>
+
+  <div class="dropdown-grid">
+
+    <!-- 1. Retro Terminal -->
+    <div class="dropdown-sample">
+      <div class="dd-label">Retro Terminal</div>
+      <style>
+        .dd-terminal { font-family:'Press Start 2P',cursive; font-size:9px; padding:10px 32px 10px 12px; background:#0a0a12; color:#33ff33; border:1px solid #33ff33; border-radius:0; appearance:none; -webkit-appearance:none; cursor:pointer; outline:none; transition:all 0.2s; min-width:200px; }
+        .dd-terminal:hover, .dd-terminal:focus { box-shadow:0 0 10px rgba(51,255,51,0.25); }
+        .dd-terminal option { background:#0a0a12; color:#33ff33; }
+      </style>
+      <div style="position:relative;display:inline-block;">
+        <select class="dd-terminal">
+          <option>Sort by: Title A-Z</option>
+          <option>Sort by: Title Z-A</option>
+          <option>Sort by: Year ↑</option>
+          <option>Sort by: Year ↓</option>
+          <option>Sort by: Rating</option>
+        </select>
+        <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#33ff33;font-size:10px;pointer-events:none;">▼</span>
+      </div>
+    </div>
+
+    <!-- 2. VHS Menu -->
+    <div class="dropdown-sample">
+      <div class="dd-label">VHS Menu</div>
+      <style>
+        .dd-vhs { font-family:'Russo One',sans-serif; font-size:12px; padding:10px 36px 10px 14px; background:linear-gradient(180deg,#1a1a2e,#12121e); color:var(--cyan); border:1px solid var(--cyan); border-radius:2px; appearance:none; -webkit-appearance:none; cursor:pointer; outline:none; transition:all 0.2s; min-width:200px; text-transform:uppercase; letter-spacing:1px; }
+        .dd-vhs:hover, .dd-vhs:focus { box-shadow:0 0 12px rgba(0,240,255,0.2), inset 0 0 8px rgba(0,240,255,0.05); }
+        .dd-vhs option { background:#12121e; color:var(--cyan); }
+      </style>
+      <div style="position:relative;display:inline-block;">
+        <select class="dd-vhs">
+          <option>Sort by: Title A-Z</option>
+          <option>Sort by: Title Z-A</option>
+          <option>Sort by: Year ↑</option>
+          <option>Sort by: Year ↓</option>
+          <option>Sort by: Rating</option>
+        </select>
+        <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--cyan);font-size:10px;pointer-events:none;">▾</span>
+      </div>
+    </div>
+
+    <!-- 3. Cinema Marquee -->
+    <div class="dropdown-sample">
+      <div class="dd-label">Cinema Marquee</div>
+      <style>
+        .dd-cinema { font-family:'Bebas Neue',sans-serif; font-size:16px; padding:10px 36px 10px 16px; background:#2a1520; color:var(--yellow); border:2px solid var(--yellow); border-radius:2px; appearance:none; -webkit-appearance:none; cursor:pointer; outline:none; transition:all 0.2s; min-width:200px; letter-spacing:3px; }
+        .dd-cinema:hover, .dd-cinema:focus { background:var(--yellow); color:#1a1520; box-shadow:0 0 16px rgba(240,255,0,0.2); }
+        .dd-cinema option { background:#2a1520; color:var(--yellow); }
+      </style>
+      <div style="position:relative;display:inline-block;">
+        <select class="dd-cinema">
+          <option>SORT BY: TITLE A-Z</option>
+          <option>SORT BY: TITLE Z-A</option>
+          <option>SORT BY: YEAR ↑</option>
+          <option>SORT BY: YEAR ↓</option>
+          <option>SORT BY: RATING</option>
+        </select>
+        <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--yellow);font-size:12px;pointer-events:none;">▼</span>
+      </div>
+    </div>
+
+    <!-- 4. Clean Modern -->
+    <div class="dropdown-sample">
+      <div class="dd-label">Clean Modern</div>
+      <style>
+        .dd-modern { font-family:'Fredoka',sans-serif; font-size:14px; padding:10px 36px 10px 14px; background:var(--bg2); color:var(--text); border:1.5px solid var(--bg3); border-radius:8px; appearance:none; -webkit-appearance:none; cursor:pointer; outline:none; transition:all 0.2s; min-width:200px; }
+        .dd-modern:hover { border-color:var(--pink); }
+        .dd-modern:focus { border-color:var(--pink); box-shadow:0 0 0 3px rgba(232,82,122,0.15); }
+        .dd-modern option { background:var(--bg2); color:var(--text); }
+      </style>
+      <div style="position:relative;display:inline-block;">
+        <select class="dd-modern">
+          <option>Sort by: Title A-Z</option>
+          <option>Sort by: Title Z-A</option>
+          <option>Sort by: Year ↑</option>
+          <option>Sort by: Year ↓</option>
+          <option>Sort by: Rating</option>
+        </select>
+        <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:10px;pointer-events:none;">▾</span>
+      </div>
+    </div>
+
+    <!-- 5. Chunky Bordered -->
+    <div class="dropdown-sample">
+      <div class="dd-label">Chunky Bordered</div>
+      <style>
+        .dd-chunky { font-family:'Bungee',cursive; font-size:11px; padding:12px 36px 12px 14px; background:var(--bg); color:var(--text); border:3px solid var(--pink); border-radius:0; appearance:none; -webkit-appearance:none; cursor:pointer; outline:none; transition:all 0.2s; min-width:200px; }
+        .dd-chunky:hover, .dd-chunky:focus { box-shadow:4px 4px 0 var(--pink); transform:translate(-2px,-2px); }
+        .dd-chunky option { background:var(--bg); color:var(--text); }
+      </style>
+      <div style="position:relative;display:inline-block;">
+        <select class="dd-chunky">
+          <option>Sort by: Title A-Z</option>
+          <option>Sort by: Title Z-A</option>
+          <option>Sort by: Year ↑</option>
+          <option>Sort by: Year ↓</option>
+          <option>Sort by: Rating</option>
+        </select>
+        <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--pink);font-size:10px;pointer-events:none;">▼</span>
+      </div>
+    </div>
+
+    <!-- 6. Ghost / Transparent -->
+    <div class="dropdown-sample">
+      <div class="dd-label">Ghost / Transparent</div>
+      <style>
+        .dd-ghost { font-family:'Space Mono',monospace; font-size:12px; padding:10px 36px 10px 14px; background:transparent; color:var(--text-dim); border:1px solid rgba(240,230,211,0.15); border-radius:6px; appearance:none; -webkit-appearance:none; cursor:pointer; outline:none; transition:all 0.2s; min-width:200px; }
+        .dd-ghost:hover { color:var(--text); border-color:rgba(240,230,211,0.3); }
+        .dd-ghost:focus { color:var(--cyan); border-color:rgba(0,240,255,0.3); }
+        .dd-ghost option { background:var(--bg2); color:var(--text); }
+      </style>
+      <div style="position:relative;display:inline-block;">
+        <select class="dd-ghost">
+          <option>Sort by: Title A-Z</option>
+          <option>Sort by: Title Z-A</option>
+          <option>Sort by: Year ↑</option>
+          <option>Sort by: Year ↓</option>
+          <option>Sort by: Rating</option>
+        </select>
+        <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:10px;pointer-events:none;">▾</span>
+      </div>
+    </div>
+
+    <!-- 7. Pill Style -->
+    <div class="dropdown-sample">
+      <div class="dd-label">Pill Style</div>
+      <style>
+        .dd-pill { font-family:'Righteous',cursive; font-size:13px; padding:10px 38px 10px 18px; background:rgba(232,82,122,0.1); color:var(--pink); border:1.5px solid rgba(232,82,122,0.3); border-radius:50px; appearance:none; -webkit-appearance:none; cursor:pointer; outline:none; transition:all 0.2s; min-width:200px; }
+        .dd-pill:hover { background:rgba(232,82,122,0.18); border-color:var(--pink); }
+        .dd-pill:focus { box-shadow:0 0 0 3px rgba(232,82,122,0.12); }
+        .dd-pill option { background:var(--bg2); color:var(--text); border-radius:0; }
+      </style>
+      <div style="position:relative;display:inline-block;">
+        <select class="dd-pill">
+          <option>Sort by: Title A-Z</option>
+          <option>Sort by: Title Z-A</option>
+          <option>Sort by: Year ↑</option>
+          <option>Sort by: Year ↓</option>
+          <option>Sort by: Rating</option>
+        </select>
+        <span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--pink);font-size:10px;pointer-events:none;">▾</span>
+      </div>
+    </div>
+
+    <!-- 8. Underline Only -->
+    <div class="dropdown-sample">
+      <div class="dd-label">Underline Only</div>
+      <style>
+        .dd-underline { font-family:'Audiowide',cursive; font-size:12px; padding:8px 32px 8px 2px; background:transparent; color:var(--text); border:none; border-bottom:2px solid var(--pink); border-radius:0; appearance:none; -webkit-appearance:none; cursor:pointer; outline:none; transition:all 0.2s; min-width:200px; }
+        .dd-underline:hover { border-bottom-color:var(--cyan); color:var(--cyan); }
+        .dd-underline:focus { border-bottom-width:3px; }
+        .dd-underline option { background:var(--bg2); color:var(--text); }
+      </style>
+      <div style="position:relative;display:inline-block;">
+        <select class="dd-underline">
+          <option>Sort by: Title A-Z</option>
+          <option>Sort by: Title Z-A</option>
+          <option>Sort by: Year ↑</option>
+          <option>Sort by: Year ↓</option>
+          <option>Sort by: Rating</option>
+        </select>
+        <span style="position:absolute;right:4px;top:50%;transform:translateY(-50%);color:var(--pink);font-size:10px;pointer-events:none;">▾</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 4 — SCROLL ROW HEADERS
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="headers">
+  <div class="section-label">Section 4</div>
+  <div class="section-title">Scroll Row Headers</div>
+  <div class="section-desc">The genre row label "Action" shown in 10 different treatments for horizontal scroll sections.</div>
+
+  <div class="header-grid">
+
+    <!-- 1. Decorative Lines -->
+    <div class="header-sample">
+      <div class="hdr-label">Decorative Lines</div>
+      <div class="hdr-display" style="display:flex;align-items:center;gap:16px;">
+        <span style="flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--pink));"></span>
+        <span style="font-family:'Press Start 2P',cursive;font-size:11px;color:var(--pink);text-shadow:0 0 8px rgba(232,82,122,0.4);letter-spacing:2px;">ACTION</span>
+        <span style="flex:1;height:1px;background:linear-gradient(90deg,var(--pink),transparent);"></span>
+      </div>
+    </div>
+
+    <!-- 2. Neon Glow -->
+    <div class="header-sample">
+      <div class="hdr-label">Neon Glow</div>
+      <div class="hdr-display">
+        <span style="font-family:'Monoton',cursive;font-size:28px;color:var(--cyan);text-shadow:0 0 10px var(--cyan),0 0 30px rgba(0,240,255,0.4),0 0 60px rgba(0,240,255,0.15);">Action</span>
+      </div>
+    </div>
+
+    <!-- 3. Stamp Effect -->
+    <div class="header-sample">
+      <div class="hdr-label">Stamp Effect</div>
+      <div class="hdr-display">
+        <span style="font-family:'Permanent Marker',cursive;font-size:22px;color:var(--pink);border:3px double var(--pink);padding:4px 16px;transform:rotate(-1deg);display:inline-block;letter-spacing:3px;text-transform:uppercase;">Action</span>
+      </div>
+    </div>
+
+    <!-- 4. Underline Only -->
+    <div class="header-sample">
+      <div class="hdr-label">Underline Only</div>
+      <div class="hdr-display">
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--text);letter-spacing:6px;border-bottom:3px solid var(--pink);padding-bottom:4px;text-transform:uppercase;">Action</span>
+      </div>
+    </div>
+
+    <!-- 5. All Caps Spaced -->
+    <div class="header-sample">
+      <div class="hdr-label">All Caps Spaced</div>
+      <div class="hdr-display">
+        <span style="font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;color:var(--text-dim);letter-spacing:12px;text-transform:uppercase;">ACTION</span>
+      </div>
+    </div>
+
+    <!-- 6. Mixed Case Italic -->
+    <div class="header-sample">
+      <div class="hdr-label">Mixed Case Italic</div>
+      <div class="hdr-display">
+        <span style="font-family:'Satisfy',cursive;font-size:32px;color:var(--pink);text-shadow:0 0 6px rgba(232,82,122,0.3);">Action</span>
+      </div>
+    </div>
+
+    <!-- 7. Outlined Text -->
+    <div class="header-sample">
+      <div class="hdr-label">Outlined Text</div>
+      <div class="hdr-display">
+        <span style="font-family:'Tourney',cursive;font-size:28px;font-weight:900;color:transparent;-webkit-text-stroke:2px var(--pink);letter-spacing:4px;text-transform:uppercase;">ACTION</span>
+      </div>
+    </div>
+
+    <!-- 8. Film Strip Dots -->
+    <div class="header-sample">
+      <div class="hdr-label">Film Strip Dots</div>
+      <div class="hdr-display" style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:10px;color:#555;letter-spacing:3px;">◻ ◻ ◻ ◻ ◻</span>
+        <span style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--text);letter-spacing:3px;text-transform:uppercase;">Action</span>
+        <span style="font-size:10px;color:#555;letter-spacing:3px;">◻ ◻ ◻ ◻ ◻</span>
+      </div>
+    </div>
+
+    <!-- 9. Marquee Dashes -->
+    <div class="header-sample">
+      <div class="hdr-label">Marquee Dashes</div>
+      <div class="hdr-display">
+        <span style="font-family:'Staatliches',cursive;font-size:22px;color:var(--yellow);letter-spacing:4px;text-transform:uppercase;">— — Action — —</span>
+      </div>
+    </div>
+
+    <!-- 10. Hand-drawn Border -->
+    <div class="header-sample">
+      <div class="hdr-label">Hand-drawn Border</div>
+      <div class="hdr-display">
+        <span style="font-family:'Concert One',cursive;font-size:22px;color:var(--text);padding:6px 20px;border:2px solid var(--text);border-radius:255px 15px 225px 15px/15px 225px 15px 255px;display:inline-block;">Action</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 5 — CARD STYLES
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="cards">
+  <div class="section-label">Section 5</div>
+  <div class="section-title">Card Styles</div>
+  <div class="section-desc">A single movie poster card in 8 different treatments. Hover to see animations and active states.</div>
+
+  <style>
+    .card-poster { width:150px; height:225px; display:flex; align-items:flex-end; justify-content:center; position:relative; overflow:hidden; transition:all 0.3s; cursor:pointer; }
+    .card-poster .poster-bg { position:absolute; inset:0; background:linear-gradient(135deg,#e8527a,#8b2252); }
+    .card-poster .poster-label { position:relative; z-index:1; font-family:'Space Mono',monospace; font-size:10px; color:#fff; padding:6px 8px; width:100%; text-align:center; }
+    .card-poster .poster-title { font-weight:700; font-size:12px; }
+    .card-poster .poster-year { font-size:10px; opacity:0.7; }
+  </style>
+
+  <div class="card-grid">
+
+    <!-- 1. Rounded Glow -->
+    <div class="card-sample">
+      <div class="card-label">Rounded + Glow</div>
+      <style>
+        .card-rounded { border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,0.4); }
+        .card-rounded:hover { transform:scale(1.05); box-shadow:0 0 20px rgba(232,82,122,0.4), 0 8px 32px rgba(0,0,0,0.4); }
+        .card-rounded .poster-bg { border-radius:12px; }
+        .card-rounded .poster-label { background:linear-gradient(transparent, rgba(0,0,0,0.8)); border-radius:0 0 12px 12px; padding:20px 8px 10px; }
+      </style>
+      <div class="card-poster card-rounded">
+        <div class="poster-bg"></div>
+        <div class="poster-label"><div class="poster-title">Die Hard</div><div class="poster-year">1988</div></div>
+      </div>
+    </div>
+
+    <!-- 2. Sharp Border -->
+    <div class="card-sample">
+      <div class="card-label">Sharp + Border</div>
+      <style>
+        .card-sharp { border-radius:0; border:2px solid var(--bg3); }
+        .card-sharp:hover { border-color:var(--pink); transform:translateY(-4px); box-shadow:4px 4px 0 var(--bg3); }
+        .card-sharp .poster-label { background:rgba(0,0,0,0.7); padding:10px 8px 8px; }
+      </style>
+      <div class="card-poster card-sharp">
+        <div class="poster-bg"></div>
+        <div class="poster-label"><div class="poster-title">Die Hard</div><div class="poster-year">1988</div></div>
+      </div>
+    </div>
+
+    <!-- 3. Polaroid -->
+    <div class="card-sample">
+      <div class="card-label">Polaroid</div>
+      <style>
+        .card-polaroid { border-radius:2px; background:#f5f0e8; padding:10px 10px 40px; width:170px; height:auto; box-shadow:0 4px 16px rgba(0,0,0,0.3); }
+        .card-polaroid:hover { transform:rotate(-2deg) scale(1.04); box-shadow:0 8px 28px rgba(0,0,0,0.4); }
+        .card-polaroid .poster-bg { position:relative; width:150px; height:200px; border-radius:0; }
+        .card-polaroid .poster-label { position:relative; background:transparent; color:#2a1520; padding:10px 4px 0; font-family:'Permanent Marker',cursive; }
+        .card-polaroid .poster-year { color:#888; }
+      </style>
+      <div class="card-poster card-polaroid" style="flex-direction:column;align-items:center;">
+        <div class="poster-bg" style="flex-shrink:0;"></div>
+        <div class="poster-label"><div class="poster-title">Die Hard</div><div class="poster-year">1988</div></div>
+      </div>
+    </div>
+
+    <!-- 4. VHS Tape -->
+    <div class="card-sample">
+      <div class="card-label">VHS Tape Label</div>
+      <style>
+        .card-vhs { border-radius:4px; border:2px solid #333; background:#111; width:170px; height:auto; flex-direction:column; align-items:stretch; }
+        .card-vhs:hover { border-color:var(--cyan); box-shadow:0 0 12px rgba(0,240,255,0.2); }
+        .card-vhs .vhs-top { background:linear-gradient(90deg,#e8527a,#ff8855); height:6px; }
+        .card-vhs .poster-bg { position:relative; height:180px; }
+        .card-vhs .vhs-label { padding:8px 10px; font-family:'Russo One',sans-serif; }
+        .card-vhs .vhs-label .poster-title { color:var(--cyan); font-size:11px; text-transform:uppercase; letter-spacing:1px; }
+        .card-vhs .vhs-label .poster-year { color:var(--text-dim); font-size:9px; }
+        .card-vhs .vhs-stripe { height:3px; background:repeating-linear-gradient(90deg,var(--cyan),var(--cyan) 4px,transparent 4px,transparent 8px); }
+      </style>
+      <div class="card-poster card-vhs">
+        <div class="vhs-top"></div>
+        <div class="poster-bg" style="flex-shrink:0;"></div>
+        <div class="vhs-stripe"></div>
+        <div class="vhs-label"><div class="poster-title">Die Hard</div><div class="poster-year">1988</div></div>
+      </div>
+    </div>
+
+    <!-- 5. Ticket Stub -->
+    <div class="card-sample">
+      <div class="card-label">Ticket Stub</div>
+      <style>
+        .card-ticket { border-radius:8px 8px 0 0; border:none; background:#f5e6c8; width:150px; height:auto; flex-direction:column; }
+        .card-ticket:hover { transform:translateY(-4px); box-shadow:0 6px 20px rgba(0,0,0,0.3); }
+        .card-ticket .poster-bg { position:relative; height:190px; border-radius:6px 6px 0 0; }
+        .card-ticket .ticket-tear { height:12px; background:#f5e6c8; position:relative; overflow:hidden; }
+        .card-ticket .ticket-tear::before { content:''; position:absolute; top:0; left:-6px; right:-6px; height:12px; background:radial-gradient(circle 6px at 12px 0, transparent 6px, #f5e6c8 6px); background-size:24px 12px; }
+        .card-ticket .ticket-info { padding:6px 10px 10px; background:#f5e6c8; }
+        .card-ticket .ticket-info .poster-title { color:#2a1520; font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:2px; }
+        .card-ticket .ticket-info .poster-year { color:#888; font-size:10px; }
+      </style>
+      <div class="card-poster card-ticket">
+        <div class="poster-bg" style="flex-shrink:0;"></div>
+        <div class="ticket-tear"></div>
+        <div class="ticket-info"><div class="poster-title">DIE HARD</div><div class="poster-year">1988</div></div>
+      </div>
+    </div>
+
+    <!-- 6. Worn / Vintage -->
+    <div class="card-sample">
+      <div class="card-label">Worn / Vintage</div>
+      <style>
+        .card-vintage { border-radius:2px; border:1px solid rgba(245,230,200,0.2); box-shadow:0 2px 8px rgba(0,0,0,0.5); position:relative; }
+        .card-vintage::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(245,230,200,0.08) 0%, transparent 50%, rgba(0,0,0,0.2) 100%); pointer-events:none; border-radius:2px; }
+        .card-vintage:hover { transform:scale(1.03) rotate(1deg); box-shadow:0 6px 20px rgba(0,0,0,0.5); }
+        .card-vintage .poster-bg { border-radius:2px; filter:sepia(0.2) contrast(0.95); }
+        .card-vintage .poster-label { background:linear-gradient(transparent 30%, rgba(0,0,0,0.7)); padding:30px 8px 10px; }
+      </style>
+      <div class="card-poster card-vintage">
+        <div class="poster-bg"></div>
+        <div class="poster-label"><div class="poster-title">Die Hard</div><div class="poster-year">1988</div></div>
+      </div>
+    </div>
+
+    <!-- 7. Neon Border -->
+    <div class="card-sample">
+      <div class="card-label">Neon Border</div>
+      <style>
+        .card-neonbdr { border-radius:8px; border:2px solid var(--pink); box-shadow:0 0 8px rgba(232,82,122,0.2), inset 0 0 8px rgba(232,82,122,0.1); }
+        .card-neonbdr:hover { box-shadow:0 0 20px rgba(232,82,122,0.5), 0 0 40px rgba(232,82,122,0.2), inset 0 0 12px rgba(232,82,122,0.15); transform:scale(1.03); }
+        .card-neonbdr .poster-bg { border-radius:6px; }
+        .card-neonbdr .poster-label { background:linear-gradient(transparent 20%, rgba(26,21,32,0.9)); border-radius:0 0 6px 6px; padding:20px 8px 10px; }
+      </style>
+      <div class="card-poster card-neonbdr">
+        <div class="poster-bg"></div>
+        <div class="poster-label"><div class="poster-title">Die Hard</div><div class="poster-year">1988</div></div>
+      </div>
+    </div>
+
+    <!-- 8. Simple Clean -->
+    <div class="card-sample">
+      <div class="card-label">Simple Clean</div>
+      <style>
+        .card-clean { border-radius:6px; border:none; box-shadow:0 2px 8px rgba(0,0,0,0.3); }
+        .card-clean:hover { transform:translateY(-6px); box-shadow:0 12px 32px rgba(0,0,0,0.4); }
+        .card-clean .poster-bg { border-radius:6px; }
+        .card-clean .poster-label { background:linear-gradient(transparent, rgba(0,0,0,0.85)); border-radius:0 0 6px 6px; padding:24px 8px 10px; }
+      </style>
+      <div class="card-poster card-clean">
+        <div class="poster-bg"></div>
+        <div class="poster-label"><div class="poster-title">Die Hard</div><div class="poster-year">1988</div></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 6 — COLOR PALETTES
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section" id="palettes">
+  <div class="section-label">Section 6</div>
+  <div class="section-title">Color Palettes</div>
+  <div class="section-desc">6 warm color palettes — each with background, primary text, accent, and hot pink. Every palette includes hot pink.</div>
+
+  <div class="palette-grid">
+
+    <!-- 1. Neon Diner -->
+    <div class="palette-card">
+      <div class="palette-preview" style="background:#1a1520; color:#f0e6d3;">
+        <div class="pal-title" style="color:#e8527a;">Amy's 80s Movie Vault</div>
+        <div class="pal-sub" style="color:rgba(240,230,211,0.6);">296 Films — The Ultimate Collection</div>
+      </div>
+      <div class="palette-swatches">
+        <div class="swatch" style="background:#1a1520;color:rgba(255,255,255,0.5);">BG #1a1520</div>
+        <div class="swatch" style="background:#f0e6d3;color:#1a1520;">Text #f0e6d3</div>
+        <div class="swatch" style="background:#00f0ff;color:#1a1520;">Accent #00f0ff</div>
+        <div class="swatch" style="background:#e8527a;color:#fff;">Pink #e8527a</div>
+      </div>
+      <div class="palette-info">
+        <span class="pal-name">Neon Diner</span>
+        <span class="pal-vibe">Current palette — cool + warm</span>
+      </div>
+    </div>
+
+    <!-- 2. Sunset Boulevard -->
+    <div class="palette-card">
+      <div class="palette-preview" style="background:#1f1018; color:#f5dcc4;">
+        <div class="pal-title" style="color:#ff7a45;">Amy's 80s Movie Vault</div>
+        <div class="pal-sub" style="color:rgba(245,220,196,0.6);">296 Films — The Ultimate Collection</div>
+      </div>
+      <div class="palette-swatches">
+        <div class="swatch" style="background:#1f1018;color:rgba(255,255,255,0.5);">BG #1f1018</div>
+        <div class="swatch" style="background:#f5dcc4;color:#1f1018;">Text #f5dcc4</div>
+        <div class="swatch" style="background:#ff7a45;color:#fff;">Accent #ff7a45</div>
+        <div class="swatch" style="background:#e8527a;color:#fff;">Pink #e8527a</div>
+      </div>
+      <div class="palette-info">
+        <span class="pal-name">Sunset Boulevard</span>
+        <span class="pal-vibe">Warm orange glow — sunset vibes</span>
+      </div>
+    </div>
+
+    <!-- 3. Vintage Video Store -->
+    <div class="palette-card">
+      <div class="palette-preview" style="background:#1a1410; color:#e8d5b8;">
+        <div class="pal-title" style="color:#daa520;">Amy's 80s Movie Vault</div>
+        <div class="pal-sub" style="color:rgba(232,213,184,0.6);">296 Films — The Ultimate Collection</div>
+      </div>
+      <div class="palette-swatches">
+        <div class="swatch" style="background:#1a1410;color:rgba(255,255,255,0.5);">BG #1a1410</div>
+        <div class="swatch" style="background:#e8d5b8;color:#1a1410;">Text #e8d5b8</div>
+        <div class="swatch" style="background:#daa520;color:#1a1410;">Accent #daa520</div>
+        <div class="swatch" style="background:#e8527a;color:#fff;">Pink #e8527a</div>
+      </div>
+      <div class="palette-info">
+        <span class="pal-name">Vintage Video Store</span>
+        <span class="pal-vibe">Warm gold — cozy nostalgia</span>
+      </div>
+    </div>
+
+    <!-- 4. Flamingo Lounge -->
+    <div class="palette-card">
+      <div class="palette-preview" style="background:#1c0f1e; color:#f0d4e8;">
+        <div class="pal-title" style="color:#ff85c0;">Amy's 80s Movie Vault</div>
+        <div class="pal-sub" style="color:rgba(240,212,232,0.6);">296 Films — The Ultimate Collection</div>
+      </div>
+      <div class="palette-swatches">
+        <div class="swatch" style="background:#1c0f1e;color:rgba(255,255,255,0.5);">BG #1c0f1e</div>
+        <div class="swatch" style="background:#f0d4e8;color:#1c0f1e;">Text #f0d4e8</div>
+        <div class="swatch" style="background:#ff85c0;color:#1c0f1e;">Accent #ff85c0</div>
+        <div class="swatch" style="background:#e8527a;color:#fff;">Pink #e8527a</div>
+      </div>
+      <div class="palette-info">
+        <span class="pal-name">Flamingo Lounge</span>
+        <span class="pal-vibe">Warm pink — soft & romantic</span>
+      </div>
+    </div>
+
+    <!-- 5. Desert Drive-In -->
+    <div class="palette-card">
+      <div class="palette-preview" style="background:#1e150e; color:#f0dcc0;">
+        <div class="pal-title" style="color:#e85050;">Amy's 80s Movie Vault</div>
+        <div class="pal-sub" style="color:rgba(240,220,192,0.6);">296 Films — The Ultimate Collection</div>
+      </div>
+      <div class="palette-swatches">
+        <div class="swatch" style="background:#1e150e;color:rgba(255,255,255,0.5);">BG #1e150e</div>
+        <div class="swatch" style="background:#f0dcc0;color:#1e150e;">Text #f0dcc0</div>
+        <div class="swatch" style="background:#e85050;color:#fff;">Accent #e85050</div>
+        <div class="swatch" style="background:#e8527a;color:#fff;">Pink #e8527a</div>
+      </div>
+      <div class="palette-info">
+        <span class="pal-name">Desert Drive-In</span>
+        <span class="pal-vibe">Warm red-earth — southwestern heat</span>
+      </div>
+    </div>
+
+    <!-- 6. Peach Fuzz -->
+    <div class="palette-card">
+      <div class="palette-preview" style="background:#1a1218; color:#f5e0d0;">
+        <div class="pal-title" style="color:#ff9966;">Amy's 80s Movie Vault</div>
+        <div class="pal-sub" style="color:rgba(245,224,208,0.6);">296 Films — The Ultimate Collection</div>
+      </div>
+      <div class="palette-swatches">
+        <div class="swatch" style="background:#1a1218;color:rgba(255,255,255,0.5);">BG #1a1218</div>
+        <div class="swatch" style="background:#f5e0d0;color:#1a1218;">Text #f5e0d0</div>
+        <div class="swatch" style="background:#ff9966;color:#1a1218;">Accent #ff9966</div>
+        <div class="swatch" style="background:#e8527a;color:#fff;">Pink #e8527a</div>
+      </div>
+      <div class="palette-info">
+        <span class="pal-name">Peach Fuzz</span>
+        <span class="pal-vibe">Warm peach — soft retro warmth</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer -->
+<div style="text-align:center;padding:50px 24px 60px;color:var(--text-dim);font-size:11px;letter-spacing:1px;">
+  Style Guide for Amy's 80s Movie Vault — Not connected to the main site
+</div>
+
+</body>
+</html>

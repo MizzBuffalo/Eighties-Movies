@@ -1,0 +1,390 @@
+================================================================================
+  AMY'S 80s MOVIE VAULT — COMPLETE PROJECT HANDOFF
+  Written: 2026-03-13
+================================================================================
+
+TABLE OF CONTENTS
+  1. Project Overview
+  2. Repository Structure & File Inventory
+  3. What Was Built (Chronological)
+  4. Architecture & Strategy Decisions
+  5. Current State & Known Issues
+  6. What's Planned But Not Yet Built (Phases 2-5)
+  7. Technical Details for Continuing Development
+  8. GitHub & Deployment Info
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+"Amy's 80s Movie Vault" is a static web app showcasing a curated collection of
+296 80s movies. The data comes from a hand-curated spreadsheet (Excel) that was
+converted to JSON. The site is built with plain HTML/CSS/JS (no frameworks, no
+build step) and is designed to be hosted for free on GitHub Pages.
+
+Owner: MizzBuffalo (GitHub username)
+Repo: https://github.com/MizzBuffalo/Eighties-Movies
+
+DATA SUMMARY (from amys_80s_vault.json):
+  - 296 movies total
+  - Each movie has: title, year, genres, special_sections, collections, notes
+  - 17 genres (Action, Comedy, Drama, Horror, Sci-Fi, etc.)
+  - 6 special sections: Cult Classics, Holiday Films, Horror Vault,
+    John Hughes Universe, Queer Cinema & Stories, Spielberg Universe
+  - 7 collections: Badass Women of the 80s, Brat Pack, Cult Classics,
+    Iconic Soundtracks, Sequels & Franchises, Spielberg Universe, Underrated Gems
+  - 14 movies flagged as queer_flagged
+  - 238 of 296 movies have handwritten "notes" (Amy's personal commentary)
+
+================================================================================
+2. REPOSITORY STRUCTURE & FILE INVENTORY
+================================================================================
+
+Root: /home/user/Eighties-Movies/
+
+SOURCE DATA:
+  amys_80s_vault.json       — 296-movie JSON database (source of truth)
+  amys_80s_vault_FINAL.xlsx — Original Excel spreadsheet
+
+DOCUMENTATION:
+  PLAN.md                   — Original tech stack plan (React/Vite approach)
+                               NOTE: This plan was NOT followed. We pivoted to
+                               plain HTML/JS instead. See Section 4 below.
+  SETUP_ADVICE.md           — Practical setup advice document (plain HTML/JS
+                               approach, GitHub Pages hosting, TMDB strategy,
+                               folder structure, cost analysis)
+  SESSION_HANDOFF.txt       — THIS FILE
+
+DESIGN GALLERY:
+  index.html                — Gallery page linking to all 17 designs + 4 vaults
+  design_01.html            — Vintage Video Store theme (light)
+  design_02.html            — Neon Arcade theme (dark) *** CHOSEN AESTHETIC ***
+  design_03.html            — Sunset Strip theme (light)
+  design_04.html            — VHS Retro theme (light)
+  design_05.html            — Miami Vice theme (light)
+  design_06.html            — Punk Zine theme (light)
+  design_07.html            — Synthwave Horizon theme (dark, has TMDB posters)
+  design_08.html            — Underground Cinema Club (dark, has TMDB posters)
+  design_09.html            — Streaming Dark / Netflix-style (dark)
+  design_10.html            — Retro Terminal theme (dark, has TMDB posters)
+  design_11.html            — Dark Theater theme (dark)
+  design_12.html            — Midnight Poster Wall (dark, has TMDB posters)
+
+TERMINAL VARIATIONS (Design 10 sub-themes, all have real TMDB posters):
+  design_10a.html           — Split Command Center (terminal left, grid right)
+  design_10b.html           — DOS File Manager (Norton Commander dual-pane)
+  design_10c.html           — Mainframe Dashboard (multi-panel monitoring)
+  design_10d.html           — WOPR War Room (WarGames-inspired)
+  design_10e.html           — Hacker Desktop (floating windows, matrix rain)
+
+THE VAULT (Production app — all 296 movies):
+  vault.html                — PRIMARY vault (Neon Arcade aesthetic, ~1293 lines)
+  vault_a.html              — Variant A: collections as compact filter pills
+  vault_b.html              — Variant B: collections as sticky sidebar buttons
+  vault_c.html              — Variant C: alternative collections layout
+
+SCRIPTS & UTILITIES:
+  fetch_posters.js          — Node.js script: fetches TMDB poster data for
+                               movies. Uses Bearer token auth. Reads from JSON,
+                               outputs enriched data.
+  fetch_all_posters.js      — Enhanced Node.js script: fetches ALL missing TMDB
+                               poster + credits data and injects it directly into
+                               all vault HTML files. Has retry logic, rate
+                               limiting, and caching (poster_cache.json).
+  fetch_posters.html        — Browser-based TMDB fetch tool (alternative to
+                               running Node.js scripts)
+  build_vault.js            — HTML generator script (reads enriched JSON data
+                               and generates vault.html)
+  posters.js                — Cached poster URL data (used by design prototypes)
+
+================================================================================
+3. WHAT WAS BUILT (CHRONOLOGICAL)
+================================================================================
+
+SESSION 1 — Foundation & Design Exploration
+─────────────────────────────────────────────
+1. Uploaded source data (amys_80s_vault.json + Excel file)
+2. Created PLAN.md — original tech stack plan proposing React + Vite + Tailwind
+3. Created SETUP_ADVICE.md — practical advice pivoting to plain HTML/JS approach
+4. Built 12 design prototypes (design_01 through design_12), each a completely
+   self-contained HTML file with inline CSS/JS and sample movie data
+5. Built index.html as a gallery page linking all designs for comparison
+6. Merged via PR #1
+
+SESSION 2 — Terminal Variations & TMDB Integration
+───────────────────────────────────────────────────
+7. Created 5 terminal-themed variations of Design 10 (10a through 10e) with
+   real TMDB movie poster images hardcoded in
+8. Created fetch_posters.js and posters.js for TMDB poster fetching
+9. Merged via PR #3
+
+SESSION 3 — Adding Real Posters to Designs
+──────────────────────────────────────────
+10. Added real TMDB poster images to all 5 terminal designs (10a-10e)
+11. Fixed duplicate CSS properties in design_10e.html
+12. Added TMDB posters to designs 07, 08, 10, and 12
+13. Added POSTERS data and getPosterUrl helper to those designs
+14. Merged via PRs #4, #5
+
+SESSION 4 — Phase 1 Vault (The Main App)
+─────────────────────────────────────────
+15. Built vault.html — the full 296-movie app with:
+    - Neon Arcade (Design 02) aesthetic
+    - Dashboard landing page with collection cards showing poster previews
+    - Full filter system: search, genre pills, year range, special sections,
+      collections, sort (A-Z, year, rating)
+    - Responsive CSS grid (5 cols desktop, 3 tablet, 2 mobile)
+    - Movie detail modal with poster, synopsis, rating, cast, director, notes
+    - Client-side TMDB enrichment (fetches poster/cast/director data in browser
+      using TMDB API, caches in localStorage)
+    - Lazy loading for images
+    - Keyboard support (Escape to close modal)
+
+16. Updated fetch_posters.js to use TMDB Bearer token auth
+
+SESSION 5 — Bug Fixes & Variants
+─────────────────────────────────
+17. Fixed filter bugs — filters were not combining correctly
+18. Added client-side TMDB enrichment with localStorage caching
+19. Reduced header text-shadow glow for legibility
+20. Created 3 vault layout variants (vault_a, vault_b, vault_c) to compare
+    different collection navigation approaches
+21. Fixed poster loading: rewrote fetch script for all vaults, added image retry
+22. Created fetch_all_posters.js — comprehensive Node.js script that:
+    - Reads MOVIES array from vault.html
+    - Fetches TMDB search + credits for each movie
+    - Writes enriched data back into ALL vault files
+    - Saves poster_cache.json for incremental updates
+23. Updated index.html gallery to include terminal variations and vault variants
+
+================================================================================
+4. ARCHITECTURE & STRATEGY DECISIONS
+================================================================================
+
+PIVOT FROM REACT TO PLAIN HTML/JS:
+  The original PLAN.md proposed React + Vite + Tailwind + TypeScript. This was
+  abandoned in favor of plain HTML/CSS/JS because:
+  - Amy (the site owner) is not a developer
+  - She needs to be able to open files in a browser with no build step
+  - 296 movies is small enough that no framework is needed
+  - Single-file HTML apps are easy to share and host
+  - No npm, no Node.js, no build pipeline required for the end user
+  ** PLAN.md still contains the old React plan. SETUP_ADVICE.md has the actual
+     approach being followed. **
+
+SINGLE-FILE ARCHITECTURE:
+  Each vault HTML file is completely self-contained:
+  - All CSS is inline in <style> tags
+  - All JS is inline in <script> tags
+  - All 296 movies are embedded as a MOVIES[] array in the HTML
+  - Only external dependencies: Google Fonts CDN + TMDB image CDN
+  - No separate .css or .js files needed at runtime
+
+TMDB POSTER STRATEGY (TWO APPROACHES EXIST):
+  Approach 1 — Pre-fetch with Node.js (recommended):
+    Run fetch_all_posters.js with a TMDB API key to enrich all vault files
+    with poster_path, overview, vote_average, director, and cast data.
+    Movies then load posters from TMDB's public image CDN (no API key needed
+    at runtime). Cache stored in poster_cache.json.
+
+  Approach 2 — Client-side enrichment (current fallback):
+    vault.html includes a client-side enrichment function that:
+    - On page load, checks each movie for missing poster/cast/director data
+    - Calls TMDB API directly from the browser using a hardcoded API key
+    - Caches results in localStorage
+    - Updates the DOM as data arrives
+    This works but exposes the API key in the HTML source.
+
+  The TMDB API key currently hardcoded in the files:
+    Bearer token in vault.html (client-side)
+    API key in fetch_all_posters.js: b5be0091e28a74a864c82ec31da4f981
+
+DESIGN AESTHETIC (Neon Arcade — Design 02):
+  - Background: #1a1520 (deep purple-black)
+  - Primary accent: #e8527a (hot pink / neon pink)
+  - Secondary accents: #00f0ff (cyan), #f0ff00 (neon yellow)
+  - Text: #f0e6d3 (warm cream)
+  - Fonts: "Press Start 2P" (headings), "Space Mono" (body text)
+  - Effects: Scanline overlay, neon text-shadow glows, CRT vignette
+  - Cards: Dark (#2a2030) with colored genre borders, hover glow effects
+
+HOSTING STRATEGY:
+  - GitHub Pages (free, zero config for static HTML)
+  - URL: https://mizzbuffalo.github.io/Eighties-Movies/
+  - No build step needed — just push and it deploys
+  - Vercel as future option if React features are added later
+
+================================================================================
+5. CURRENT STATE & KNOWN ISSUES
+================================================================================
+
+WHAT WORKS:
+  [x] All 296 movies load and display in vault.html
+  [x] Search by title (real-time filtering)
+  [x] Genre filter pills
+  [x] Year range filtering
+  [x] Special section filtering
+  [x] Collection filtering
+  [x] Sort by title, year, rating
+  [x] Filters combine correctly (e.g., Horror + 1986)
+  [x] Movie detail modal with poster, synopsis, rating, cast, director, notes
+  [x] Dashboard collection cards with poster previews
+  [x] Responsive layout (desktop/tablet/mobile)
+  [x] Design gallery (index.html) links to all 17 designs + 4 vaults
+  [x] Client-side TMDB enrichment with localStorage caching
+
+KNOWN ISSUES / THINGS TO ADDRESS:
+
+  1. EXPOSED TMDB API KEY
+     The TMDB API key (b5be0091e28a74a864c82ec31da4f981) is hardcoded in
+     vault.html and fetch_all_posters.js. This is a free key with generous
+     limits, but it's still publicly visible. Ideally:
+     - Run fetch_all_posters.js once to pre-populate all poster data
+     - Remove the client-side TMDB fetching code from vault.html
+     - Serve only pre-fetched poster URLs from TMDB's public image CDN
+
+  2. POSTER DATA MAY BE INCOMPLETE
+     Not all 296 movies may have poster_path, director, and cast data yet.
+     The client-side enrichment fills gaps on-the-fly, but this relies on the
+     exposed API key. Running fetch_all_posters.js with the key would fix this
+     permanently.
+
+  3. FOUR VAULT VARIANTS NEED CONSOLIDATION
+     vault.html, vault_a.html, vault_b.html, vault_c.html exist as comparison
+     variants for collection navigation layout. A final choice needs to be made
+     and the others removed or archived.
+
+  4. PLAN.md IS OUTDATED
+     PLAN.md still describes the React/Vite approach that was NOT followed.
+     It should be updated to reflect the actual plain HTML/JS architecture,
+     or removed in favor of SETUP_ADVICE.md.
+
+  5. DESIGN FILES HAVE INCONSISTENT POSTER DATA
+     Some design prototypes (07, 08, 10, 12, 10a-10e) have real TMDB posters.
+     Others (01-06, 09, 11) still use placeholder/sample data. This is cosmetic
+     only — these are design demos, not the production app.
+
+  6. FILE ORGANIZATION
+     All files are in the repo root (no subdirectories). The SETUP_ADVICE.md
+     recommends a structured layout (css/, js/, designs/, scripts/, assets/)
+     but this has not been implemented. For a plain HTML single-file approach,
+     the flat structure works fine, but it could get messy as more files are
+     added.
+
+  7. LOCAL BRANCH IS "master" BUT REMOTE DEFAULT IS "main"
+     The local default branch is called "master" but the GitHub remote uses
+     "main". Development work happens on the feature branch
+     "claude/plan-movie-vault-stack-Tzsej" and gets merged via PRs.
+
+================================================================================
+6. WHAT'S PLANNED BUT NOT YET BUILT (PHASES 2-5)
+================================================================================
+
+PHASE 2 — SPECIAL SECTION PAGES
+  Each special section gets its own visual identity/theme:
+  - Horror Vault: Dark background, red accents, fog/mist effects
+  - Queer Cinema & Stories: Rainbow gradient accents, pride-inspired palette
+  - John Hughes Universe: Warm, nostalgic, yearbook aesthetic
+  - Spielberg Universe: Epic, cinematic, wide-format displays
+  - Holiday Films: Warm golds, snowfall effect, cozy aesthetic
+  - Cult Classics: VHS tape aesthetic, tracking lines
+
+PHASE 2 (ALT) — BRAMILY COMMUNITY FEATURES
+  Described in detail in PLAN.md's Phase 2 section. Community features for
+  Amy's friend group ("Bramily"):
+  - User accounts (Google sign-in or invite code)
+  - Personal Top 20 lists with drag-and-drop ranking
+  - Bramily Ratings (VHS tapes or popcorn buckets instead of stars)
+  - Community dashboard stats (most popular, most controversial, etc.)
+  - Voting & polls (bracket tournaments, weekly picks)
+  - Watch tracker with completion score leaderboard
+  - Requires a backend: Firebase or Supabase recommended
+
+PHASE 3 — INTERACTIVE FEATURES
+  - "Have You Seen It?" Tracker: mark movies as seen, rate 1-5, progress bar
+  - Movie Randomizer: spin-wheel or slot-machine animation
+  - Tier List Builder: drag-and-drop S/A/B/C/D/F tiers, shareable as image
+  - Quote Guessing Game: famous quote → guess the movie from 4 choices
+
+PHASE 4 — AMY'S VOICE
+  - Expanded notes/reviews for every film
+  - Full written Top 20 with personal essays
+  - "Amy Says" badges on cards
+
+PHASE 5 — GO LIVE
+  - Deploy to Vercel or GitHub Pages with custom domain
+  - Open Graph meta tags for social sharing link previews
+  - Shareable URLs for individual movies and sections
+  - Performance optimization pass
+
+================================================================================
+7. TECHNICAL DETAILS FOR CONTINUING DEVELOPMENT
+================================================================================
+
+VAULT.HTML INTERNAL ARCHITECTURE:
+  The file is ~1293 lines, structured as:
+
+  Lines 1-7:      HTML head, meta tags, Google Fonts link
+  Lines 8-350:    <style> block — all CSS (Neon Arcade theme, responsive grid,
+                  modal, filters, dashboard, scanlines, etc.)
+  Lines 351-750:  <script> — MOVIES[] array (all 296 movies as JS objects)
+                  Each movie: { title, year, genres[], special_sections[],
+                  collections[], notes, queer_flagged, poster_path, overview,
+                  vote_average, director, cast[] }
+  Lines 750-850:  HTML body — header, dashboard container, filter bar, grid
+                  container, modal template
+  Lines 850-1293: <script> — App logic:
+                  - buildDashboard() — renders collection cards
+                  - buildFilters() — renders genre/year/section/collection pills
+                  - buildGrid() — renders all 296 movie cards
+                  - applyFilters() — combines all active filters
+                  - openModal(idx) — shows movie detail overlay
+                  - enrichAllMovies() — client-side TMDB data fetching
+                  - enrichMovie(movie, idx) — single movie TMDB lookup
+                  - localStorage caching for TMDB data
+
+TMDB API USAGE:
+  Search endpoint: GET https://api.themoviedb.org/3/search/movie
+    ?query={title}&year={year}
+    Headers: Authorization: Bearer {token}
+  Credits endpoint: GET https://api.themoviedb.org/3/movie/{tmdb_id}/credits
+    Headers: Authorization: Bearer {token}
+  Image CDN (no auth needed): https://image.tmdb.org/t/p/w300/{poster_path}
+    Sizes available: w92, w154, w185, w300, w342, w500, w780, original
+
+FILTER SYSTEM:
+  All filtering happens client-side on the MOVIES[] array.
+  Active filters stored as JS variables, combined with AND logic.
+  DOM elements are shown/hidden via CSS classes (not removed/recreated).
+  Results count updates in real-time: "Showing X of 296 films"
+
+DEPENDENCIES (runtime):
+  - Google Fonts CDN (Press Start 2P, Space Mono)
+  - TMDB image CDN (image.tmdb.org) for poster images
+  - No npm packages, no frameworks, no build tools needed
+
+DEPENDENCIES (development/build scripts only):
+  - Node.js (for running fetch_all_posters.js)
+  - TMDB API key (free, for poster pre-fetching)
+
+================================================================================
+8. GITHUB & DEPLOYMENT INFO
+================================================================================
+
+REPO: https://github.com/MizzBuffalo/Eighties-Movies
+DEFAULT BRANCH: main (remote) / master (local)
+FEATURE BRANCH: claude/plan-movie-vault-stack-Tzsej
+PRs MERGED: #1, #2, #3, #4, #5
+
+TO VIEW THE SITE:
+  Option 1: Clone repo, open any .html file in a browser
+  Option 2: Enable GitHub Pages (Settings > Pages > Deploy from main branch)
+             Then visit: https://mizzbuffalo.github.io/Eighties-Movies/
+
+ENTRY POINTS:
+  index.html  — Design gallery (links to all designs and vaults)
+  vault.html  — The main app (all 296 movies with filters and search)
+
+================================================================================
+END OF HANDOFF
+================================================================================

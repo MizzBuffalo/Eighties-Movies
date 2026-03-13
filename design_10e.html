@@ -803,7 +803,7 @@ function renderMovies() {
     return `
     <div class="movie-card">
       <div class="movie-poster ${genreClasses[m.genre]}">
-        ${posterUrl ? `<img src="${posterUrl}" alt="${m.title}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.remove()">` : (genreIcons[m.genre] || "")}
+        ${posterUrl ? `<img src="${posterUrl}" alt="${m.title}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.parentElement.textContent='${(genreIcons[m.genre] || '').replace(/'/g, "\\'")}'">` : (genreIcons[m.genre] || "")}
       </div>
       <div class="movie-info">
         <div class="movie-title">${m.title}</div>

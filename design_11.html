@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amy's 80s Movie Vault — Dark Theater</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --deep-black: #080808;
+  --charcoal: #1e1e1e;
+  --hot-pink: #e8527a;
+  --gold: #d4a853;
+  --soft-white: #f0f0f0;
+  --spotlight-center: #1a1a1a;
+  --spotlight-edge: #050505;
+  --transition-speed: 0.4s;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Lato', sans-serif;
+  background: var(--deep-black);
+  color: var(--soft-white);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Vignette overlay on entire page */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  box-shadow: inset 0 0 150px 60px rgba(0,0,0,0.85);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ─── STICKY HEADER ─── */
+.sticky-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  background: rgba(8, 8, 8, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(212, 168, 83, 0.15);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  transition: transform var(--transition-speed) ease;
+}
+
+.header-brand {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--gold);
+  white-space: nowrap;
+  letter-spacing: 1px;
+}
+
+.search-wrapper {
+  flex: 1;
+  min-width: 180px;
+  max-width: 360px;
+  position: relative;
+}
+
+.search-bar {
+  width: 100%;
+  padding: 8px 16px 8px 38px;
+  border: 1px solid rgba(232, 82, 122, 0.3);
+  border-radius: 24px;
+  background: rgba(30, 30, 30, 0.8);
+  color: var(--soft-white);
+  font-family: 'Lato', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+.search-bar:focus {
+  border-color: var(--hot-pink);
+  box-shadow: 0 0 12px rgba(232, 82, 122, 0.25);
+}
+
+.search-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(232, 82, 122, 0.5);
+  font-size: 0.85rem;
+}
+
+.genre-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.genre-btn {
+  font-family: 'Lato', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 5px 14px;
+  border: 1px solid rgba(212, 168, 83, 0.3);
+  border-radius: 20px;
+  background: transparent;
+  color: rgba(240, 240, 240, 0.6);
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  white-space: nowrap;
+}
+
+.genre-btn:hover, .genre-btn.active {
+  background: var(--hot-pink);
+  border-color: var(--hot-pink);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(232, 82, 122, 0.35);
+}
+
+/* ─── HERO / COVER SECTION ─── */
+.hero {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  background: radial-gradient(ellipse at center, var(--spotlight-center) 0%, var(--deep-black) 55%, var(--spotlight-edge) 100%);
+  padding: 0 24px;
+}
+
+/* Animated dust particles */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(212,168,83,0.15), transparent),
+    radial-gradient(1px 1px at 40% 60%, rgba(232,82,122,0.1), transparent),
+    radial-gradient(1px 1px at 60% 20%, rgba(212,168,83,0.12), transparent),
+    radial-gradient(1px 1px at 80% 70%, rgba(240,240,240,0.06), transparent),
+    radial-gradient(1px 1px at 10% 80%, rgba(232,82,122,0.08), transparent),
+    radial-gradient(1px 1px at 90% 40%, rgba(212,168,83,0.1), transparent);
+  animation: dustFloat 20s linear infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes dustFloat {
+  0% { transform: translateY(0) translateX(0); }
+  100% { transform: translateY(-30px) translateX(15px); }
+}
+
+.hero-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: clamp(2.2rem, 6vw, 5rem);
+  color: var(--soft-white);
+  letter-spacing: 6px;
+  line-height: 1.15;
+  text-shadow: 0 0 60px rgba(232, 82, 122, 0.2), 0 0 120px rgba(0,0,0,0.8);
+  position: relative;
+  padding-bottom: 20px;
+  animation: fadeInUp 1.2s ease forwards;
+}
+
+.hero-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  animation: lineExpand 1.8s ease 0.6s forwards;
+}
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(40px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes lineExpand {
+  0% { width: 0; opacity: 0; }
+  100% { width: 120px; opacity: 1; }
+}
+
+.hero-subtitle {
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  color: rgba(240, 240, 240, 0.5);
+  margin-top: 24px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  animation: fadeInUp 1.2s ease 0.4s both;
+}
+
+.hero-cta {
+  margin-top: 48px;
+  padding: 14px 42px;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--hot-pink);
+  background: transparent;
+  border: 1.5px solid var(--gold);
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  text-decoration: none;
+  display: inline-block;
+  animation: fadeInUp 1.2s ease 0.8s both;
+}
+
+.hero-cta:hover {
+  background: var(--hot-pink);
+  border-color: var(--hot-pink);
+  color: #fff;
+  box-shadow: 0 0 30px rgba(232, 82, 122, 0.4), 0 0 60px rgba(232, 82, 122, 0.15);
+  transform: translateY(-2px);
+}
+
+/* ─── MOVIE CONTENT ─── */
+.movie-content {
+  padding: 80px 0 60px;
+  position: relative;
+}
+
+/* ─── GENRE SECTION ─── */
+.genre-section {
+  padding: 40px 0 20px;
+  position: relative;
+}
+
+.genre-section.hidden { display: none; }
+
+.genre-header {
+  padding: 0 40px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.genre-header::before {
+  content: '';
+  position: absolute;
+  top: -30px; left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 100px;
+  background: radial-gradient(ellipse, rgba(212, 168, 83, 0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.genre-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  color: var(--soft-white);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  padding-bottom: 10px;
+  display: inline-block;
+  position: relative;
+}
+
+.genre-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 60px;
+  height: 1.5px;
+  background: var(--gold);
+}
+
+.genre-divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold), rgba(212, 168, 83, 0.1), transparent);
+  margin: 0 40px;
+  opacity: 0.3;
+}
+
+/* ─── MOVIE ROW (Drag-to-scroll) ─── */
+.movie-row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 16px 40px 30px;
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: auto;
+}
+
+.movie-row::-webkit-scrollbar { display: none; }
+.movie-row.dragging { cursor: grabbing; scroll-behavior: auto; }
+.movie-row.dragging .movie-card { pointer-events: none; }
+
+/* ─── MOVIE CARD ─── */
+.movie-card {
+  flex: 0 0 150px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--charcoal);
+  opacity: 0.6;
+  transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease, border-color var(--transition-speed) ease;
+  border-left: 3px solid transparent;
+  position: relative;
+}
+
+.movie-card:hover {
+  opacity: 1;
+  transform: translateY(-6px) scale(1.03);
+  border-left-color: var(--hot-pink);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6), 0 0 15px rgba(232,82,122,0.15);
+}
+
+.movie-poster {
+  width: 100%;
+  aspect-ratio: 3 / 4.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.poster-year {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+  background: rgba(0,0,0,0.55);
+  padding: 2px 7px;
+  border-radius: 3px;
+  letter-spacing: 1px;
+}
+
+.poster-icon {
+  font-size: 2rem;
+  opacity: 0.25;
+}
+
+.movie-info {
+  padding: 10px;
+}
+
+.movie-title {
+  font-family: 'Lato', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--soft-white);
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+
+.movie-year {
+  font-family: 'Lato', sans-serif;
+  font-size: 0.7rem;
+  color: rgba(240,240,240,0.4);
+}
+
+/* ─── COMING SOON BOX ─── */
+.coming-soon {
+  margin: 60px 40px 80px;
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  padding: 40px;
+  text-align: center;
+  background: rgba(212, 168, 83, 0.03);
+  position: relative;
+}
+
+.coming-soon::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 1px;
+  background: var(--hot-pink);
+}
+
+.coming-soon-label {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+.coming-soon-text {
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  font-size: 1.05rem;
+  color: rgba(240,240,240,0.55);
+  letter-spacing: 1px;
+  line-height: 1.8;
+}
+
+.coming-soon-text span {
+  color: var(--hot-pink);
+  font-weight: 400;
+}
+
+/* ─── NO RESULTS ─── */
+.no-results {
+  display: none;
+  text-align: center;
+  padding: 80px 24px;
+  font-family: 'Cinzel', serif;
+  font-size: 1.2rem;
+  color: rgba(240,240,240,0.35);
+  letter-spacing: 3px;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .sticky-header {
+    padding: 10px 16px;
+    gap: 10px;
+  }
+
+  .header-brand { font-size: 0.8rem; }
+
+  .search-wrapper { max-width: none; order: 10; flex-basis: 100%; }
+
+  .genre-filters { order: 11; flex-basis: 100%; justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+  .genre-filters::-webkit-scrollbar { display: none; }
+
+  .genre-btn { font-size: 0.65rem; padding: 4px 10px; }
+
+  .movie-card { flex: 0 0 120px; }
+
+  .movie-row { padding: 12px 20px 24px; gap: 12px; }
+
+  .genre-header { padding: 0 20px; }
+  .genre-divider { margin: 0 20px; }
+
+  .hero-title { letter-spacing: 3px; }
+  .hero-cta { padding: 12px 30px; font-size: 0.8rem; letter-spacing: 3px; }
+
+  .coming-soon { margin: 40px 20px 60px; padding: 28px 20px; }
+}
+
+@media (max-width: 480px) {
+  .movie-card { flex: 0 0 110px; }
+  .movie-title { font-size: 0.7rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── STICKY HEADER ─── -->
+<header class="sticky-header" id="stickyHeader">
+  <div class="header-brand">AMY'S VAULT</div>
+  <div class="search-wrapper">
+    <span class="search-icon">&#128269;</span>
+    <input type="text" class="search-bar" id="searchBar" placeholder="Search 296 films..." autocomplete="off">
+  </div>
+  <div class="genre-filters" id="genreFilters">
+    <button class="genre-btn active" data-genre="all">All</button>
+    <button class="genre-btn" data-genre="action">Action</button>
+    <button class="genre-btn" data-genre="comedy">Comedy</button>
+    <button class="genre-btn" data-genre="drama">Drama</button>
+    <button class="genre-btn" data-genre="horror">Horror</button>
+    <button class="genre-btn" data-genre="teen">Teen</button>
+    <button class="genre-btn" data-genre="sci-fi">Sci-Fi</button>
+    <button class="genre-btn" data-genre="romance">Romance</button>
+  </div>
+</header>
+
+<!-- ─── HERO COVER ─── -->
+<section class="hero" id="hero">
+  <h1 class="hero-title">AMY'S 80s<br>MOVIE VAULT</h1>
+  <p class="hero-subtitle">296 Films. Ranked. Rated. Ready for Game Night.</p>
+  <a href="#movieContent" class="hero-cta">Take Your Seat</a>
+</section>
+
+<!-- ─── MOVIE CONTENT ─── -->
+<main class="movie-content" id="movieContent"></main>
+
+<!-- ─── NO RESULTS ─── -->
+<div class="no-results" id="noResults">No films found in the darkness...</div>
+
+<!-- ─── COMING SOON ─── -->
+<section class="coming-soon" id="comingSoon">
+  <div class="coming-soon-label">Coming Soon</div>
+  <div class="coming-soon-text">
+    <span>Quiz Night</span> &nbsp;|&nbsp; <span>Tier Rankings</span> &nbsp;|&nbsp; <span>Movie Roulette</span> &nbsp;|&nbsp; <span>Watch Tracker</span>
+  </div>
+</section>
+
+<script>
+// ─── MOVIE DATA ───
+const genres = [
+  {
+    name: 'Action', key: 'action',
+    gradient: 'linear-gradient(135deg, #d4380d, #ff7a45)',
+    icon: '💥',
+    movies: [
+      { title: 'Raiders of the Lost Ark', year: 1981 },
+      { title: 'Die Hard', year: 1988 },
+      { title: 'The Terminator', year: 1984 },
+      { title: 'RoboCop', year: 1987 },
+      { title: 'Beverly Hills Cop', year: 1984 },
+      { title: 'Top Gun', year: 1986 },
+      { title: 'Lethal Weapon', year: 1987 },
+      { title: 'Aliens', year: 1986 },
+      { title: 'First Blood', year: 1982 },
+      { title: 'Predator', year: 1987 }
+    ]
+  },
+  {
+    name: 'Comedy', key: 'comedy',
+    gradient: 'linear-gradient(135deg, #faad14, #ffc53d)',
+    icon: '😂',
+    movies: [
+      { title: 'Ghostbusters', year: 1984 },
+      { title: "Ferris Bueller's Day Off", year: 1986 },
+      { title: 'Tootsie', year: 1982 },
+      { title: 'Coming to America', year: 1988 },
+      { title: 'Airplane!', year: 1980 },
+      { title: 'Beetlejuice', year: 1988 },
+      { title: 'Trading Places', year: 1983 },
+      { title: "National Lampoon's Vacation", year: 1983 },
+      { title: 'Spaceballs', year: 1987 },
+      { title: '9 to 5', year: 1980 }
+    ]
+  },
+  {
+    name: 'Drama', key: 'drama',
+    gradient: 'linear-gradient(135deg, #1890ff, #69c0ff)',
+    icon: '🎭',
+    movies: [
+      { title: 'Stand By Me', year: 1986 },
+      { title: 'Scarface', year: 1983 },
+      { title: 'Rain Man', year: 1988 },
+      { title: 'The Color Purple', year: 1985 },
+      { title: 'Platoon', year: 1986 },
+      { title: 'Full Metal Jacket', year: 1987 },
+      { title: 'Ordinary People', year: 1980 },
+      { title: 'Driving Miss Daisy', year: 1989 },
+      { title: 'Blue Velvet', year: 1986 },
+      { title: 'Do the Right Thing', year: 1989 }
+    ]
+  },
+  {
+    name: 'Horror', key: 'horror',
+    gradient: 'linear-gradient(135deg, #722ed1, #b37feb)',
+    icon: '👻',
+    movies: [
+      { title: 'The Shining', year: 1980 },
+      { title: 'A Nightmare on Elm Street', year: 1984 },
+      { title: 'The Thing', year: 1982 },
+      { title: 'Poltergeist', year: 1982 },
+      { title: 'Gremlins', year: 1984 },
+      { title: 'The Fly', year: 1986 },
+      { title: 'Friday the 13th', year: 1980 },
+      { title: 'Halloween II', year: 1981 },
+      { title: 'Christine', year: 1983 },
+      { title: 'Hellraiser', year: 1987 }
+    ]
+  },
+  {
+    name: 'Teen', key: 'teen',
+    gradient: 'linear-gradient(135deg, #e8527a, #ff85a2)',
+    icon: '🎒',
+    movies: [
+      { title: 'The Breakfast Club', year: 1985 },
+      { title: 'Sixteen Candles', year: 1984 },
+      { title: 'Pretty in Pink', year: 1986 },
+      { title: 'Fast Times at Ridgemont High', year: 1982 },
+      { title: 'Heathers', year: 1988 },
+      { title: 'Say Anything', year: 1989 },
+      { title: 'Valley Girl', year: 1983 },
+      { title: 'Some Kind of Wonderful', year: 1987 },
+      { title: 'Weird Science', year: 1985 }
+    ]
+  },
+  {
+    name: 'Sci-Fi', key: 'sci-fi',
+    gradient: 'linear-gradient(135deg, #13c2c2, #5cdbd3)',
+    icon: '🚀',
+    movies: [
+      { title: 'Back to the Future', year: 1985 },
+      { title: 'E.T.', year: 1982 },
+      { title: 'Blade Runner', year: 1982 },
+      { title: 'Tron', year: 1982 },
+      { title: 'WarGames', year: 1983 },
+      { title: 'The Last Starfighter', year: 1984 },
+      { title: 'Cocoon', year: 1985 },
+      { title: 'Short Circuit', year: 1986 },
+      { title: 'They Live', year: 1988 }
+    ]
+  },
+  {
+    name: 'Romance', key: 'romance',
+    gradient: 'linear-gradient(135deg, #eb2f96, #ff85c0)',
+    icon: '💕',
+    movies: [
+      { title: 'Dirty Dancing', year: 1987 },
+      { title: 'Flashdance', year: 1983 },
+      { title: 'An Officer and a Gentleman', year: 1982 },
+      { title: 'When Harry Met Sally', year: 1989 },
+      { title: 'Moonstruck', year: 1987 },
+      { title: 'The Princess Bride', year: 1987 }
+    ]
+  }
+];
+
+// ─── BUILD DOM ───
+const movieContent = document.getElementById('movieContent');
+
+genres.forEach((genre, i) => {
+  const section = document.createElement('div');
+  section.className = 'genre-section';
+  section.dataset.genre = genre.key;
+
+  if (i > 0) {
+    const divider = document.createElement('hr');
+    divider.className = 'genre-divider';
+    section.appendChild(divider);
+  }
+
+  const header = document.createElement('div');
+  header.className = 'genre-header';
+  header.innerHTML = `<h2 class="genre-title">${genre.name}</h2>`;
+  section.appendChild(header);
+
+  const row = document.createElement('div');
+  row.className = 'movie-row';
+
+  genre.movies.forEach(movie => {
+    const card = document.createElement('div');
+    card.className = 'movie-card';
+    card.dataset.title = movie.title.toLowerCase();
+    card.innerHTML = `
+      <div class="movie-poster" style="background:${genre.gradient}">
+        <span class="poster-year">${movie.year}</span>
+        <span class="poster-icon">${genre.icon}</span>
+      </div>
+      <div class="movie-info">
+        <div class="movie-title">${movie.title}</div>
+        <div class="movie-year">${movie.year}</div>
+      </div>
+    `;
+    row.appendChild(card);
+  });
+
+  section.appendChild(row);
+  movieContent.appendChild(section);
+});
+
+// ─── SEARCH ───
+const searchBar = document.getElementById('searchBar');
+const noResults = document.getElementById('noResults');
+
+searchBar.addEventListener('input', () => {
+  const query = searchBar.value.toLowerCase().trim();
+  let anyVisible = false;
+
+  document.querySelectorAll('.genre-section').forEach(section => {
+    const activeGenre = document.querySelector('.genre-btn.active')?.dataset.genre || 'all';
+    if (activeGenre !== 'all' && section.dataset.genre !== activeGenre) return;
+
+    let sectionVisible = false;
+    section.querySelectorAll('.movie-card').forEach(card => {
+      const match = !query || card.dataset.title.includes(query);
+      card.style.display = match ? '' : 'none';
+      if (match) sectionVisible = true;
+    });
+
+    section.style.display = sectionVisible ? '' : 'none';
+    if (sectionVisible) anyVisible = true;
+  });
+
+  noResults.style.display = anyVisible ? 'none' : 'block';
+});
+
+// ─── GENRE FILTER ───
+document.getElementById('genreFilters').addEventListener('click', e => {
+  if (!e.target.classList.contains('genre-btn')) return;
+
+  document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+
+  const genre = e.target.dataset.genre;
+
+  document.querySelectorAll('.genre-section').forEach(section => {
+    section.style.display = (genre === 'all' || section.dataset.genre === genre) ? '' : 'none';
+  });
+
+  // Re-apply search filter
+  searchBar.dispatchEvent(new Event('input'));
+});
+
+// ─── DRAG TO SCROLL ───
+document.querySelectorAll('.movie-row').forEach(row => {
+  let isDown = false, startX, scrollLeft;
+
+  const onDown = (e) => {
+    isDown = true;
+    row.classList.add('dragging');
+    const pageX = e.touches ? e.touches[0].pageX : e.pageX;
+    startX = pageX - row.offsetLeft;
+    scrollLeft = row.scrollLeft;
+  };
+
+  const onUp = () => {
+    isDown = false;
+    row.classList.remove('dragging');
+  };
+
+  const onMove = (e) => {
+    if (!isDown) return;
+    const pageX = e.touches ? e.touches[0].pageX : e.pageX;
+    const x = pageX - row.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    row.scrollLeft = scrollLeft - walk;
+  };
+
+  row.addEventListener('mousedown', onDown);
+  row.addEventListener('touchstart', onDown, { passive: true });
+  row.addEventListener('mouseup', onUp);
+  row.addEventListener('mouseleave', onUp);
+  row.addEventListener('touchend', onUp);
+  row.addEventListener('mousemove', onMove);
+  row.addEventListener('touchmove', onMove, { passive: true });
+});
+
+// ─── HEADER VISIBILITY (hide on hero, show on scroll) ───
+const header = document.getElementById('stickyHeader');
+const hero = document.getElementById('hero');
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    header.style.transform = entry.isIntersecting ? 'translateY(-100%)' : 'translateY(0)';
+  });
+}, { threshold: 0.3 });
+
+observer.observe(hero);
+header.style.transform = 'translateY(-100%)';
+</script>
+</body>
+</html>

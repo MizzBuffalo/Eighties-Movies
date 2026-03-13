@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amy's 80s Movie Vault — Vintage Video Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --cream: #faf3e8;
+  --cream-dark: #f0e6d3;
+  --burgundy: #6b1d3a;
+  --burgundy-light: #8a2850;
+  --forest: #2d5016;
+  --forest-light: #3d6b1e;
+  --pink: #e8527a;
+  --pink-light: #ff6b8e;
+  --pink-glow: rgba(232, 82, 122, 0.25);
+  --card-shadow: 0 2px 8px rgba(107, 29, 58, 0.15);
+  --card-shadow-hover: 0 6px 20px rgba(232, 82, 122, 0.3);
+  --text-dark: #2a1a0e;
+  --text-mid: #5a4535;
+  --text-light: #8a7565;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--cream);
+  color: var(--text-dark);
+  min-height: 100vh;
+  overflow-x: hidden;
+  /* Paper grain texture */
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* Sticky Header */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: linear-gradient(180deg, var(--burgundy) 0%, #5a1730 100%);
+  padding: 0 24px;
+  box-shadow: 0 3px 16px rgba(107, 29, 58, 0.35);
+  border-bottom: 3px solid var(--pink);
+}
+
+.header-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 64px;
+}
+
+.site-logo {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: #fff;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  flex-shrink: 0;
+}
+
+.site-logo .logo-accent {
+  color: var(--pink);
+  font-style: italic;
+  font-weight: 700;
+}
+
+.search-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+}
+
+.search-bar {
+  width: 100%;
+  padding: 9px 16px 9px 40px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 24px;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(4px);
+}
+
+.search-bar::placeholder {
+  color: rgba(255,255,255,0.5);
+}
+
+.search-bar:focus {
+  border-color: var(--pink);
+  background: rgba(255,255,255,0.18);
+  box-shadow: 0 0 0 3px var(--pink-glow);
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,0.45);
+  font-size: 0.95rem;
+  pointer-events: none;
+}
+
+/* Genre Filter Bar */
+.genre-bar {
+  background: var(--cream-dark);
+  border-bottom: 1px solid rgba(107, 29, 58, 0.1);
+  padding: 12px 24px;
+  position: sticky;
+  top: 64px;
+  z-index: 90;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.genre-bar-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 2px;
+}
+
+.genre-bar-inner::-webkit-scrollbar {
+  display: none;
+}
+
+.genre-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 7px 18px;
+  border-radius: 20px;
+  border: 2px solid var(--burgundy);
+  background: transparent;
+  color: var(--burgundy);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.genre-btn:hover {
+  background: var(--pink);
+  border-color: var(--pink);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px var(--pink-glow);
+}
+
+.genre-btn.active {
+  background: var(--pink);
+  border-color: var(--pink);
+  color: #fff;
+  box-shadow: 0 2px 8px var(--pink-glow);
+}
+
+/* Main Content */
+.main-content {
+  padding: 24px 0 60px;
+}
+
+/* Genre Row */
+.genre-section {
+  margin-bottom: 32px;
+  transition: opacity 0.3s ease, max-height 0.4s ease;
+}
+
+.genre-section.hidden {
+  display: none;
+}
+
+.genre-section-header {
+  padding: 0 28px 12px;
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.genre-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--burgundy);
+  position: relative;
+}
+
+.genre-title::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--pink), transparent);
+  border-radius: 1px;
+}
+
+.genre-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-light);
+  background: rgba(107, 29, 58, 0.08);
+  padding: 2px 10px;
+  border-radius: 10px;
+}
+
+/* Scroll Row */
+.scroll-row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 28px 16px;
+  cursor: grab;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+
+.scroll-row::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-row.dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+}
+
+.scroll-row.dragging .movie-card {
+  pointer-events: none;
+}
+
+/* Movie Card — VHS Rental Card Style */
+.movie-card {
+  flex-shrink: 0;
+  width: 150px;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  scroll-snap-align: start;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.movie-card:hover {
+  transform: translateY(-6px) scale(1.03);
+}
+
+.movie-card.hidden-by-search {
+  display: none;
+}
+
+.card-inner {
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(107, 29, 58, 0.08);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  position: relative;
+}
+
+.movie-card:hover .card-inner {
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--pink);
+}
+
+/* VHS sticker label effect */
+.card-inner::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  background: var(--forest);
+  border-radius: 50%;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.movie-card:hover .card-inner::before {
+  opacity: 0.85;
+  transform: scale(1.05);
+}
+
+.poster-placeholder {
+  width: 100%;
+  aspect-ratio: 3 / 4.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Film grain overlay on poster */
+.poster-placeholder::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.poster-year {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 0.03em;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  z-index: 1;
+}
+
+.card-info {
+  padding: 10px 10px 12px;
+  background: #fff;
+  /* Subtle tape/label edge */
+  border-top: 2px solid rgba(107, 29, 58, 0.06);
+  position: relative;
+}
+
+/* VHS label stripe */
+.card-info::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--pink), var(--burgundy));
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.movie-card:hover .card-info::before {
+  opacity: 1;
+}
+
+.card-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  line-height: 1.3;
+  margin-bottom: 3px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-year {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 0.72rem;
+  color: var(--pink);
+  font-weight: 700;
+}
+
+/* No results state */
+.no-results {
+  display: none;
+  text-align: center;
+  padding: 60px 24px;
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.no-results.visible {
+  display: block;
+}
+
+.no-results h2 {
+  font-size: 1.5rem;
+  color: var(--burgundy);
+  margin-bottom: 8px;
+}
+
+.no-results p {
+  font-family: 'Inter', sans-serif;
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+
+/* Footer */
+.site-footer {
+  text-align: center;
+  padding: 24px;
+  background: var(--burgundy);
+  color: rgba(255,255,255,0.5);
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+}
+
+.site-footer span {
+  color: var(--pink);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .header-inner {
+    height: 56px;
+    padding: 0;
+  }
+
+  .site-logo {
+    font-size: 1.15rem;
+  }
+
+  .search-wrapper {
+    max-width: 200px;
+  }
+
+  .search-bar {
+    padding: 7px 12px 7px 34px;
+    font-size: 0.82rem;
+  }
+
+  .search-icon {
+    left: 11px;
+    font-size: 0.85rem;
+  }
+
+  .genre-bar {
+    padding: 10px 16px;
+    top: 56px;
+  }
+
+  .genre-btn {
+    font-size: 0.75rem;
+    padding: 6px 14px;
+  }
+
+  .genre-section-header {
+    padding: 0 16px 10px;
+  }
+
+  .genre-title {
+    font-size: 1.1rem;
+  }
+
+  .scroll-row {
+    gap: 12px;
+    padding: 4px 16px 14px;
+  }
+
+  .movie-card {
+    width: 120px;
+  }
+
+  .poster-year {
+    font-size: 1.7rem;
+  }
+
+  .card-info {
+    padding: 8px 8px 10px;
+  }
+
+  .card-title {
+    font-size: 0.72rem;
+  }
+
+  .card-year {
+    font-size: 0.68rem;
+  }
+
+  .main-content {
+    padding: 16px 0 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-logo {
+    font-size: 1rem;
+  }
+
+  .site-logo .logo-sub {
+    display: none;
+  }
+
+  .movie-card {
+    width: 110px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="site-logo">
+      Amy's <span class="logo-accent">80s</span> Movie Vault
+    </div>
+    <div class="search-wrapper">
+      <span class="search-icon">&#128269;</span>
+      <input type="text" class="search-bar" id="searchInput" placeholder="Search movies..." autocomplete="off" spellcheck="false">
+    </div>
+  </div>
+</header>
+
+<!-- Genre Filter Bar -->
+<nav class="genre-bar">
+  <div class="genre-bar-inner" id="genreBar">
+    <button class="genre-btn active" data-genre="all">All</button>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="main-content" id="mainContent">
+</main>
+
+<div class="no-results" id="noResults">
+  <h2>No movies found</h2>
+  <p>Try a different search term or clear your filters.</p>
+</div>
+
+<!-- Footer -->
+<footer class="site-footer">
+  Amy's 80s Movie Vault &mdash; <span>&hearts;</span> A Vintage Video Store Experience
+</footer>
+
+<script>
+// Movie data
+const MOVIES = {
+  "Action": {
+    gradient: "linear-gradient(135deg, #d4380d, #ff7a45)",
+    films: [
+      { title: "Raiders of the Lost Ark", year: 1981 },
+      { title: "Die Hard", year: 1988 },
+      { title: "The Terminator", year: 1984 },
+      { title: "RoboCop", year: 1987 },
+      { title: "Beverly Hills Cop", year: 1984 },
+      { title: "Top Gun", year: 1986 },
+      { title: "Lethal Weapon", year: 1987 },
+      { title: "Aliens", year: 1986 },
+      { title: "First Blood", year: 1982 },
+      { title: "Predator", year: 1987 }
+    ]
+  },
+  "Comedy": {
+    gradient: "linear-gradient(135deg, #faad14, #ffc53d)",
+    films: [
+      { title: "Ghostbusters", year: 1984 },
+      { title: "Ferris Bueller's Day Off", year: 1986 },
+      { title: "Tootsie", year: 1982 },
+      { title: "Coming to America", year: 1988 },
+      { title: "Airplane!", year: 1980 },
+      { title: "Beetlejuice", year: 1988 },
+      { title: "Trading Places", year: 1983 },
+      { title: "National Lampoon's Vacation", year: 1983 },
+      { title: "Spaceballs", year: 1987 },
+      { title: "9 to 5", year: 1980 }
+    ]
+  },
+  "Drama": {
+    gradient: "linear-gradient(135deg, #1890ff, #69c0ff)",
+    films: [
+      { title: "Stand By Me", year: 1986 },
+      { title: "Scarface", year: 1983 },
+      { title: "Rain Man", year: 1988 },
+      { title: "The Color Purple", year: 1985 },
+      { title: "Platoon", year: 1986 },
+      { title: "Full Metal Jacket", year: 1987 },
+      { title: "Ordinary People", year: 1980 },
+      { title: "Driving Miss Daisy", year: 1989 },
+      { title: "Blue Velvet", year: 1986 },
+      { title: "Do the Right Thing", year: 1989 }
+    ]
+  },
+  "Horror": {
+    gradient: "linear-gradient(135deg, #722ed1, #b37feb)",
+    films: [
+      { title: "The Shining", year: 1980 },
+      { title: "A Nightmare on Elm Street", year: 1984 },
+      { title: "The Thing", year: 1982 },
+      { title: "Poltergeist", year: 1982 },
+      { title: "Gremlins", year: 1984 },
+      { title: "The Fly", year: 1986 },
+      { title: "Friday the 13th", year: 1980 },
+      { title: "Halloween II", year: 1981 },
+      { title: "Christine", year: 1983 },
+      { title: "Hellraiser", year: 1987 }
+    ]
+  },
+  "Teen": {
+    gradient: "linear-gradient(135deg, #e8527a, #ff85a2)",
+    films: [
+      { title: "The Breakfast Club", year: 1985 },
+      { title: "Sixteen Candles", year: 1984 },
+      { title: "Pretty in Pink", year: 1986 },
+      { title: "Fast Times at Ridgemont High", year: 1982 },
+      { title: "Heathers", year: 1988 },
+      { title: "Say Anything", year: 1989 },
+      { title: "Valley Girl", year: 1983 },
+      { title: "Some Kind of Wonderful", year: 1987 },
+      { title: "Weird Science", year: 1985 }
+    ]
+  },
+  "Sci-Fi": {
+    gradient: "linear-gradient(135deg, #13c2c2, #5cdbd3)",
+    films: [
+      { title: "Back to the Future", year: 1985 },
+      { title: "E.T.", year: 1982 },
+      { title: "Blade Runner", year: 1982 },
+      { title: "Tron", year: 1982 },
+      { title: "WarGames", year: 1983 },
+      { title: "The Last Starfighter", year: 1984 },
+      { title: "Cocoon", year: 1985 },
+      { title: "Short Circuit", year: 1986 },
+      { title: "They Live", year: 1988 }
+    ]
+  },
+  "Romance": {
+    gradient: "linear-gradient(135deg, #eb2f96, #ff85c0)",
+    films: [
+      { title: "Dirty Dancing", year: 1987 },
+      { title: "Flashdance", year: 1983 },
+      { title: "An Officer and a Gentleman", year: 1982 },
+      { title: "When Harry Met Sally", year: 1989 },
+      { title: "Moonstruck", year: 1987 },
+      { title: "The Princess Bride", year: 1987 }
+    ]
+  }
+};
+
+const genres = Object.keys(MOVIES);
+
+// Build genre filter buttons
+const genreBar = document.getElementById('genreBar');
+genres.forEach(genre => {
+  const btn = document.createElement('button');
+  btn.className = 'genre-btn';
+  btn.dataset.genre = genre;
+  btn.textContent = genre;
+  genreBar.appendChild(btn);
+});
+
+// Build movie rows
+const mainContent = document.getElementById('mainContent');
+
+genres.forEach(genre => {
+  const data = MOVIES[genre];
+  const section = document.createElement('section');
+  section.className = 'genre-section';
+  section.dataset.genre = genre;
+
+  section.innerHTML = `
+    <div class="genre-section-header">
+      <h2 class="genre-title">${genre}</h2>
+      <span class="genre-count">${data.films.length} titles</span>
+    </div>
+    <div class="scroll-row" data-genre="${genre}">
+      ${data.films.map(film => `
+        <div class="movie-card" data-title="${film.title.toLowerCase()}" data-year="${film.year}">
+          <div class="card-inner">
+            <div class="poster-placeholder" style="background: ${data.gradient};">
+              <span class="poster-year">${film.year}</span>
+            </div>
+            <div class="card-info">
+              <div class="card-title">${film.title}</div>
+              <div class="card-year">${film.year}</div>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  mainContent.appendChild(section);
+});
+
+// Genre filter logic
+let activeGenre = 'all';
+
+genreBar.addEventListener('click', (e) => {
+  const btn = e.target.closest('.genre-btn');
+  if (!btn) return;
+
+  document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  activeGenre = btn.dataset.genre;
+  applyFilters();
+});
+
+// Search logic
+const searchInput = document.getElementById('searchInput');
+let searchTerm = '';
+
+searchInput.addEventListener('input', (e) => {
+  searchTerm = e.target.value.toLowerCase().trim();
+  applyFilters();
+});
+
+function applyFilters() {
+  const sections = document.querySelectorAll('.genre-section');
+  let anyVisible = false;
+
+  sections.forEach(section => {
+    const genre = section.dataset.genre;
+    const genreMatch = activeGenre === 'all' || activeGenre === genre;
+
+    if (!genreMatch) {
+      section.classList.add('hidden');
+      return;
+    }
+
+    section.classList.remove('hidden');
+
+    const cards = section.querySelectorAll('.movie-card');
+    let visibleCards = 0;
+
+    cards.forEach(card => {
+      const title = card.dataset.title;
+      const year = card.dataset.year;
+      const matchesSearch = !searchTerm || title.includes(searchTerm) || year.includes(searchTerm);
+
+      if (matchesSearch) {
+        card.classList.remove('hidden-by-search');
+        visibleCards++;
+      } else {
+        card.classList.add('hidden-by-search');
+      }
+    });
+
+    // Update count
+    const countEl = section.querySelector('.genre-count');
+    if (countEl) {
+      countEl.textContent = `${visibleCards} title${visibleCards !== 1 ? 's' : ''}`;
+    }
+
+    if (visibleCards === 0) {
+      section.classList.add('hidden');
+    } else {
+      anyVisible = true;
+    }
+  });
+
+  const noResults = document.getElementById('noResults');
+  noResults.classList.toggle('visible', !anyVisible);
+}
+
+// Drag-to-scroll on every row
+document.querySelectorAll('.scroll-row').forEach(row => {
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+  let velX = 0;
+  let lastX = 0;
+  let lastTime = 0;
+  let momentumId = null;
+
+  function stopMomentum() {
+    if (momentumId) {
+      cancelAnimationFrame(momentumId);
+      momentumId = null;
+    }
+  }
+
+  // Mouse events
+  row.addEventListener('mousedown', (e) => {
+    stopMomentum();
+    isDown = true;
+    row.classList.add('dragging');
+    startX = e.pageX - row.offsetLeft;
+    scrollLeft = row.scrollLeft;
+    lastX = e.pageX;
+    lastTime = Date.now();
+    velX = 0;
+  });
+
+  row.addEventListener('mouseleave', () => {
+    if (isDown) {
+      isDown = false;
+      row.classList.remove('dragging');
+      startMomentum();
+    }
+  });
+
+  row.addEventListener('mouseup', () => {
+    if (isDown) {
+      isDown = false;
+      row.classList.remove('dragging');
+      startMomentum();
+    }
+  });
+
+  row.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - row.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    row.scrollLeft = scrollLeft - walk;
+
+    const now = Date.now();
+    const dt = now - lastTime;
+    if (dt > 0) {
+      velX = (e.pageX - lastX) / dt;
+    }
+    lastX = e.pageX;
+    lastTime = now;
+  });
+
+  function startMomentum() {
+    if (Math.abs(velX) < 0.05) return;
+
+    let v = velX * 15;
+
+    function step() {
+      v *= 0.94;
+      if (Math.abs(v) < 0.5) return;
+      row.scrollLeft -= v;
+      momentumId = requestAnimationFrame(step);
+    }
+    momentumId = requestAnimationFrame(step);
+  }
+
+  // Touch events
+  let touchStartX;
+  let touchScrollLeft;
+
+  row.addEventListener('touchstart', (e) => {
+    stopMomentum();
+    touchStartX = e.touches[0].pageX;
+    touchScrollLeft = row.scrollLeft;
+    lastX = touchStartX;
+    lastTime = Date.now();
+    velX = 0;
+  }, { passive: true });
+
+  row.addEventListener('touchmove', (e) => {
+    const x = e.touches[0].pageX;
+    const walk = (x - touchStartX) * 1.2;
+    row.scrollLeft = touchScrollLeft - walk;
+
+    const now = Date.now();
+    const dt = now - lastTime;
+    if (dt > 0) {
+      velX = (x - lastX) / dt;
+    }
+    lastX = x;
+    lastTime = now;
+  }, { passive: true });
+
+  row.addEventListener('touchend', () => {
+    startMomentum();
+  }, { passive: true });
+});
+
+// Prevent click on cards after drag
+document.querySelectorAll('.scroll-row').forEach(row => {
+  let didDrag = false;
+  let downX = 0;
+
+  row.addEventListener('mousedown', (e) => {
+    didDrag = false;
+    downX = e.pageX;
+  });
+
+  row.addEventListener('mousemove', (e) => {
+    if (Math.abs(e.pageX - downX) > 5) {
+      didDrag = true;
+    }
+  });
+
+  row.addEventListener('click', (e) => {
+    if (didDrag) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true);
+});
+</script>
+</body>
+</html>

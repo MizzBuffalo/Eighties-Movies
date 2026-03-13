@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amy's 80s Movie Vault — Streaming Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0e0e0e;--card:#1a1a1a;--border:#2a2a2a;
+  --pink:#e8527a;--white:#ffffff;--gray:#888888;
+  --header-bg:rgba(14,14,14,0.85);
+}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--white);
+  line-height:1.5;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── Sticky Header ── */
+.header{
+  position:sticky;top:0;z-index:100;
+  background:var(--header-bg);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 clamp(16px,3vw,48px);
+  height:64px;display:flex;align-items:center;gap:16px;
+}
+.logo{
+  font-weight:700;font-size:1.1rem;white-space:nowrap;
+  letter-spacing:-0.02em;flex-shrink:0;
+}
+.logo span{color:var(--pink);}
+.search-wrap{
+  flex:1;max-width:420px;position:relative;
+}
+.search-wrap svg{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;stroke:var(--gray);stroke-width:2;fill:none;
+}
+.search-input{
+  width:100%;padding:8px 14px 8px 36px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:8px;color:var(--white);font-family:inherit;
+  font-size:0.85rem;font-weight:400;outline:none;
+  transition:border-color .2s;
+}
+.search-input::placeholder{color:var(--gray);}
+.search-input:focus{border-color:var(--pink);}
+
+.header-icons{
+  display:flex;gap:4px;flex-shrink:0;margin-left:auto;
+}
+.icon-btn{
+  position:relative;width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:8px;cursor:pointer;font-size:1rem;
+  background:transparent;border:1px solid transparent;
+  transition:background .2s,border-color .2s;
+  user-select:none;
+}
+.icon-btn:hover{background:var(--card);border-color:var(--border);}
+.icon-btn .tip{
+  position:absolute;bottom:-32px;left:50%;transform:translateX(-50%);
+  background:#222;color:var(--white);font-size:0.7rem;font-weight:500;
+  padding:4px 10px;border-radius:6px;white-space:nowrap;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.icon-btn:hover .tip{opacity:1;}
+
+/* ── Genre Pills ── */
+.filters{
+  padding:20px clamp(16px,3vw,48px) 4px;
+  display:flex;gap:8px;flex-wrap:wrap;
+}
+.pill{
+  padding:6px 16px;border-radius:20px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--gray);font-family:inherit;font-size:0.8rem;
+  font-weight:500;cursor:pointer;transition:all .25s;
+  white-space:nowrap;
+}
+.pill:hover{border-color:#555;color:var(--white);}
+.pill.active{
+  background:var(--pink);border-color:var(--pink);color:var(--white);
+}
+
+/* ── Row Section ── */
+.row-section{
+  padding:28px 0 8px;
+}
+.row-section.hidden{display:none;}
+.row-label{
+  padding:0 clamp(16px,3vw,48px);
+  font-size:0.95rem;font-weight:600;letter-spacing:-0.01em;
+  margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.row-label::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--pink);flex-shrink:0;
+}
+.row-wrap{
+  position:relative;
+}
+/* Gradient fades */
+.row-wrap::before,.row-wrap::after{
+  content:'';position:absolute;top:0;bottom:0;width:clamp(24px,4vw,64px);
+  z-index:2;pointer-events:none;
+}
+.row-wrap::before{
+  left:0;background:linear-gradient(to right,var(--bg),transparent);
+}
+.row-wrap::after{
+  right:0;background:linear-gradient(to left,var(--bg),transparent);
+}
+.row-track{
+  display:flex;gap:14px;
+  overflow-x:auto;overflow-y:hidden;
+  padding:4px clamp(16px,3vw,48px) 18px;
+  scroll-padding:0 clamp(16px,3vw,48px);
+  cursor:grab;
+  -ms-overflow-style:none;scrollbar-width:none;
+}
+.row-track::-webkit-scrollbar{display:none;}
+.row-track.dragging{cursor:grabbing;scroll-behavior:auto;}
+
+/* ── Movie Card ── */
+.card{
+  flex-shrink:0;width:150px;
+  border-radius:8px;overflow:hidden;
+  background:var(--card);
+  border-bottom:2px solid transparent;
+  transition:transform .3s cubic-bezier(.25,.8,.25,1),border-color .3s,box-shadow .3s;
+  user-select:none;
+}
+.card:hover{
+  transform:scale(1.08);
+  border-bottom:3px solid var(--pink);
+  box-shadow:0 8px 30px rgba(0,0,0,.5);
+  z-index:3;position:relative;
+}
+.card.hidden-card{display:none;}
+.poster{
+  width:100%;aspect-ratio:3/4.5;
+  display:flex;align-items:flex-end;
+  padding:10px;
+  position:relative;
+}
+.poster::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.55) 0%,transparent 50%);
+}
+.card-info{
+  position:relative;z-index:1;width:100%;
+}
+.card-title{
+  font-size:0.75rem;font-weight:600;line-height:1.3;
+  color:var(--white);
+  text-shadow:0 1px 4px rgba(0,0,0,.6);
+}
+.card-year{
+  font-size:0.65rem;font-weight:300;color:rgba(255,255,255,.75);
+  margin-top:2px;
+}
+
+/* ── Coming Soon ── */
+.coming-soon{
+  text-align:center;padding:60px clamp(16px,3vw,48px);
+  border-top:1px solid var(--border);margin-top:20px;
+}
+.coming-soon p{
+  font-size:0.9rem;font-weight:300;color:var(--gray);
+  letter-spacing:0.02em;
+}
+.coming-soon span.hl{color:var(--pink);font-weight:500;}
+.coming-soon .cs-label{
+  font-size:0.7rem;text-transform:uppercase;letter-spacing:0.12em;
+  color:var(--gray);margin-bottom:10px;font-weight:600;
+}
+
+/* ── No Results ── */
+.no-results{
+  display:none;text-align:center;padding:80px 20px;
+  color:var(--gray);font-weight:300;font-size:1rem;
+}
+.no-results.show{display:block;}
+
+/* ── Mobile ── */
+@media(max-width:640px){
+  .header{height:56px;gap:10px;}
+  .logo{font-size:0.95rem;}
+  .search-wrap{max-width:none;}
+  .header-icons{gap:2px;}
+  .icon-btn{width:32px;height:32px;font-size:0.85rem;}
+  .card{width:120px;}
+  .card-title{font-size:0.68rem;}
+  .card-year{font-size:0.6rem;}
+  .row-label{font-size:0.85rem;}
+  .filters{gap:6px;}
+  .pill{padding:5px 12px;font-size:0.75rem;}
+  .row-track{gap:10px;}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="logo">Amy's 80s <span>Vault</span></div>
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+    <input type="text" class="search-input" id="searchInput" placeholder="Search movies..." autocomplete="off">
+  </div>
+  <div class="header-icons">
+    <div class="icon-btn" aria-label="Random movie">🎲<span class="tip">Randomizer</span></div>
+    <div class="icon-btn" aria-label="Ratings">⭐<span class="tip">Ratings</span></div>
+    <div class="icon-btn" aria-label="Tier list">🏆<span class="tip">Tier List</span></div>
+    <div class="icon-btn" aria-label="Quiz">💬<span class="tip">Quiz</span></div>
+  </div>
+</header>
+
+<!-- Genre Filters -->
+<div class="filters" id="filters">
+  <button class="pill active" data-genre="all">All</button>
+  <button class="pill" data-genre="Action">Action</button>
+  <button class="pill" data-genre="Comedy">Comedy</button>
+  <button class="pill" data-genre="Drama">Drama</button>
+  <button class="pill" data-genre="Horror">Horror</button>
+  <button class="pill" data-genre="Teen">Teen</button>
+  <button class="pill" data-genre="Sci-Fi">Sci-Fi</button>
+  <button class="pill" data-genre="Romance">Romance</button>
+</div>
+
+<!-- Movie Rows (generated by JS) -->
+<main id="main"></main>
+
+<!-- No Results -->
+<div class="no-results" id="noResults">No movies match your search.</div>
+
+<!-- Coming Soon -->
+<div class="coming-soon" id="comingSoon">
+  <p class="cs-label">Coming Soon</p>
+  <p><span class="hl">Movie Quiz</span> &nbsp;·&nbsp; <span class="hl">Tier Rankings</span> &nbsp;·&nbsp; <span class="hl">Watch Tracker</span></p>
+</div>
+
+<script>
+/* ── Data ── */
+const genres = {
+  Action:{
+    gradient:'linear-gradient(135deg,#d4380d,#ff7a45)',
+    movies:[
+      ['Raiders of the Lost Ark',1981],['Die Hard',1988],['The Terminator',1984],
+      ['RoboCop',1987],['Beverly Hills Cop',1984],['Top Gun',1986],
+      ['Lethal Weapon',1987],['Aliens',1986],['First Blood',1982],['Predator',1987]
+    ]
+  },
+  Comedy:{
+    gradient:'linear-gradient(135deg,#faad14,#ffc53d)',
+    movies:[
+      ['Ghostbusters',1984],['Ferris Bueller\'s Day Off',1986],['Tootsie',1982],
+      ['Coming to America',1988],['Airplane!',1980],['Beetlejuice',1988],
+      ['Trading Places',1983],['National Lampoon\'s Vacation',1983],['Spaceballs',1987],['9 to 5',1980]
+    ]
+  },
+  Drama:{
+    gradient:'linear-gradient(135deg,#1890ff,#69c0ff)',
+    movies:[
+      ['Stand By Me',1986],['Scarface',1983],['Rain Man',1988],
+      ['The Color Purple',1985],['Platoon',1986],['Full Metal Jacket',1987],
+      ['Ordinary People',1980],['Driving Miss Daisy',1989],['Blue Velvet',1986],['Do the Right Thing',1989]
+    ]
+  },
+  Horror:{
+    gradient:'linear-gradient(135deg,#722ed1,#b37feb)',
+    movies:[
+      ['The Shining',1980],['A Nightmare on Elm Street',1984],['The Thing',1982],
+      ['Poltergeist',1982],['Gremlins',1984],['The Fly',1986],
+      ['Friday the 13th',1980],['Halloween II',1981],['Christine',1983],['Hellraiser',1987]
+    ]
+  },
+  Teen:{
+    gradient:'linear-gradient(135deg,#e8527a,#ff85a2)',
+    movies:[
+      ['The Breakfast Club',1985],['Sixteen Candles',1984],['Pretty in Pink',1986],
+      ['Fast Times at Ridgemont High',1982],['Heathers',1988],['Say Anything',1989],
+      ['Valley Girl',1983],['Some Kind of Wonderful',1987],['Weird Science',1985]
+    ]
+  },
+  'Sci-Fi':{
+    gradient:'linear-gradient(135deg,#13c2c2,#5cdbd3)',
+    movies:[
+      ['Back to the Future',1985],['E.T.',1982],['Blade Runner',1982],
+      ['Tron',1982],['WarGames',1983],['The Last Starfighter',1984],
+      ['Cocoon',1985],['Short Circuit',1986],['They Live',1988]
+    ]
+  },
+  Romance:{
+    gradient:'linear-gradient(135deg,#eb2f96,#ff85c0)',
+    movies:[
+      ['Dirty Dancing',1987],['Flashdance',1983],['An Officer and a Gentleman',1982],
+      ['When Harry Met Sally',1989],['Moonstruck',1987],['The Princess Bride',1987]
+    ]
+  }
+};
+
+/* ── Build DOM ── */
+const main = document.getElementById('main');
+
+Object.entries(genres).forEach(([genre, data]) => {
+  const section = document.createElement('div');
+  section.className = 'row-section';
+  section.dataset.genre = genre;
+
+  let cardsHTML = '';
+  data.movies.forEach(([title, year]) => {
+    cardsHTML += `
+      <div class="card" data-title="${title.toLowerCase()}" data-genre="${genre}">
+        <div class="poster" style="background:${data.gradient}">
+          <div class="card-info">
+            <div class="card-title">${title}</div>
+            <div class="card-year">${year}</div>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  section.innerHTML = `
+    <div class="row-label">${genre}</div>
+    <div class="row-wrap">
+      <div class="row-track">${cardsHTML}</div>
+    </div>`;
+  main.appendChild(section);
+});
+
+/* ── Genre Filter ── */
+const pills = document.querySelectorAll('.pill');
+const sections = document.querySelectorAll('.row-section');
+let activeGenre = 'all';
+
+pills.forEach(pill => {
+  pill.addEventListener('click', () => {
+    pills.forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    activeGenre = pill.dataset.genre;
+    applyFilters();
+  });
+});
+
+/* ── Search ── */
+const searchInput = document.getElementById('searchInput');
+let searchTerm = '';
+
+searchInput.addEventListener('input', () => {
+  searchTerm = searchInput.value.trim().toLowerCase();
+  applyFilters();
+});
+
+function applyFilters() {
+  let anyVisible = false;
+
+  sections.forEach(sec => {
+    const genre = sec.dataset.genre;
+    const genreMatch = activeGenre === 'all' || genre === activeGenre;
+
+    if (!genreMatch) {
+      sec.classList.add('hidden');
+      return;
+    }
+
+    const cards = sec.querySelectorAll('.card');
+    let rowHasVisible = false;
+
+    cards.forEach(card => {
+      const title = card.dataset.title;
+      if (searchTerm && !title.includes(searchTerm)) {
+        card.classList.add('hidden-card');
+      } else {
+        card.classList.remove('hidden-card');
+        rowHasVisible = true;
+      }
+    });
+
+    if (rowHasVisible) {
+      sec.classList.remove('hidden');
+      anyVisible = true;
+    } else {
+      sec.classList.add('hidden');
+    }
+  });
+
+  const noRes = document.getElementById('noResults');
+  noRes.classList.toggle('show', !anyVisible);
+  document.getElementById('comingSoon').style.display = anyVisible ? '' : 'none';
+}
+
+/* ── Drag-to-scroll ── */
+document.querySelectorAll('.row-track').forEach(track => {
+  let isDown = false, startX, scrollLeft, moved = false;
+
+  const start = (x) => {
+    isDown = true; moved = false;
+    startX = x - track.offsetLeft;
+    scrollLeft = track.scrollLeft;
+    track.classList.add('dragging');
+  };
+  const end = () => {
+    isDown = false;
+    track.classList.remove('dragging');
+  };
+  const move = (x) => {
+    if (!isDown) return;
+    const walk = (x - track.offsetLeft - startX) * 1.5;
+    if (Math.abs(walk) > 4) moved = true;
+    track.scrollLeft = scrollLeft - walk;
+  };
+
+  track.addEventListener('mousedown', e => { e.preventDefault(); start(e.pageX); });
+  track.addEventListener('mouseleave', end);
+  track.addEventListener('mouseup', end);
+  track.addEventListener('mousemove', e => move(e.pageX));
+
+  /* Prevent click on cards after drag */
+  track.addEventListener('click', e => { if (moved) e.stopPropagation(); }, true);
+
+  /* Touch */
+  track.addEventListener('touchstart', e => start(e.touches[0].pageX), {passive:true});
+  track.addEventListener('touchend', end);
+  track.addEventListener('touchmove', e => move(e.touches[0].pageX), {passive:true});
+});
+</script>
+</body>
+</html>

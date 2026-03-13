@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amy's 80s Movie Vault — VHS Retro</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --beige: #f0e6d3;
+  --pink: #e8527a;
+  --blue: #0088ff;
+  --vhs-white: #f5f0e8;
+  --charcoal: #2a2a2a;
+  --card-w: 150px;
+  --card-h: calc(var(--card-w) * 1.5);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'IBM Plex Mono', monospace;
+  background-color: var(--beige);
+  color: var(--charcoal);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* VHS tracking lines overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.015) 2px,
+    rgba(0,0,0,0.015) 4px
+  );
+}
+
+/* Subtle worn paper texture */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+/* ---- STICKY HEADER ---- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--charcoal);
+  border-bottom: 3px solid var(--pink);
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.site-title {
+  font-family: 'VT323', monospace;
+  font-size: 28px;
+  color: var(--pink);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(232,82,122,0.5);
+  flex-shrink: 0;
+}
+
+.site-title span {
+  color: var(--vhs-white);
+}
+
+.search-wrap {
+  position: relative;
+  max-width: 340px;
+  width: 100%;
+  flex-shrink: 1;
+}
+
+.search-wrap input {
+  width: 100%;
+  padding: 8px 14px 8px 36px;
+  border: 2px solid rgba(232,82,122,0.4);
+  border-radius: 4px;
+  background: rgba(245,240,232,0.1);
+  color: var(--vhs-white);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-wrap input::placeholder { color: rgba(245,240,232,0.4); }
+.search-wrap input:focus { border-color: var(--pink); }
+
+.search-wrap svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  stroke: rgba(245,240,232,0.4);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---- GENRE FILTER BAR ---- */
+.filter-bar {
+  position: sticky;
+  top: 64px;
+  z-index: 999;
+  background: #3a3530;
+  padding: 10px 24px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  border-bottom: 2px solid rgba(232,82,122,0.2);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+
+.filter-btn {
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  padding: 6px 18px;
+  border: 2px solid rgba(245,240,232,0.2);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--vhs-white);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+}
+
+.filter-btn:hover {
+  border-color: var(--pink);
+  color: var(--pink);
+}
+
+.filter-btn.active {
+  background: var(--pink);
+  border-color: var(--pink);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(232,82,122,0.4);
+}
+
+/* ---- MAIN CONTENT ---- */
+.main-content {
+  padding: 20px 0 60px;
+}
+
+/* ---- GENRE SECTION ---- */
+.genre-section {
+  margin-bottom: 32px;
+}
+
+.genre-section.hidden { display: none; }
+
+/* VHS Label Sticker header */
+.genre-header {
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  margin-bottom: 14px;
+}
+
+.genre-label {
+  font-family: 'VT323', monospace;
+  font-size: 28px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--charcoal);
+  background: var(--vhs-white);
+  padding: 4px 20px 4px 14px;
+  border-left: 5px solid var(--pink);
+  border-radius: 0 3px 3px 0;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.1), inset 0 0 0 1px rgba(0,0,0,0.05);
+  position: relative;
+}
+
+.genre-label::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='64' height='64' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 64px;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.genre-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: rgba(42,42,42,0.4);
+  margin-left: 12px;
+}
+
+/* ---- SCROLL ROW ---- */
+.scroll-row {
+  display: flex;
+  gap: 16px;
+  padding: 4px 24px 12px;
+  overflow-x: auto;
+  cursor: grab;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.scroll-row::-webkit-scrollbar { display: none; }
+.scroll-row.dragging { cursor: grabbing; }
+.scroll-row.dragging .movie-card { pointer-events: none; }
+
+/* ---- MOVIE CARD — VHS BOX ---- */
+.movie-card {
+  flex: 0 0 var(--card-w);
+  width: var(--card-w);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.movie-card.card-hidden {
+  display: none;
+}
+
+.movie-card:hover {
+  transform: translateY(-6px) scale(1.03);
+}
+
+.vhs-box {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+  background: var(--vhs-white);
+  padding: 5px;
+  box-shadow:
+    2px 3px 0 rgba(0,0,0,0.12),
+    4px 5px 10px rgba(0,0,0,0.08),
+    inset 0 0 0 1px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s;
+}
+
+.movie-card:hover .vhs-box {
+  box-shadow:
+    2px 3px 0 rgba(232,82,122,0.25),
+    0 8px 24px rgba(232,82,122,0.15),
+    inset 0 0 0 1px rgba(232,82,122,0.2);
+}
+
+/* Worn/aged overlay on VHS box */
+.vhs-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='128' height='128' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px;
+  mix-blend-mode: multiply;
+  z-index: 2;
+}
+
+.poster-area {
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.poster-gradient {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 10px 8px 8px;
+}
+
+.poster-year {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  color: rgba(255,255,255,0.9);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  line-height: 1;
+}
+
+/* Play button overlay */
+.play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 1;
+}
+
+.movie-card:hover .play-overlay { opacity: 1; }
+
+.play-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--pink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(232,82,122,0.5);
+}
+
+.play-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: #fff;
+  margin-left: 2px;
+}
+
+/* Static noise on hover */
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  z-index: 3;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  transition: opacity 0.2s;
+}
+
+.movie-card:hover .noise-overlay {
+  opacity: 0.12;
+  animation: staticNoise 0.15s steps(5) infinite;
+}
+
+@keyframes staticNoise {
+  0% { background-position: 0 0; }
+  20% { background-position: -20px 10px; }
+  40% { background-position: 15px -15px; }
+  60% { background-position: -10px 20px; }
+  80% { background-position: 20px -5px; }
+  100% { background-position: -5px 15px; }
+}
+
+.noise-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px;
+}
+
+/* Card title area */
+.card-info {
+  padding: 6px 2px 0;
+}
+
+.card-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--charcoal);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-year {
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  color: var(--pink);
+  margin-top: 1px;
+}
+
+/* ---- NO RESULTS ---- */
+.no-results {
+  display: none;
+  text-align: center;
+  padding: 80px 24px;
+  font-family: 'VT323', monospace;
+  font-size: 28px;
+  color: rgba(42,42,42,0.4);
+}
+
+.no-results.visible { display: block; }
+
+/* ---- FOOTER ---- */
+.site-footer {
+  text-align: center;
+  padding: 24px;
+  font-size: 12px;
+  color: rgba(42,42,42,0.35);
+  border-top: 1px solid rgba(42,42,42,0.08);
+}
+.site-footer span { color: var(--pink); }
+
+/* ---- MOBILE ---- */
+@media (max-width: 640px) {
+  :root {
+    --card-w: 120px;
+  }
+
+  .site-header {
+    height: 56px;
+    padding: 0 14px;
+    gap: 10px;
+  }
+
+  .site-title { font-size: 18px; letter-spacing: 1px; }
+
+  .search-wrap input { font-size: 12px; padding: 7px 12px 7px 32px; }
+
+  .filter-bar { padding: 8px 14px; gap: 6px; }
+  .filter-btn { font-size: 15px; padding: 5px 12px; }
+
+  .genre-header { padding: 0 14px; margin-bottom: 10px; }
+  .genre-label { font-size: 22px; padding: 3px 14px 3px 10px; }
+
+  .scroll-row { padding: 4px 14px 10px; gap: 12px; }
+
+  .card-title { font-size: 10px; }
+  .card-year { font-size: 14px; }
+
+  .play-btn { width: 36px; height: 36px; }
+  .play-btn svg { width: 14px; height: 14px; }
+}
+
+@media (max-width: 400px) {
+  :root { --card-w: 110px; }
+  .site-title { font-size: 15px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="site-title">Amy's <span>80s Movie Vault</span></div>
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="Search movies..." autocomplete="off">
+  </div>
+</header>
+
+<!-- GENRE FILTER BAR -->
+<nav class="filter-bar" id="filterBar"></nav>
+
+<!-- MAIN -->
+<main class="main-content" id="mainContent"></main>
+<div class="no-results" id="noResults">NO TAPES FOUND — TRY ANOTHER SEARCH</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">Be Kind, Rewind <span>&hearts;</span> Amy's 80s Movie Vault</footer>
+
+<script>
+// ---- MOVIE DATA ----
+const genres = [
+  {
+    name: 'Action',
+    gradient: 'linear-gradient(135deg, #d4380d, #ff7a45)',
+    movies: [
+      ['Raiders of the Lost Ark', 1981], ['Die Hard', 1988], ['The Terminator', 1984],
+      ['RoboCop', 1987], ['Beverly Hills Cop', 1984], ['Top Gun', 1986],
+      ['Lethal Weapon', 1987], ['Aliens', 1986], ['First Blood', 1982], ['Predator', 1987]
+    ]
+  },
+  {
+    name: 'Comedy',
+    gradient: 'linear-gradient(135deg, #faad14, #ffc53d)',
+    movies: [
+      ['Ghostbusters', 1984], ["Ferris Bueller's Day Off", 1986], ['Tootsie', 1982],
+      ['Coming to America', 1988], ['Airplane!', 1980], ['Beetlejuice', 1988],
+      ['Trading Places', 1983], ["National Lampoon's Vacation", 1983], ['Spaceballs', 1987],
+      ['9 to 5', 1980]
+    ]
+  },
+  {
+    name: 'Drama',
+    gradient: 'linear-gradient(135deg, #1890ff, #69c0ff)',
+    movies: [
+      ['Stand By Me', 1986], ['Scarface', 1983], ['Rain Man', 1988],
+      ['The Color Purple', 1985], ['Platoon', 1986], ['Full Metal Jacket', 1987],
+      ['Ordinary People', 1980], ['Driving Miss Daisy', 1989], ['Blue Velvet', 1986],
+      ['Do the Right Thing', 1989]
+    ]
+  },
+  {
+    name: 'Horror',
+    gradient: 'linear-gradient(135deg, #722ed1, #b37feb)',
+    movies: [
+      ['The Shining', 1980], ['A Nightmare on Elm Street', 1984], ['The Thing', 1982],
+      ['Poltergeist', 1982], ['Gremlins', 1984], ['The Fly', 1986],
+      ['Friday the 13th', 1980], ['Halloween II', 1981], ['Christine', 1983],
+      ['Hellraiser', 1987]
+    ]
+  },
+  {
+    name: 'Teen',
+    gradient: 'linear-gradient(135deg, #e8527a, #ff85a2)',
+    movies: [
+      ['The Breakfast Club', 1985], ['Sixteen Candles', 1984], ['Pretty in Pink', 1986],
+      ['Fast Times at Ridgemont High', 1982], ['Heathers', 1988], ['Say Anything', 1989],
+      ['Valley Girl', 1983], ['Some Kind of Wonderful', 1987], ['Weird Science', 1985]
+    ]
+  },
+  {
+    name: 'Sci-Fi',
+    gradient: 'linear-gradient(135deg, #13c2c2, #5cdbd3)',
+    movies: [
+      ['Back to the Future', 1985], ['E.T.', 1982], ['Blade Runner', 1982],
+      ['Tron', 1982], ['WarGames', 1983], ['The Last Starfighter', 1984],
+      ['Cocoon', 1985], ['Short Circuit', 1986], ['They Live', 1988]
+    ]
+  },
+  {
+    name: 'Romance',
+    gradient: 'linear-gradient(135deg, #eb2f96, #ff85c0)',
+    movies: [
+      ['Dirty Dancing', 1987], ['Flashdance', 1983], ['An Officer and a Gentleman', 1982],
+      ['When Harry Met Sally', 1989], ['Moonstruck', 1987], ['The Princess Bride', 1987]
+    ]
+  }
+];
+
+const playSVG = `<svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg>`;
+
+// ---- BUILD FILTER BAR ----
+const filterBar = document.getElementById('filterBar');
+const allBtn = document.createElement('button');
+allBtn.className = 'filter-btn active';
+allBtn.textContent = 'All';
+allBtn.dataset.genre = 'all';
+filterBar.appendChild(allBtn);
+
+genres.forEach(g => {
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn';
+  btn.textContent = g.name;
+  btn.dataset.genre = g.name;
+  filterBar.appendChild(btn);
+});
+
+// ---- BUILD GENRE ROWS ----
+const mainContent = document.getElementById('mainContent');
+
+genres.forEach(g => {
+  const section = document.createElement('section');
+  section.className = 'genre-section';
+  section.dataset.genre = g.name;
+
+  const header = document.createElement('div');
+  header.className = 'genre-header';
+  header.innerHTML = `<div class="genre-label">${g.name}</div><span class="genre-count">${g.movies.length} tapes</span>`;
+  section.appendChild(header);
+
+  const row = document.createElement('div');
+  row.className = 'scroll-row';
+
+  g.movies.forEach(([title, year]) => {
+    const card = document.createElement('div');
+    card.className = 'movie-card';
+    card.dataset.title = title.toLowerCase();
+    card.dataset.year = year;
+
+    card.innerHTML = `
+      <div class="vhs-box">
+        <div class="poster-area">
+          <div class="poster-gradient" style="background:${g.gradient}">
+            <div class="poster-year">${year}</div>
+          </div>
+          <div class="play-overlay"><div class="play-btn">${playSVG}</div></div>
+          <div class="noise-overlay"></div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="card-title">${title}</div>
+        <div class="card-year">${year}</div>
+      </div>
+    `;
+
+    row.appendChild(card);
+  });
+
+  section.appendChild(row);
+  mainContent.appendChild(section);
+});
+
+// ---- DRAG-TO-SCROLL ----
+document.querySelectorAll('.scroll-row').forEach(row => {
+  let isDown = false, startX, scrollLeft;
+
+  const onDown = (e) => {
+    isDown = true;
+    row.classList.add('dragging');
+    const pageX = e.touches ? e.touches[0].pageX : e.pageX;
+    startX = pageX - row.offsetLeft;
+    scrollLeft = row.scrollLeft;
+  };
+
+  const onUp = () => {
+    isDown = false;
+    row.classList.remove('dragging');
+  };
+
+  const onMove = (e) => {
+    if (!isDown) return;
+    const pageX = e.touches ? e.touches[0].pageX : e.pageX;
+    const x = pageX - row.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    row.scrollLeft = scrollLeft - walk;
+  };
+
+  row.addEventListener('mousedown', onDown);
+  row.addEventListener('mouseleave', onUp);
+  row.addEventListener('mouseup', onUp);
+  row.addEventListener('mousemove', onMove);
+
+  row.addEventListener('touchstart', onDown, { passive: true });
+  row.addEventListener('touchend', onUp);
+  row.addEventListener('touchmove', onMove, { passive: true });
+});
+
+// ---- GENRE FILTER ----
+const filterBtns = document.querySelectorAll('.filter-btn');
+const sections = document.querySelectorAll('.genre-section');
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const genre = btn.dataset.genre;
+    sections.forEach(s => {
+      if (genre === 'all' || s.dataset.genre === genre) {
+        s.classList.remove('hidden');
+      } else {
+        s.classList.add('hidden');
+      }
+    });
+    applySearch();
+  });
+});
+
+// ---- SEARCH ----
+const searchInput = document.getElementById('searchInput');
+const noResults = document.getElementById('noResults');
+
+function applySearch() {
+  const q = searchInput.value.trim().toLowerCase();
+  let anyVisible = false;
+
+  sections.forEach(section => {
+    if (section.classList.contains('hidden')) return;
+
+    const cards = section.querySelectorAll('.movie-card');
+    let sectionHasVisible = false;
+
+    cards.forEach(card => {
+      const title = card.dataset.title;
+      const year = card.dataset.year;
+      const match = !q || title.includes(q) || year.includes(q);
+      card.classList.toggle('card-hidden', !match);
+      if (match) sectionHasVisible = true;
+    });
+
+    section.style.display = sectionHasVisible ? '' : 'none';
+    if (sectionHasVisible) anyVisible = true;
+  });
+
+  noResults.classList.toggle('visible', !anyVisible);
+}
+
+searchInput.addEventListener('input', applySearch);
+</script>
+</body>
+</html>

@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amy's 80s Movie Vault — Punk Zine</title>
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --pink: #e8527a;
+  --orange: #ff6600;
+  --yellow: #ffe100;
+  --black: #1a1a1a;
+  --bg: #f5ede0;
+  --pink-light: #fce4ec;
+  --card-shadow: 3px 3px 0 var(--black);
+}
+
+@keyframes noiseAnim {
+  0% { background-position: 0 0; }
+  25% { background-position: 50% 50%; }
+  50% { background-position: 100% 0; }
+  75% { background-position: 50% 100%; }
+  100% { background-position: 0 0; }
+}
+
+body {
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  background-color: var(--bg);
+  color: var(--black);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  animation: noiseAnim 0.5s steps(4) infinite;
+}
+
+/* ===== STICKY HEADER ===== */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--pink);
+  border-bottom: 4px solid var(--black);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  box-shadow: 0 4px 0 var(--black);
+}
+
+.site-header::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 0; right: 0;
+  height: 8px;
+  background: repeating-linear-gradient(90deg, var(--yellow) 0, var(--yellow) 20px, var(--orange) 20px, var(--orange) 40px, var(--pink) 40px, var(--pink) 60px);
+  border-bottom: 2px solid var(--black);
+}
+
+.site-title {
+  font-family: 'Permanent Marker', cursive;
+  font-size: 1.8rem;
+  color: var(--yellow);
+  text-shadow: 3px 3px 0 var(--black), -1px -1px 0 var(--black);
+  transform: rotate(-1.5deg);
+  white-space: nowrap;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.site-title span {
+  color: #fff;
+  font-size: 0.6em;
+  display: block;
+  text-shadow: 2px 2px 0 var(--black);
+  transform: rotate(1deg);
+  margin-top: 2px;
+}
+
+.search-wrap {
+  position: relative;
+  flex: 0 1 320px;
+  min-width: 180px;
+}
+
+.search-bar {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.95rem;
+  border: 3px solid var(--black);
+  background: #fff;
+  color: var(--black);
+  outline: none;
+  box-shadow: 3px 3px 0 var(--black);
+  transition: box-shadow 0.15s;
+}
+
+.search-bar::placeholder { color: #999; }
+.search-bar:focus { box-shadow: 5px 5px 0 var(--black); }
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.1rem;
+  pointer-events: none;
+  color: var(--black);
+}
+
+/* ===== GENRE FILTER BAR ===== */
+.genre-bar {
+  position: sticky;
+  top: 76px;
+  z-index: 999;
+  background: var(--black);
+  padding: 10px 20px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  border-bottom: 3px solid var(--pink);
+  margin-top: 10px;
+  scrollbar-width: none;
+}
+
+.genre-bar::-webkit-scrollbar { display: none; }
+
+.genre-btn {
+  font-family: 'Permanent Marker', cursive;
+  font-size: 0.9rem;
+  padding: 6px 16px;
+  border: 2px solid var(--pink);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+}
+
+.genre-btn:hover {
+  background: var(--pink);
+  color: var(--yellow);
+  transform: rotate(-1deg) scale(1.05);
+}
+
+.genre-btn.active {
+  background: var(--pink);
+  color: var(--yellow);
+  box-shadow: 3px 3px 0 var(--orange);
+  transform: rotate(-1deg);
+}
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+  position: relative;
+  z-index: 1;
+  padding: 30px 0 60px;
+}
+
+/* ===== GENRE ROW ===== */
+.genre-row {
+  margin-bottom: 36px;
+  padding: 0 20px;
+}
+
+.genre-row.hidden { display: none; }
+
+.genre-header {
+  font-family: 'Permanent Marker', cursive;
+  font-size: 1.8rem;
+  text-transform: uppercase;
+  color: var(--black);
+  margin-bottom: 16px;
+  display: inline-block;
+  position: relative;
+  padding: 4px 18px 4px 14px;
+  letter-spacing: 2px;
+  transform: rotate(-0.8deg);
+}
+
+.genre-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--pink);
+  z-index: -1;
+  clip-path: polygon(2% 8%, 98% 0%, 100% 85%, 1% 100%);
+  opacity: 0.85;
+}
+
+.genre-header::after {
+  content: '★';
+  margin-left: 8px;
+  color: var(--yellow);
+  font-size: 0.7em;
+  text-shadow: 1px 1px 0 var(--black);
+}
+
+/* ===== SCROLL ROW ===== */
+.scroll-row {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 10px 4px 18px;
+  cursor: grab;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  user-select: none;
+}
+
+.scroll-row::-webkit-scrollbar { display: none; }
+.scroll-row.dragging { cursor: grabbing; }
+.scroll-row.dragging .movie-card { pointer-events: none; }
+
+/* ===== MOVIE CARD ===== */
+.movie-card {
+  flex: 0 0 150px;
+  position: relative;
+  transition: transform 0.2s;
+  /* rotation set via inline style randomly */
+}
+
+.movie-card:hover {
+  transform: rotate(0deg) scale(1.07) !important;
+  z-index: 10;
+}
+
+.movie-card.hidden { display: none; }
+
+.card-inner {
+  background: #fff;
+  border: 3px solid var(--black);
+  box-shadow: var(--card-shadow);
+  padding: 6px 6px 8px;
+  position: relative;
+}
+
+/* Torn edge top */
+.card-inner::before {
+  content: '';
+  position: absolute;
+  top: -5px; left: -3px; right: -3px;
+  height: 6px;
+  background: #fff;
+  clip-path: polygon(0% 100%, 3% 30%, 7% 80%, 11% 20%, 16% 90%, 20% 40%, 25% 100%, 28% 50%, 33% 80%, 37% 10%, 42% 70%, 46% 30%, 51% 100%, 55% 40%, 60% 80%, 64% 20%, 69% 90%, 73% 50%, 78% 70%, 82% 10%, 87% 100%, 91% 40%, 95% 80%, 100% 30%, 100% 100%);
+  z-index: 2;
+}
+
+/* Paper texture overlay */
+.card-inner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 80px;
+  z-index: 1;
+}
+
+.poster-placeholder {
+  width: 100%;
+  aspect-ratio: 3 / 4.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: 2px solid var(--black);
+}
+
+.poster-placeholder .poster-year {
+  font-family: 'Permanent Marker', cursive;
+  font-size: 2rem;
+  color: rgba(255,255,255,0.35);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+}
+
+.card-info {
+  padding: 6px 2px 2px;
+}
+
+.card-title {
+  font-family: 'Permanent Marker', cursive;
+  font-size: 0.78rem;
+  color: var(--black);
+  line-height: 1.15;
+  margin-bottom: 4px;
+}
+
+.card-year {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--pink);
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1.5px solid var(--black);
+  transform: rotate(-1deg);
+}
+
+/* Genre sticker badge */
+.card-genre-tag {
+  position: absolute;
+  top: 10px;
+  right: 2px;
+  font-family: 'Permanent Marker', cursive;
+  font-size: 0.55rem;
+  color: var(--black);
+  background: var(--yellow);
+  padding: 2px 7px;
+  border: 2px solid var(--black);
+  transform: rotate(5deg);
+  z-index: 5;
+  box-shadow: 1px 1px 0 var(--black);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===== NO RESULTS ===== */
+.no-results {
+  display: none;
+  text-align: center;
+  padding: 60px 20px;
+  font-family: 'Permanent Marker', cursive;
+  font-size: 1.5rem;
+  color: var(--pink);
+}
+
+.no-results.visible { display: block; }
+
+/* ===== DECORATIVE ELEMENTS ===== */
+.deco-star {
+  position: fixed;
+  font-size: 3rem;
+  color: var(--yellow);
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+  text-shadow: 2px 2px 0 var(--black);
+  font-family: 'Permanent Marker', cursive;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .site-header { padding: 8px 12px; }
+  .site-title { font-size: 1.3rem; }
+  .site-title span { font-size: 0.55em; }
+  .search-wrap { flex: 1 1 100%; order: 3; }
+  .genre-bar { top: 68px; padding: 8px 12px; gap: 6px; }
+  .genre-btn { font-size: 0.75rem; padding: 5px 12px; }
+  .genre-header { font-size: 1.3rem; }
+  .genre-row { padding: 0 12px; margin-bottom: 28px; }
+  .scroll-row { gap: 14px; }
+  .movie-card { flex: 0 0 120px; }
+  .card-title { font-size: 0.68rem; }
+  .card-year { font-size: 0.6rem; }
+  .card-genre-tag { font-size: 0.48rem; }
+  .poster-placeholder .poster-year { font-size: 1.5rem; }
+}
+
+@media (max-width: 480px) {
+  .site-title { font-size: 1.1rem; }
+  .genre-bar { top: 60px; }
+  .movie-card { flex: 0 0 110px; }
+}
+
+/* ===== FOOTER ===== */
+.site-footer {
+  text-align: center;
+  padding: 30px 20px;
+  font-family: 'Permanent Marker', cursive;
+  font-size: 0.9rem;
+  color: var(--pink);
+  border-top: 3px dashed var(--pink);
+  margin: 0 20px;
+}
+
+.site-footer span {
+  color: var(--orange);
+}
+</style>
+</head>
+<body>
+
+<!-- Decorative background elements -->
+<div class="deco-star" style="top:15%;left:3%;transform:rotate(-20deg);">★</div>
+<div class="deco-star" style="top:40%;right:2%;transform:rotate(15deg);color:#e8527a;">✦</div>
+<div class="deco-star" style="top:65%;left:5%;transform:rotate(10deg);">☆</div>
+<div class="deco-star" style="bottom:10%;right:4%;transform:rotate(-10deg);color:#ff6600;">★</div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="site-title">Amy's 80s Movie Vault<span>a punk zine ✂ 1984</span></div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" class="search-bar" id="searchBar" placeholder="search the vault..." autocomplete="off">
+  </div>
+</header>
+
+<!-- GENRE FILTER BAR -->
+<nav class="genre-bar" id="genreBar">
+  <button class="genre-btn active" data-genre="all">All</button>
+  <button class="genre-btn" data-genre="action">Action</button>
+  <button class="genre-btn" data-genre="comedy">Comedy</button>
+  <button class="genre-btn" data-genre="drama">Drama</button>
+  <button class="genre-btn" data-genre="horror">Horror</button>
+  <button class="genre-btn" data-genre="teen">Teen</button>
+  <button class="genre-btn" data-genre="sci-fi">Sci-Fi</button>
+  <button class="genre-btn" data-genre="romance">Romance</button>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main-content" id="mainContent"></main>
+
+<div class="no-results" id="noResults">No movies found... try another search! ✖</div>
+
+<footer class="site-footer">
+  Made with scissors, glue & <span>♥</span> — Amy's 80s Movie Vault © 1984–forever
+</footer>
+
+<script>
+// ===== MOVIE DATA =====
+const movieData = {
+  "Action": {
+    gradient: "linear-gradient(135deg, #d4380d, #ff7a45)",
+    movies: [
+      { title: "Raiders of the Lost Ark", year: 1981 },
+      { title: "Die Hard", year: 1988 },
+      { title: "The Terminator", year: 1984 },
+      { title: "RoboCop", year: 1987 },
+      { title: "Beverly Hills Cop", year: 1984 },
+      { title: "Top Gun", year: 1986 },
+      { title: "Lethal Weapon", year: 1987 },
+      { title: "Aliens", year: 1986 },
+      { title: "First Blood", year: 1982 },
+      { title: "Predator", year: 1987 }
+    ]
+  },
+  "Comedy": {
+    gradient: "linear-gradient(135deg, #faad14, #ffc53d)",
+    movies: [
+      { title: "Ghostbusters", year: 1984 },
+      { title: "Ferris Bueller's Day Off", year: 1986 },
+      { title: "Tootsie", year: 1982 },
+      { title: "Coming to America", year: 1988 },
+      { title: "Airplane!", year: 1980 },
+      { title: "Beetlejuice", year: 1988 },
+      { title: "Trading Places", year: 1983 },
+      { title: "National Lampoon's Vacation", year: 1983 },
+      { title: "Spaceballs", year: 1987 },
+      { title: "9 to 5", year: 1980 }
+    ]
+  },
+  "Drama": {
+    gradient: "linear-gradient(135deg, #1890ff, #69c0ff)",
+    movies: [
+      { title: "Stand By Me", year: 1986 },
+      { title: "Scarface", year: 1983 },
+      { title: "Rain Man", year: 1988 },
+      { title: "The Color Purple", year: 1985 },
+      { title: "Platoon", year: 1986 },
+      { title: "Full Metal Jacket", year: 1987 },
+      { title: "Ordinary People", year: 1980 },
+      { title: "Driving Miss Daisy", year: 1989 },
+      { title: "Blue Velvet", year: 1986 },
+      { title: "Do the Right Thing", year: 1989 }
+    ]
+  },
+  "Horror": {
+    gradient: "linear-gradient(135deg, #722ed1, #b37feb)",
+    movies: [
+      { title: "The Shining", year: 1980 },
+      { title: "A Nightmare on Elm Street", year: 1984 },
+      { title: "The Thing", year: 1982 },
+      { title: "Poltergeist", year: 1982 },
+      { title: "Gremlins", year: 1984 },
+      { title: "The Fly", year: 1986 },
+      { title: "Friday the 13th", year: 1980 },
+      { title: "Halloween II", year: 1981 },
+      { title: "Christine", year: 1983 },
+      { title: "Hellraiser", year: 1987 }
+    ]
+  },
+  "Teen": {
+    gradient: "linear-gradient(135deg, #e8527a, #ff85a2)",
+    movies: [
+      { title: "The Breakfast Club", year: 1985 },
+      { title: "Sixteen Candles", year: 1984 },
+      { title: "Pretty in Pink", year: 1986 },
+      { title: "Fast Times at Ridgemont High", year: 1982 },
+      { title: "Heathers", year: 1988 },
+      { title: "Say Anything", year: 1989 },
+      { title: "Valley Girl", year: 1983 },
+      { title: "Some Kind of Wonderful", year: 1987 },
+      { title: "Weird Science", year: 1985 }
+    ]
+  },
+  "Sci-Fi": {
+    gradient: "linear-gradient(135deg, #13c2c2, #5cdbd3)",
+    movies: [
+      { title: "Back to the Future", year: 1985 },
+      { title: "E.T.", year: 1982 },
+      { title: "Blade Runner", year: 1982 },
+      { title: "Tron", year: 1982 },
+      { title: "WarGames", year: 1983 },
+      { title: "The Last Starfighter", year: 1984 },
+      { title: "Cocoon", year: 1985 },
+      { title: "Short Circuit", year: 1986 },
+      { title: "They Live", year: 1988 }
+    ]
+  },
+  "Romance": {
+    gradient: "linear-gradient(135deg, #eb2f96, #ff85c0)",
+    movies: [
+      { title: "Dirty Dancing", year: 1987 },
+      { title: "Flashdance", year: 1983 },
+      { title: "An Officer and a Gentleman", year: 1982 },
+      { title: "When Harry Met Sally", year: 1989 },
+      { title: "Moonstruck", year: 1987 },
+      { title: "The Princess Bride", year: 1987 }
+    ]
+  }
+};
+
+// ===== BUILD DOM =====
+const main = document.getElementById('mainContent');
+
+function randomRotation() {
+  return (Math.random() * 4 - 2).toFixed(2);
+}
+
+Object.entries(movieData).forEach(([genre, data]) => {
+  const row = document.createElement('div');
+  row.className = 'genre-row';
+  row.dataset.genre = genre.toLowerCase();
+
+  // Genre header
+  const header = document.createElement('h2');
+  header.className = 'genre-header';
+  header.textContent = genre;
+  row.appendChild(header);
+
+  // Scroll container
+  const scrollRow = document.createElement('div');
+  scrollRow.className = 'scroll-row';
+
+  data.movies.forEach(movie => {
+    const card = document.createElement('div');
+    card.className = 'movie-card';
+    card.dataset.title = movie.title.toLowerCase();
+    card.dataset.year = movie.year;
+    card.dataset.genre = genre.toLowerCase();
+    card.style.transform = `rotate(${randomRotation()}deg)`;
+
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="card-genre-tag">${genre}</div>
+        <div class="poster-placeholder" style="background:${data.gradient};">
+          <span class="poster-year">${movie.year}</span>
+        </div>
+        <div class="card-info">
+          <div class="card-title">${movie.title}</div>
+          <span class="card-year">${movie.year}</span>
+        </div>
+      </div>
+    `;
+
+    scrollRow.appendChild(card);
+  });
+
+  row.appendChild(scrollRow);
+  main.appendChild(row);
+});
+
+// ===== DRAG-TO-SCROLL =====
+document.querySelectorAll('.scroll-row').forEach(row => {
+  let isDown = false, startX, scrollLeft;
+
+  row.addEventListener('mousedown', e => {
+    isDown = true;
+    row.classList.add('dragging');
+    startX = e.pageX - row.offsetLeft;
+    scrollLeft = row.scrollLeft;
+  });
+
+  row.addEventListener('mouseleave', () => {
+    isDown = false;
+    row.classList.remove('dragging');
+  });
+
+  row.addEventListener('mouseup', () => {
+    isDown = false;
+    row.classList.remove('dragging');
+  });
+
+  row.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - row.offsetLeft;
+    row.scrollLeft = scrollLeft - (x - startX) * 1.5;
+  });
+
+  // Touch support
+  let touchStartX, touchScrollLeft;
+
+  row.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].pageX - row.offsetLeft;
+    touchScrollLeft = row.scrollLeft;
+  }, { passive: true });
+
+  row.addEventListener('touchmove', e => {
+    const x = e.touches[0].pageX - row.offsetLeft;
+    row.scrollLeft = touchScrollLeft - (x - touchStartX);
+  }, { passive: true });
+});
+
+// ===== GENRE FILTER =====
+const genreBtns = document.querySelectorAll('.genre-btn');
+const genreRows = document.querySelectorAll('.genre-row');
+let activeGenre = 'all';
+
+genreBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    genreBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeGenre = btn.dataset.genre;
+    applyFilters();
+  });
+});
+
+// ===== SEARCH =====
+const searchBar = document.getElementById('searchBar');
+const noResults = document.getElementById('noResults');
+
+searchBar.addEventListener('input', () => {
+  applyFilters();
+});
+
+function applyFilters() {
+  const query = searchBar.value.toLowerCase().trim();
+  let totalVisible = 0;
+
+  genreRows.forEach(row => {
+    const genre = row.dataset.genre;
+
+    // Genre filter
+    if (activeGenre !== 'all' && genre !== activeGenre) {
+      row.classList.add('hidden');
+      return;
+    }
+
+    row.classList.remove('hidden');
+    const cards = row.querySelectorAll('.movie-card');
+    let rowVisible = 0;
+
+    cards.forEach(card => {
+      const title = card.dataset.title;
+      const year = card.dataset.year;
+      const matches = !query || title.includes(query) || year.includes(query);
+      card.classList.toggle('hidden', !matches);
+      if (matches) rowVisible++;
+    });
+
+    if (rowVisible === 0) {
+      row.classList.add('hidden');
+    }
+    totalVisible += rowVisible;
+  });
+
+  noResults.classList.toggle('visible', totalVisible === 0);
+}
+</script>
+</body>
+</html>

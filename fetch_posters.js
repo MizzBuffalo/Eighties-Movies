@@ -12,44 +12,69 @@
 const fs = require('fs');
 const https = require('https');
 
-const API_KEY = process.env.TMDB_API_KEY;
+const TOKEN = process.env.TMDB_TOKEN || process.env.TMDB_API_KEY;
 
-if (!API_KEY) {
-  console.error('ERROR: Set TMDB_API_KEY environment variable first.');
-  console.error('  Get a free key at: https://www.themoviedb.org/settings/api');
-  console.error('  Then run: TMDB_API_KEY=your_key node fetch_posters.js');
+if (!TOKEN) {
+  console.error('ERROR: Set TMDB_TOKEN environment variable first.');
+  console.error('  Get your Read Access Token at: https://www.themoviedb.org/settings/api');
+  console.error('  Then run: TMDB_TOKEN=your_token node fetch_posters.js');
   process.exit(1);
 }
 
-function searchMovie(title, year) {
+function httpGet(url) {
+  const parsed = new URL(url);
+  const options = {
+    hostname: parsed.hostname,
+    path: parsed.pathname + parsed.search,
+    headers: {
+      'Authorization': `Bearer ${TOKEN}`,
+      'accept': 'application/json'
+    }
+  };
   return new Promise((resolve, reject) => {
-    const query = encodeURIComponent(title);
-    const url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}&year=${year}`;
-
-    https.get(url, (res) => {
+    https.get(options, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
-        try {
-          const json = JSON.parse(data);
-          if (json.results && json.results.length > 0) {
-            const movie = json.results[0];
-            resolve({
-              tmdb_id: movie.id,
-              poster_path: movie.poster_path,
-              overview: movie.overview,
-              vote_average: movie.vote_average
-            });
-          } else {
-            resolve({ tmdb_id: null, poster_path: null, overview: null, vote_average: null });
-          }
-        } catch (e) {
-          reject(e);
-        }
+        try { resolve(JSON.parse(data)); }
+        catch (e) { reject(e); }
       });
       res.on('error', reject);
     }).on('error', reject);
   });
+}
+
+async function searchMovie(title, year) {
+  const query = encodeURIComponent(title);
+  const url = `https://api.themoviedb.org/3/search/movie?query=${query}&year=${year}`;
+  const json = await httpGet(url);
+
+  if (json.results && json.results.length > 0) {
+    const movie = json.results[0];
+    return {
+      tmdb_id: movie.id,
+      poster_path: movie.poster_path,
+      overview: movie.overview,
+      vote_average: movie.vote_average
+    };
+  }
+  return { tmdb_id: null, poster_path: null, overview: null, vote_average: null };
+}
+
+async function fetchCredits(tmdbId) {
+  const url = `https://api.themoviedb.org/3/movie/${tmdbId}/credits`;
+  const json = await httpGet(url);
+
+  const director = (json.crew || []).find(c => c.job === 'Director');
+  const cast = (json.cast || []).slice(0, 5).map(c => ({
+    name: c.name,
+    character: c.character
+  }));
+
+  return {
+    director: director ? director.name : null,
+    cast
+  };
 }
 
 function sleep(ms) {
@@ -71,6 +96,13 @@ async function main() {
     try {
       const tmdb = await searchMovie(movie.title, movie.year);
 
+      // Fetch credits if we got a TMDB ID
+      let credits = { director: null, cast: [] };
+      if (tmdb.tmdb_id) {
+        await sleep(200);
+        credits = await fetchCredits(tmdb.tmdb_id);
+      }
+
       const enriched = {
         ...movie,
         tmdb_id: tmdb.tmdb_id,
@@ -82,7 +114,9 @@ async function main() {
           ? `https://image.tmdb.org/t/p/w500${tmdb.poster_path}`
           : null,
         overview: tmdb.overview,
-        vote_average: tmdb.vote_average
+        vote_average: tmdb.vote_average,
+        director: credits.director,
+        cast: credits.cast
       };
 
       results.push(enriched);

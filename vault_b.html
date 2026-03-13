@@ -1125,7 +1125,7 @@ function buildGrid() {
 
     let posterHTML = '<div class="poster-bg ' + gradClass + '">' + icon + '</div>';
     if (posterUrl) {
-      posterHTML += '<img class="poster-img" src="' + posterUrl + '" alt="' + movie.title.replace(/"/g, '&quot;') + '" loading="lazy" onerror="this.remove()">';
+      posterHTML += '<img class="poster-img" src="' + posterUrl + '" alt="' + movie.title.replace(/"/g, '&quot;') + '" loading="lazy" onerror="if(!this.dataset.retried){this.dataset.retried=1;this.src=this.src+\'?t=\'+Date.now()}else{this.remove()}">';
     }
 
     card.innerHTML =
@@ -1369,7 +1369,14 @@ function updateCardPoster(idx) {
   img.src = movie.poster_url;
   img.alt = movie.title;
   img.loading = 'lazy';
-  img.onerror = function() { this.remove(); };
+  img.onerror = function() {
+    if (!this.dataset.retried) {
+      this.dataset.retried = '1';
+      this.src = this.src + '?t=' + Date.now();
+    } else {
+      this.remove();
+    }
+  };
   posterDiv.appendChild(img);
 
   // Add rating badge if missing

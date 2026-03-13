@@ -12,18 +12,27 @@
 const fs = require('fs');
 const https = require('https');
 
-const API_KEY = process.env.TMDB_API_KEY;
+const TOKEN = process.env.TMDB_TOKEN || process.env.TMDB_API_KEY;
 
-if (!API_KEY) {
-  console.error('ERROR: Set TMDB_API_KEY environment variable first.');
-  console.error('  Get a free key at: https://www.themoviedb.org/settings/api');
-  console.error('  Then run: TMDB_API_KEY=your_key node fetch_posters.js');
+if (!TOKEN) {
+  console.error('ERROR: Set TMDB_TOKEN environment variable first.');
+  console.error('  Get your Read Access Token at: https://www.themoviedb.org/settings/api');
+  console.error('  Then run: TMDB_TOKEN=your_token node fetch_posters.js');
   process.exit(1);
 }
 
 function httpGet(url) {
+  const parsed = new URL(url);
+  const options = {
+    hostname: parsed.hostname,
+    path: parsed.pathname + parsed.search,
+    headers: {
+      'Authorization': `Bearer ${TOKEN}`,
+      'accept': 'application/json'
+    }
+  };
   return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
+    https.get(options, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
@@ -37,7 +46,7 @@ function httpGet(url) {
 
 async function searchMovie(title, year) {
   const query = encodeURIComponent(title);
-  const url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}&year=${year}`;
+  const url = `https://api.themoviedb.org/3/search/movie?query=${query}&year=${year}`;
   const json = await httpGet(url);
 
   if (json.results && json.results.length > 0) {
@@ -53,7 +62,7 @@ async function searchMovie(title, year) {
 }
 
 async function fetchCredits(tmdbId) {
-  const url = `https://api.themoviedb.org/3/movie/${tmdbId}/credits?api_key=${API_KEY}`;
+  const url = `https://api.themoviedb.org/3/movie/${tmdbId}/credits`;
   const json = await httpGet(url);
 
   const director = (json.crew || []).find(c => c.job === 'Director');

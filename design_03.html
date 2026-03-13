@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amy's 80s Movie Vault — Sunset Strip</title>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --pink: #e8527a;
+  --coral: #ff6b6b;
+  --amber: #f0a500;
+  --purple: #9b6b9e;
+  --peach: #fde8d0;
+  --lavender: #e8d5f0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(180deg, var(--peach) 0%, #fce4c8 25%, #f5d8d8 50%, #eddce8 75%, var(--lavender) 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: #3d2b3d;
+  overflow-x: hidden;
+}
+
+/* Sticky Header */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: linear-gradient(135deg, rgba(253,232,208,0.92) 0%, rgba(232,213,240,0.92) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 2px solid rgba(232,82,122,0.2);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 20px rgba(155,107,158,0.15);
+}
+
+.site-title {
+  font-family: 'Righteous', cursive;
+  font-size: 1.6rem;
+  background: linear-gradient(135deg, var(--pink), var(--coral), var(--amber));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+  text-shadow: none;
+  flex-shrink: 0;
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 360px;
+  min-width: 180px;
+}
+
+.search-wrap input {
+  width: 100%;
+  padding: 10px 16px 10px 40px;
+  border: 2px solid rgba(232,82,122,0.25);
+  border-radius: 50px;
+  background: rgba(255,255,255,0.7);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  color: #3d2b3d;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.search-wrap input:focus {
+  border-color: var(--pink);
+  box-shadow: 0 0 0 3px rgba(232,82,122,0.15);
+}
+
+.search-wrap input::placeholder { color: #b89db8; }
+
+.search-wrap .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--pink);
+  pointer-events: none;
+}
+
+/* Genre Filter Bar */
+.filter-bar {
+  width: 100%;
+  padding: 10px 24px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+
+.filter-btn {
+  flex-shrink: 0;
+  padding: 7px 20px;
+  border: 2px solid transparent;
+  border-radius: 50px;
+  background: rgba(255,255,255,0.5);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #6b4a6b;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  letter-spacing: 0.3px;
+}
+
+.filter-btn::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50px;
+  background: linear-gradient(135deg, var(--pink), var(--coral), var(--amber));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.filter-btn:hover {
+  border-color: rgba(232,82,122,0.4);
+  background: rgba(255,255,255,0.8);
+  color: var(--pink);
+}
+
+.filter-btn.active {
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 3px 12px rgba(232,82,122,0.35);
+}
+
+/* Main Content */
+.main-content {
+  padding: 8px 0 40px;
+}
+
+/* Genre Row */
+.genre-section {
+  margin-bottom: 28px;
+  transition: opacity 0.3s, max-height 0.4s;
+}
+
+.genre-section.hidden {
+  display: none;
+}
+
+.genre-header {
+  font-family: 'Righteous', cursive;
+  font-size: 1.35rem;
+  padding: 8px 28px 6px;
+  background: linear-gradient(135deg, var(--coral), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.5px;
+}
+
+.movie-row-wrapper {
+  position: relative;
+}
+
+.movie-row {
+  display: flex;
+  gap: 16px;
+  padding: 12px 28px 16px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.movie-row::-webkit-scrollbar { display: none; }
+.movie-row.dragging { cursor: grabbing; scroll-behavior: auto; }
+
+/* Movie Card */
+.movie-card {
+  flex-shrink: 0;
+  width: 150px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.movie-card.card-hidden {
+  display: none;
+}
+
+.movie-card:hover {
+  transform: translateY(-6px) scale(1.04);
+}
+
+.poster {
+  width: 100%;
+  aspect-ratio: 3 / 4.5;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(155,107,158,0.2), 0 1px 4px rgba(0,0,0,0.06);
+  transition: box-shadow 0.3s;
+}
+
+.movie-card:hover .poster {
+  box-shadow: 0 8px 28px rgba(232,82,122,0.3), 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.poster-gradient {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 10px 6px;
+}
+
+.poster-year {
+  font-family: 'Righteous', cursive;
+  font-size: 1.8rem;
+  color: rgba(255,255,255,0.25);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  letter-spacing: 2px;
+}
+
+.movie-title {
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #3d2b3d;
+  margin-top: 8px;
+  line-height: 1.25;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.movie-year {
+  font-size: 0.72rem;
+  color: var(--purple);
+  text-align: center;
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+/* Empty state */
+.no-results {
+  text-align: center;
+  padding: 60px 24px;
+  font-family: 'Righteous', cursive;
+  font-size: 1.3rem;
+  color: var(--purple);
+  display: none;
+}
+
+.no-results.show { display: block; }
+
+/* Fade edges on rows */
+.movie-row-wrapper::before,
+.movie-row-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  z-index: 2;
+  pointer-events: none;
+}
+.movie-row-wrapper::before {
+  left: 0;
+  background: linear-gradient(to right, var(--peach), transparent);
+}
+.movie-row-wrapper::after {
+  right: 0;
+  background: linear-gradient(to left, var(--lavender), transparent);
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .site-header {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  .site-title { font-size: 1.2rem; }
+  .search-wrap { max-width: none; min-width: 140px; }
+  .search-wrap input { padding: 8px 12px 8px 36px; font-size: 0.88rem; }
+  .filter-bar { padding: 8px 14px; gap: 6px; }
+  .filter-btn { padding: 6px 14px; font-size: 0.78rem; }
+  .genre-header { font-size: 1.1rem; padding: 6px 16px 4px; }
+  .movie-row { gap: 12px; padding: 10px 16px 14px; }
+  .movie-card { width: 120px; }
+  .movie-title { font-size: 0.72rem; }
+  .movie-year { font-size: 0.66rem; }
+  .poster-year { font-size: 1.4rem; }
+  .movie-row-wrapper::before,
+  .movie-row-wrapper::after { width: 16px; }
+}
+
+/* Tiny screens */
+@media (max-width: 380px) {
+  .movie-card { width: 105px; }
+  .site-title { font-size: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-title">Amy's 80s Movie Vault</div>
+  <div class="search-wrap">
+    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="Search movies..." autocomplete="off">
+  </div>
+</header>
+
+<div class="filter-bar" id="filterBar"></div>
+
+<main class="main-content" id="mainContent"></main>
+<div class="no-results" id="noResults">No movies found on the Strip tonight...</div>
+
+<script>
+const GENRES = {
+  "Action": {
+    gradient: "linear-gradient(135deg, #d4380d, #ff7a45)",
+    movies: [
+      ["Raiders of the Lost Ark", 1981], ["Die Hard", 1988], ["The Terminator", 1984],
+      ["RoboCop", 1987], ["Beverly Hills Cop", 1984], ["Top Gun", 1986],
+      ["Lethal Weapon", 1987], ["Aliens", 1986], ["First Blood", 1982], ["Predator", 1987]
+    ]
+  },
+  "Comedy": {
+    gradient: "linear-gradient(135deg, #faad14, #ffc53d)",
+    movies: [
+      ["Ghostbusters", 1984], ["Ferris Bueller's Day Off", 1986], ["Tootsie", 1982],
+      ["Coming to America", 1988], ["Airplane!", 1980], ["Beetlejuice", 1988],
+      ["Trading Places", 1983], ["National Lampoon's Vacation", 1983], ["Spaceballs", 1987], ["9 to 5", 1980]
+    ]
+  },
+  "Drama": {
+    gradient: "linear-gradient(135deg, #1890ff, #69c0ff)",
+    movies: [
+      ["Stand By Me", 1986], ["Scarface", 1983], ["Rain Man", 1988],
+      ["The Color Purple", 1985], ["Platoon", 1986], ["Full Metal Jacket", 1987],
+      ["Ordinary People", 1980], ["Driving Miss Daisy", 1989], ["Blue Velvet", 1986], ["Do the Right Thing", 1989]
+    ]
+  },
+  "Horror": {
+    gradient: "linear-gradient(135deg, #722ed1, #b37feb)",
+    movies: [
+      ["The Shining", 1980], ["A Nightmare on Elm Street", 1984], ["The Thing", 1982],
+      ["Poltergeist", 1982], ["Gremlins", 1984], ["The Fly", 1986],
+      ["Friday the 13th", 1980], ["Halloween II", 1981], ["Christine", 1983], ["Hellraiser", 1987]
+    ]
+  },
+  "Teen": {
+    gradient: "linear-gradient(135deg, #e8527a, #ff85a2)",
+    movies: [
+      ["The Breakfast Club", 1985], ["Sixteen Candles", 1984], ["Pretty in Pink", 1986],
+      ["Fast Times at Ridgemont High", 1982], ["Heathers", 1988], ["Say Anything", 1989],
+      ["Valley Girl", 1983], ["Some Kind of Wonderful", 1987], ["Weird Science", 1985]
+    ]
+  },
+  "Sci-Fi": {
+    gradient: "linear-gradient(135deg, #13c2c2, #5cdbd3)",
+    movies: [
+      ["Back to the Future", 1985], ["E.T.", 1982], ["Blade Runner", 1982],
+      ["Tron", 1982], ["WarGames", 1983], ["The Last Starfighter", 1984],
+      ["Cocoon", 1985], ["Short Circuit", 1986], ["They Live", 1988]
+    ]
+  },
+  "Romance": {
+    gradient: "linear-gradient(135deg, #eb2f96, #ff85c0)",
+    movies: [
+      ["Dirty Dancing", 1987], ["Flashdance", 1983], ["An Officer and a Gentleman", 1982],
+      ["When Harry Met Sally", 1989], ["Moonstruck", 1987], ["The Princess Bride", 1987]
+    ]
+  }
+};
+
+const genreNames = Object.keys(GENRES);
+
+// Build filter buttons
+const filterBar = document.getElementById('filterBar');
+const allBtn = document.createElement('button');
+allBtn.className = 'filter-btn active';
+allBtn.textContent = 'All';
+allBtn.dataset.genre = 'all';
+filterBar.appendChild(allBtn);
+
+genreNames.forEach(g => {
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn';
+  btn.textContent = g;
+  btn.dataset.genre = g;
+  filterBar.appendChild(btn);
+});
+
+// Build genre rows
+const mainContent = document.getElementById('mainContent');
+
+genreNames.forEach(genre => {
+  const section = document.createElement('section');
+  section.className = 'genre-section';
+  section.dataset.genre = genre;
+
+  const header = document.createElement('h2');
+  header.className = 'genre-header';
+  header.textContent = genre;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'movie-row-wrapper';
+
+  const row = document.createElement('div');
+  row.className = 'movie-row';
+
+  GENRES[genre].movies.forEach(([title, year]) => {
+    const card = document.createElement('div');
+    card.className = 'movie-card';
+    card.dataset.title = title.toLowerCase();
+    card.dataset.year = year;
+
+    card.innerHTML = `
+      <div class="poster">
+        <div class="poster-gradient" style="background:${GENRES[genre].gradient}">
+          <span class="poster-year">${year}</span>
+        </div>
+      </div>
+      <div class="movie-title">${title}</div>
+      <div class="movie-year">${year}</div>
+    `;
+    row.appendChild(card);
+  });
+
+  wrapper.appendChild(row);
+  section.appendChild(header);
+  section.appendChild(wrapper);
+  mainContent.appendChild(section);
+});
+
+// Genre filter
+let activeGenre = 'all';
+
+filterBar.addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeGenre = btn.dataset.genre;
+  applyFilters();
+});
+
+// Search
+const searchInput = document.getElementById('searchInput');
+searchInput.addEventListener('input', () => applyFilters());
+
+function applyFilters() {
+  const query = searchInput.value.trim().toLowerCase();
+  const sections = document.querySelectorAll('.genre-section');
+  let anyVisible = false;
+
+  sections.forEach(sec => {
+    const genre = sec.dataset.genre;
+    const genreMatch = activeGenre === 'all' || activeGenre === genre;
+
+    if (!genreMatch) {
+      sec.classList.add('hidden');
+      return;
+    }
+
+    sec.classList.remove('hidden');
+    const cards = sec.querySelectorAll('.movie-card');
+    let rowHasVisible = false;
+
+    cards.forEach(card => {
+      const title = card.dataset.title;
+      const year = card.dataset.year;
+      const match = !query || title.includes(query) || year.includes(query);
+      card.classList.toggle('card-hidden', !match);
+      if (match) rowHasVisible = true;
+    });
+
+    sec.classList.toggle('hidden', !rowHasVisible);
+    if (rowHasVisible) anyVisible = true;
+  });
+
+  document.getElementById('noResults').classList.toggle('show', !anyVisible);
+}
+
+// Drag-to-scroll on every row
+document.querySelectorAll('.movie-row').forEach(row => {
+  let isDown = false, startX, scrollLeft;
+
+  row.addEventListener('mousedown', e => {
+    isDown = true;
+    row.classList.add('dragging');
+    startX = e.pageX - row.offsetLeft;
+    scrollLeft = row.scrollLeft;
+  });
+
+  row.addEventListener('mouseleave', () => { isDown = false; row.classList.remove('dragging'); });
+  row.addEventListener('mouseup', () => { isDown = false; row.classList.remove('dragging'); });
+
+  row.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - row.offsetLeft;
+    row.scrollLeft = scrollLeft - (x - startX) * 1.2;
+  });
+
+  // Touch
+  let touchStartX, touchScrollLeft;
+  row.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].pageX;
+    touchScrollLeft = row.scrollLeft;
+  }, { passive: true });
+
+  row.addEventListener('touchmove', e => {
+    const x = e.touches[0].pageX;
+    row.scrollLeft = touchScrollLeft - (x - touchStartX);
+  }, { passive: true });
+});
+</script>
+</body>
+</html>

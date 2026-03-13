@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WOPR MOVIE DATABASE v2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --pink: #e8527a;
+  --green: #33ff33;
+  --amber: #ffaa00;
+  --red: #ff3333;
+  --bg: #000;
+  --card-bg: #111;
+  --white: #fff;
+}
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Fira Code', monospace;
+  text-transform: uppercase;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* CRT Scanline Overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* CRT Vignette */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.6) 100%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* Blinking animation */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes blink-slow {
+  0%, 69% { opacity: 1; }
+  70%, 100% { opacity: 0.3; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor; }
+  50% { text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; }
+}
+
+/* TOP BAR */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  border-bottom: 2px solid var(--green);
+  background: rgba(0, 20, 0, 0.4);
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-indicators {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.status-dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.status-dot.amber { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+.status-dot.red { background: var(--red); box-shadow: 0 0 6px var(--red); animation: blink-slow 1.5s infinite; }
+
+.top-bar-center {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.top-bar-title {
+  color: var(--green);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-shadow: 0 0 8px var(--green);
+  white-space: nowrap;
+}
+
+.online-badge {
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 700;
+  animation: blink 1.2s infinite;
+}
+
+.search-area {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.search-area label {
+  color: var(--amber);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.search-area input {
+  background: transparent;
+  border: 1px solid var(--amber);
+  color: var(--white);
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  padding: 4px 10px;
+  text-transform: uppercase;
+  width: 180px;
+  outline: none;
+}
+
+.search-area input:focus {
+  border-color: var(--pink);
+  box-shadow: 0 0 6px var(--pink);
+}
+
+.search-area input::placeholder {
+  color: rgba(255, 170, 0, 0.4);
+}
+
+/* QUOTE BAR */
+.quote-bar {
+  text-align: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(51, 255, 51, 0.3);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.quote-bar span {
+  color: var(--pink);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  animation: glow-pulse 2s ease-in-out infinite;
+  text-shadow: 0 0 10px var(--pink), 0 0 20px var(--pink);
+}
+
+/* MAIN LAYOUT */
+.main-layout {
+  display: flex;
+  min-height: calc(100vh - 120px);
+}
+
+/* LEFT COLUMN */
+.left-col {
+  width: 20%;
+  min-width: 220px;
+  border-right: 1px solid rgba(51, 255, 51, 0.3);
+  padding: 16px 14px;
+  flex-shrink: 0;
+}
+
+.panel-header {
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(51, 255, 51, 0.3);
+  margin-bottom: 14px;
+  text-shadow: 0 0 6px var(--green);
+}
+
+.genre-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  transition: all 0.15s;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.genre-bar-item:hover {
+  background: rgba(232, 82, 122, 0.1);
+  border-color: rgba(232, 82, 122, 0.3);
+}
+
+.genre-bar-item.active {
+  background: rgba(232, 82, 122, 0.15);
+  border-color: var(--pink);
+  box-shadow: 0 0 6px rgba(232, 82, 122, 0.3);
+}
+
+.genre-label {
+  width: 62px;
+  flex-shrink: 0;
+  color: var(--amber);
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.genre-blocks {
+  flex: 1;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.genre-count {
+  width: 22px;
+  text-align: right;
+  flex-shrink: 0;
+  color: var(--white);
+  font-size: 11px;
+}
+
+.genre-bar-item[data-genre="action"] .genre-blocks { color: #d4380d; }
+.genre-bar-item[data-genre="comedy"] .genre-blocks { color: #faad14; }
+.genre-bar-item[data-genre="drama"] .genre-blocks { color: #1890ff; }
+.genre-bar-item[data-genre="horror"] .genre-blocks { color: #722ed1; }
+.genre-bar-item[data-genre="teen"] .genre-blocks { color: var(--pink); }
+.genre-bar-item[data-genre="sci-fi"] .genre-blocks { color: #13c2c2; }
+.genre-bar-item[data-genre="romance"] .genre-blocks { color: #eb2f96; }
+
+/* CENTER COLUMN */
+.center-col {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.movie-card {
+  background: var(--card-bg);
+  border: 1px solid rgba(51, 255, 51, 0.3);
+  border-radius: 2px;
+  overflow: hidden;
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.movie-card:hover {
+  border-color: var(--pink);
+  box-shadow: 0 0 12px rgba(232, 82, 122, 0.4), 0 0 24px rgba(232, 82, 122, 0.15);
+}
+
+.movie-poster {
+  width: 100%;
+  aspect-ratio: 3 / 4.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.movie-poster::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.08) 3px,
+    rgba(0,0,0,0.08) 6px
+  );
+}
+
+.poster-text {
+  color: rgba(255,255,255,0.15);
+  font-size: 10px;
+  letter-spacing: 3px;
+  z-index: 1;
+}
+
+.movie-info {
+  padding: 10px 12px;
+  border-top: 1px solid rgba(51, 255, 51, 0.2);
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.movie-info .field-label {
+  color: var(--amber);
+}
+
+.movie-info .field-value {
+  color: var(--white);
+}
+
+.movie-info .status-line .field-value {
+  color: var(--red);
+  font-weight: 600;
+}
+
+/* RIGHT COLUMN */
+.right-col {
+  width: 25%;
+  min-width: 240px;
+  border-left: 1px solid rgba(51, 255, 51, 0.3);
+  padding: 16px 14px;
+  flex-shrink: 0;
+}
+
+.mission-item {
+  padding: 10px 8px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(51, 255, 51, 0.2);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mission-item:hover {
+  border-color: var(--green);
+  background: rgba(51, 255, 51, 0.05);
+  box-shadow: 0 0 8px rgba(51, 255, 51, 0.15);
+}
+
+.mission-label {
+  color: var(--amber);
+}
+
+.mission-ready {
+  color: var(--green);
+  font-weight: 700;
+  animation: blink-slow 2s infinite;
+}
+
+.defcon-display {
+  margin-top: 30px;
+  text-align: center;
+  padding: 14px;
+  border: 2px solid var(--green);
+  border-radius: 2px;
+  background: rgba(0, 20, 0, 0.3);
+}
+
+.defcon-label {
+  font-size: 11px;
+  color: var(--amber);
+  margin-bottom: 6px;
+}
+
+.defcon-level {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--green);
+  text-shadow: 0 0 10px var(--green);
+}
+
+.defcon-status {
+  font-size: 11px;
+  color: var(--green);
+  margin-top: 4px;
+}
+
+/* NO RESULTS */
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--amber);
+  font-size: 14px;
+}
+
+.no-results .big-text {
+  font-size: 18px;
+  color: var(--red);
+  margin-bottom: 10px;
+}
+
+/* MOBILE */
+@media (max-width: 900px) {
+  .main-layout {
+    flex-direction: column;
+  }
+
+  .left-col, .right-col {
+    width: 100%;
+    min-width: unset;
+    border-right: none;
+    border-left: none;
+    border-bottom: 1px solid rgba(51, 255, 51, 0.3);
+  }
+
+  .left-col {
+    order: 1;
+  }
+
+  .center-col {
+    order: 2;
+  }
+
+  .right-col {
+    order: 3;
+    border-bottom: none;
+  }
+
+  .genre-bar-item {
+    font-size: 13px;
+  }
+
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .top-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .top-bar-center {
+    justify-content: center;
+  }
+
+  .search-area {
+    justify-content: center;
+  }
+
+  .status-indicators {
+    justify-content: center;
+  }
+
+  .search-area input {
+    width: 140px;
+  }
+}
+
+@media (max-width: 500px) {
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+
+  .quote-bar span {
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+
+  .top-bar-title {
+    font-size: 12px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="status-indicators">
+    <span><span class="status-dot green"></span>SYS</span>
+    <span><span class="status-dot green"></span>NET</span>
+    <span><span class="status-dot amber"></span>SAT</span>
+    <span><span class="status-dot red"></span>ALERT</span>
+  </div>
+  <div class="top-bar-center">
+    <span class="top-bar-title">WOPR MOVIE DATABASE v2.0</span>
+    <span class="online-badge">[ONLINE]</span>
+  </div>
+  <div class="search-area">
+    <label for="search-input">TARGET SEARCH:</label>
+    <input type="text" id="search-input" placeholder="_" autocomplete="off">
+  </div>
+</div>
+
+<!-- QUOTE BAR -->
+<div class="quote-bar">
+  <span>"SHALL WE PLAY A GAME?"</span>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- LEFT COLUMN: THREAT ASSESSMENT -->
+  <div class="left-col">
+    <div class="panel-header">// THREAT ASSESSMENT</div>
+    <div id="genre-chart"></div>
+  </div>
+
+  <!-- CENTER COLUMN: MOVIE GRID -->
+  <div class="center-col">
+    <div class="movie-grid" id="movie-grid"></div>
+  </div>
+
+  <!-- RIGHT COLUMN: OPERATIONS -->
+  <div class="right-col">
+    <div class="panel-header">// OPERATIONS</div>
+    <div class="mission-item" onclick="alert('MISSION 1: QUIZ MODE\\nStatus: Awaiting authorization...')">
+      <span class="mission-label">MISSION 1: QUIZ MODE</span>
+      <span class="mission-ready">[READY]</span>
+    </div>
+    <div class="mission-item" onclick="alert('MISSION 2: TIER RANKING\\nStatus: Awaiting authorization...')">
+      <span class="mission-label">MISSION 2: TIER RANKING</span>
+      <span class="mission-ready">[READY]</span>
+    </div>
+    <div class="mission-item" onclick="alert('MISSION 3: RANDOM TARGET\\nStatus: Acquiring target...')">
+      <span class="mission-label">MISSION 3: RANDOM TARGET</span>
+      <span class="mission-ready">[READY]</span>
+    </div>
+    <div class="mission-item" onclick="alert('MISSION 4: WATCH TRACKER\\nStatus: Awaiting authorization...')">
+      <span class="mission-label">MISSION 4: WATCH TRACKER</span>
+      <span class="mission-ready">[READY]</span>
+    </div>
+
+    <div class="defcon-display">
+      <div class="defcon-label">DEFCON LEVEL</div>
+      <div class="defcon-level">5</div>
+      <div class="defcon-status">(PEACE)</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const movies = [
+  { title: "Raiders of the Lost Ark", year: 1981, genre: "action" },
+  { title: "Die Hard", year: 1988, genre: "action" },
+  { title: "The Terminator", year: 1984, genre: "action" },
+  { title: "RoboCop", year: 1987, genre: "action" },
+  { title: "Beverly Hills Cop", year: 1984, genre: "action" },
+  { title: "Top Gun", year: 1986, genre: "action" },
+  { title: "Lethal Weapon", year: 1987, genre: "action" },
+  { title: "Aliens", year: 1986, genre: "action" },
+  { title: "First Blood", year: 1982, genre: "action" },
+  { title: "Predator", year: 1987, genre: "action" },
+  { title: "Ghostbusters", year: 1984, genre: "comedy" },
+  { title: "Ferris Bueller's Day Off", year: 1986, genre: "comedy" },
+  { title: "Tootsie", year: 1982, genre: "comedy" },
+  { title: "Coming to America", year: 1988, genre: "comedy" },
+  { title: "Airplane!", year: 1980, genre: "comedy" },
+  { title: "Beetlejuice", year: 1988, genre: "comedy" },
+  { title: "Trading Places", year: 1983, genre: "comedy" },
+  { title: "National Lampoon's Vacation", year: 1983, genre: "comedy" },
+  { title: "Spaceballs", year: 1987, genre: "comedy" },
+  { title: "9 to 5", year: 1980, genre: "comedy" },
+  { title: "Stand By Me", year: 1986, genre: "drama" },
+  { title: "Scarface", year: 1983, genre: "drama" },
+  { title: "Rain Man", year: 1988, genre: "drama" },
+  { title: "The Color Purple", year: 1985, genre: "drama" },
+  { title: "Platoon", year: 1986, genre: "drama" },
+  { title: "Full Metal Jacket", year: 1987, genre: "drama" },
+  { title: "Ordinary People", year: 1980, genre: "drama" },
+  { title: "Driving Miss Daisy", year: 1989, genre: "drama" },
+  { title: "Blue Velvet", year: 1986, genre: "drama" },
+  { title: "Do the Right Thing", year: 1989, genre: "drama" },
+  { title: "The Shining", year: 1980, genre: "horror" },
+  { title: "A Nightmare on Elm Street", year: 1984, genre: "horror" },
+  { title: "The Thing", year: 1982, genre: "horror" },
+  { title: "Poltergeist", year: 1982, genre: "horror" },
+  { title: "Gremlins", year: 1984, genre: "horror" },
+  { title: "The Fly", year: 1986, genre: "horror" },
+  { title: "Friday the 13th", year: 1980, genre: "horror" },
+  { title: "Halloween II", year: 1981, genre: "horror" },
+  { title: "Christine", year: 1983, genre: "horror" },
+  { title: "Hellraiser", year: 1987, genre: "horror" },
+  { title: "The Breakfast Club", year: 1985, genre: "teen" },
+  { title: "Sixteen Candles", year: 1984, genre: "teen" },
+  { title: "Pretty in Pink", year: 1986, genre: "teen" },
+  { title: "Fast Times at Ridgemont High", year: 1982, genre: "teen" },
+  { title: "Heathers", year: 1988, genre: "teen" },
+  { title: "Say Anything", year: 1989, genre: "teen" },
+  { title: "Valley Girl", year: 1983, genre: "teen" },
+  { title: "Some Kind of Wonderful", year: 1987, genre: "teen" },
+  { title: "Weird Science", year: 1985, genre: "teen" },
+  { title: "Back to the Future", year: 1985, genre: "sci-fi" },
+  { title: "E.T.", year: 1982, genre: "sci-fi" },
+  { title: "Blade Runner", year: 1982, genre: "sci-fi" },
+  { title: "Tron", year: 1982, genre: "sci-fi" },
+  { title: "WarGames", year: 1983, genre: "sci-fi" },
+  { title: "The Last Starfighter", year: 1984, genre: "sci-fi" },
+  { title: "Cocoon", year: 1985, genre: "sci-fi" },
+  { title: "Short Circuit", year: 1986, genre: "sci-fi" },
+  { title: "They Live", year: 1988, genre: "sci-fi" },
+  { title: "Dirty Dancing", year: 1987, genre: "romance" },
+  { title: "Flashdance", year: 1983, genre: "romance" },
+  { title: "An Officer and a Gentleman", year: 1982, genre: "romance" },
+  { title: "When Harry Met Sally", year: 1989, genre: "romance" },
+  { title: "Moonstruck", year: 1987, genre: "romance" },
+  { title: "The Princess Bride", year: 1987, genre: "romance" }
+];
+
+const gradients = {
+  action: "linear-gradient(135deg, #d4380d, #ff7a45)",
+  comedy: "linear-gradient(135deg, #faad14, #ffc53d)",
+  drama: "linear-gradient(135deg, #1890ff, #69c0ff)",
+  horror: "linear-gradient(135deg, #722ed1, #b37feb)",
+  teen: "linear-gradient(135deg, #e8527a, #ff85a2)",
+  "sci-fi": "linear-gradient(135deg, #13c2c2, #5cdbd3)",
+  romance: "linear-gradient(135deg, #eb2f96, #ff85c0)"
+};
+
+const genreOrder = ["action", "comedy", "drama", "horror", "teen", "sci-fi", "romance"];
+
+let activeGenre = null;
+
+function getGenreCounts() {
+  const counts = {};
+  genreOrder.forEach(g => counts[g] = 0);
+  movies.forEach(m => counts[m.genre]++);
+  return counts;
+}
+
+function buildGenreChart() {
+  const container = document.getElementById('genre-chart');
+  const counts = getGenreCounts();
+  const max = Math.max(...Object.values(counts));
+
+  container.innerHTML = '';
+  genreOrder.forEach(genre => {
+    const count = counts[genre];
+    const barLen = Math.round((count / max) * 10);
+    const blocks = '\u2588'.repeat(barLen);
+
+    const item = document.createElement('div');
+    item.className = 'genre-bar-item' + (activeGenre === genre ? ' active' : '');
+    item.dataset.genre = genre;
+    item.innerHTML = `
+      <span class="genre-label">${genre.toUpperCase()}</span>
+      <span class="genre-blocks">${blocks}</span>
+      <span class="genre-count">${count}</span>
+    `;
+    item.addEventListener('click', () => {
+      activeGenre = activeGenre === genre ? null : genre;
+      buildGenreChart();
+      renderMovies();
+    });
+    container.appendChild(item);
+  });
+}
+
+function renderMovies() {
+  const grid = document.getElementById('movie-grid');
+  const searchTerm = document.getElementById('search-input').value.toLowerCase();
+
+  let filtered = movies;
+  if (activeGenre) {
+    filtered = filtered.filter(m => m.genre === activeGenre);
+  }
+  if (searchTerm) {
+    filtered = filtered.filter(m => m.title.toLowerCase().includes(searchTerm));
+  }
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="no-results">
+        <div class="big-text">// TARGET NOT FOUND</div>
+        <div>No matching entries in database.<br>Adjust search parameters.</div>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(m => `
+    <div class="movie-card">
+      <div class="movie-poster" style="background: ${gradients[m.genre]}">
+        <span class="poster-text">// CLASSIFIED //</span>
+      </div>
+      <div class="movie-info">
+        <div><span class="field-label">DESIGNATION: </span><span class="field-value">${m.title}</span></div>
+        <div><span class="field-label">YEAR: </span><span class="field-value">${m.year}</span></div>
+        <div><span class="field-label">CLASS: </span><span class="field-value">${m.genre.toUpperCase()}</span></div>
+        <div class="status-line"><span class="field-label">STATUS: </span><span class="field-value">CLASSIFIED</span></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('search-input').addEventListener('input', renderMovies);
+
+buildGenreChart();
+renderMovies();
+</script>
+</body>
+</html>

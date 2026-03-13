@@ -637,6 +637,78 @@ const movieData = {
   }
 };
 
+const POSTERS = {
+  "Raiders of the Lost Ark": "/ceG9VzoRAVGwivFU403Wc3AHRys.jpg",
+  "Die Hard": "/yFihWxQcmqcaBR31QM6Y8gT6aYV.jpg",
+  "The Terminator": "/qvktm0BHcnmDpul4Hz01GIazWPr.jpg",
+  "RoboCop": "/hoCbhAOfOFpnF7MCsIv04v1rnkS.jpg",
+  "Beverly Hills Cop": "/eBJEvMR82Lhyri6XKV2B3pRXCAm.jpg",
+  "Top Gun": "/xUuHj3CgmZQ9P2cMaqQs4J0d4Zc.jpg",
+  "Lethal Weapon": "/bFxAftejRNhkMFederCq9QghF8u.jpg",
+  "Aliens": "/r1x5JGpyqZU8PYhbs4UcrO1Xb6x.jpg",
+  "First Blood": "/a9sa6ERZCpplbPEO7OMWE763CLD.jpg",
+  "Predator": "/bFOqHIDN2MnJNQph5SMpWnQyilq.jpg",
+  "Ghostbusters": "/loFCAro1YSAhMJHfmRFCemMNLun.jpg",
+  "Ferris Bueller's Day Off": "/9LddG87JMmHXsRJbpLpwMjcWpW2.jpg",
+  "Tootsie": "/rBaW4mq1E3NqWfVHU9GPn5hOj8I.jpg",
+  "Coming to America": "/djRAvxyvvN4yMFnDEqeKkz7lkOl.jpg",
+  "Airplane!": "/7Q4bPJVkealJWDi4CaF4VlPYS47.jpg",
+  "Beetlejuice": "/nnl6OWkyPpuMm595hmAxNW614NU.jpg",
+  "Trading Places": "/4ACm9hOr7ib3TjBqv5dRkAe0JKb.jpg",
+  "National Lampoon's Vacation": "/q3DvIoSbhwOOd4T7mDYENsaXvYH.jpg",
+  "Spaceballs": "/o624HTt9RMu9YwWHKt7lSm1DVXE.jpg",
+  "9 to 5": "/6xIKMxk2h6vP1WA7bqFqjvEFvqT.jpg",
+  "Stand By Me": "/bXbTlLFj3zHEdcfnlMlNvPbY8za.jpg",
+  "Scarface": "/iQ5ztdjvteGeboXVh1eW3xIF5gO.jpg",
+  "Rain Man": "/jOUPMGemkJBd6sGl0NnjIS3CoWQ.jpg",
+  "The Color Purple": "/sGNlnJEhm5x7BBCsSFxfSpqzTAF.jpg",
+  "Platoon": "/oJDPvJynGqVfxjJMkMjXJIPhSsa.jpg",
+  "Full Metal Jacket": "/kMKyx1k8hWWscYFnPbnxxYAEOoW.jpg",
+  "Ordinary People": "/4eFgqxMbFxV7lSjRNphdCJK8VIt.jpg",
+  "Driving Miss Daisy": "/vYcFBCj1gqTaFAfFdEiRjeMBBjU.jpg",
+  "Blue Velvet": "/p74T3JoHsL1MFMfL5rTgm3OWbeS.jpg",
+  "Do the Right Thing": "/v8GAMPFijQddPWPxECDETRfSqfR.jpg",
+  "The Shining": "/b6ko0IKC8MdYBBPkkA1aBPLe2yz.jpg",
+  "A Nightmare on Elm Street": "/wGTpGGRMZmyFCcrY2mFKBSHoXw1.jpg",
+  "The Thing": "/tzGY49kseSE9QAKk47uuDGwnSCu.jpg",
+  "Poltergeist": "/2DMJV9RhTtaXnEUmjuqmBj1jCD5.jpg",
+  "Gremlins": "/kFNVfJCjs5d4GD5nRt0dxMUcbtC.jpg",
+  "The Fly": "/1MYCbEMbXTNjVbaiGJElCOGLkfR.jpg",
+  "Friday the 13th": "/HzrPn1gEHWixfMOvOehOTlHROo.jpg",
+  "Halloween II": "/wSqAXL1EHVJ3MnDZ7dOucGGMscu.jpg",
+  "Christine": "/c0RuUAvsCW9t8gGVLR4cH3EB9t3.jpg",
+  "Hellraiser": "/tCBFDCeB3wYlfVHvE06tCOFfoJq.jpg",
+  "The Breakfast Club": "/aYPV0pzfoaaCvn9CBfXPqqFMFTi.jpg",
+  "Sixteen Candles": "/aXcidnDDnCmoEnc9MIQ7bNlMd2z.jpg",
+  "Pretty in Pink": "/cMcggIi3JDvnVfK5BoMTj4BpkCA.jpg",
+  "Fast Times at Ridgemont High": "/7jACMfZTM2r0IPo35JxnKbNn7Ix.jpg",
+  "Heathers": "/n28BVBzMkim2dO2bInY7vMi1H7r.jpg",
+  "Say Anything": "/mxVMJPx3rqBkRIBIXI5URqV1wdw.jpg",
+  "Valley Girl": "/cpf1F0r33EX5vRBPDT1bBBgcj4r.jpg",
+  "Some Kind of Wonderful": "/z5WNAhS9DO4BBDNA39MHKGN8hyB.jpg",
+  "Weird Science": "/fNOJwol6l1X82A3OQRT2FfdIPKN.jpg",
+  "Back to the Future": "/fNOH9f1aA7XRTzl1sAOx9iF553Q.jpg",
+  "E.T.": "/an0UbGBgYMjO5CbRKcMV3UAvAcn.jpg",
+  "Blade Runner": "/63N9uy8nd9j7Eog2axPQ8lbr3Wj.jpg",
+  "Tron": "/zwSFEczP4eOSCipmqeHBEBJf7HR.jpg",
+  "WarGames": "/gOINggBk1iFLTZFDifxFGPaqjzd.jpg",
+  "The Last Starfighter": "/an1x4uKGERzVJvZpAo7qMiEMDBX.jpg",
+  "Cocoon": "/sLXYEGxwbPIh2FwBcEGdBqO2hJR.jpg",
+  "Short Circuit": "/kHSHIYe9sYKehTH97WMQlzL7KYm.jpg",
+  "They Live": "/wXlOkp4002hAP7drPaFPmA1kHKH.jpg",
+  "Dirty Dancing": "/ePXzWAn8015YPEk3RkEB3GXlhBx.jpg",
+  "Flashdance": "/hGGRxjRDBhp2yRRAPRAYBo7FMbt.jpg",
+  "An Officer and a Gentleman": "/chQtVijGFPzFMYEnFolk09JbRLU.jpg",
+  "When Harry Met Sally": "/srlSH8mGonEcSvSDlo17RKZNT3Z.jpg",
+  "Moonstruck": "/tmHNSJOGjrJwxiPbZBEVlORjCgx.jpg",
+  "The Princess Bride": "/gpSiauHMK84aTSAlWpPbCKjJBKQ.jpg"
+};
+
+function getPosterUrl(title) {
+  const path = POSTERS[title];
+  return path ? "https://image.tmdb.org/t/p/w300" + path : null;
+}
+
 // Build sections
 const container = document.getElementById('movieSections');
 
@@ -647,9 +719,11 @@ Object.entries(movieData).forEach(([genre, data]) => {
 
   let cardsHTML = '';
   data.movies.forEach(([title, year]) => {
+    const posterUrl = getPosterUrl(title);
     cardsHTML += `
       <div class="movie-card" data-genre="${genre}" data-title="${title.toLowerCase()}">
         <div class="card-poster">
+          ${posterUrl ? `<img class="poster-img" src="${posterUrl}" alt="${title}" onerror="this.remove()">` : ''}
           <div class="poster-bg" style="background: ${data.gradient}">
             <div class="poster-year">${year}</div>
             <div class="poster-icon">${data.icon}</div>

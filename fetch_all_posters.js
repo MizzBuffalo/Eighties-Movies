@@ -3,10 +3,10 @@
  * Fetch ALL missing TMDB poster data and update every vault HTML file.
  *
  * Usage:
- *   TMDB_API_KEY=your_key node fetch_all_posters.js
- *
- * Or use the key already embedded in vault.html (not recommended for heavy use):
  *   node fetch_all_posters.js
+ *
+ * Requires TMDB_API_KEY in a .env file or as an environment variable.
+ * Get a free key at: https://www.themoviedb.org/settings/api
  *
  * What this does:
  *   1. Reads the MOVIES array from vault.html (source of truth)
@@ -20,8 +20,23 @@ const fs = require('fs');
 const https = require('https');
 const path = require('path');
 
+// Auto-load .env if present
+try {
+  const envPath = path.join(__dirname, '.env');
+  if (fs.existsSync(envPath)) {
+    fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
+      const match = line.match(/^\s*([^#=]+?)\s*=\s*(.*?)\s*$/);
+      if (match && !process.env[match[1]]) process.env[match[1]] = match[2];
+    });
+  }
+} catch {}
+
 // ── Config ──
-const API_KEY = process.env.TMDB_API_KEY || 'b5be0091e28a74a864c82ec31da4f981';
+const API_KEY = process.env.TMDB_API_KEY;
+if (!API_KEY) {
+  console.error('ERROR: TMDB_API_KEY not found. Create a .env file with TMDB_API_KEY=your_key');
+  process.exit(1);
+}
 const VAULT_FILES = ['vault.html', 'vault_a.html', 'vault_b.html', 'vault_c.html'];
 const CACHE_FILE = 'poster_cache.json';
 const RATE_LIMIT_MS = 300;   // ms between API calls (TMDB allows 40/sec)

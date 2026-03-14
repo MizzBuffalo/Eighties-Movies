@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amy's 80s Movie Vault — Flamingo Lounge</title>
+<link href="https://fonts.googleapis.com/css2?family=Monoton&family=Audiowide&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #1c0f1e;
+  --bg-light: #271930;
+  --accent: #ff85c0;
+  --pink: #e8527a;
+  --text: #f0d4e8;
+  --text-dim: #a07a94;
+  --card-w: 170px;
+  --card-h: 250px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Audiowide', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Header ── */
+.site-header {
+  text-align: center;
+  padding: 48px 20px 12px;
+}
+.site-title {
+  font-family: 'Monoton', cursive;
+  font-size: clamp(1.6rem, 5vw, 3rem);
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(255,133,192,.5), 0 0 35px rgba(255,133,192,.2);
+  letter-spacing: 3px;
+}
+.tagline {
+  font-size: clamp(.75rem, 2vw, .95rem);
+  color: var(--text-dim);
+  margin-top: 10px;
+  letter-spacing: 1.5px;
+}
+
+/* ── Genre Filter Buttons ── */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  padding: 28px 20px 8px;
+}
+.filter-btn {
+  font-family: 'Audiowide', sans-serif;
+  font-size: .72rem;
+  padding: 7px 18px;
+  border: 2px solid var(--accent);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all .25s;
+}
+.filter-btn:hover, .filter-btn.active {
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: 0 0 12px rgba(255,133,192,.4);
+}
+
+/* ── Genre Row ── */
+.genre-section { padding: 18px 0 8px; }
+.genre-section.hidden { display: none; }
+
+.genre-header {
+  font-family: 'Monoton', cursive;
+  font-size: clamp(1rem, 2.5vw, 1.35rem);
+  color: var(--accent);
+  padding: 0 24px 10px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.genre-header::before,
+.genre-header::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--pink), transparent);
+  max-width: 120px;
+}
+.genre-header::before { margin-left: 0; }
+.genre-header::after { margin-right: 0; }
+
+.scroll-row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 8px 24px 20px;
+  scroll-behavior: smooth;
+  cursor: grab;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scroll-row::-webkit-scrollbar { display: none; }
+.scroll-row.dragging { cursor: grabbing; scroll-behavior: auto; }
+
+/* ── Movie Card ── */
+.movie-card {
+  flex: 0 0 var(--card-w);
+  height: var(--card-h);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  border: 2px solid rgba(255,133,192,.12);
+  transition: border-color .3s, box-shadow .3s, transform .3s, filter .3s;
+  user-select: none;
+  filter: saturate(.7) brightness(.85);
+}
+.movie-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 14px rgba(255,133,192,.5), 0 0 30px rgba(255,133,192,.18);
+  transform: translateY(-4px) scale(1.03);
+  filter: saturate(1) brightness(1);
+}
+
+.card-poster {
+  width: 100%;
+  height: 100%;
+}
+
+.card-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 28px 10px 10px;
+  background: linear-gradient(transparent, rgba(14,8,16,.92));
+}
+.card-title {
+  font-family: 'Audiowide', sans-serif;
+  font-size: .76rem;
+  color: #fff;
+  line-height: 1.25;
+}
+.card-year {
+  font-size: .65rem;
+  color: var(--accent);
+  margin-top: 3px;
+}
+
+/* ── Special Sections Teaser ── */
+.special-teaser {
+  text-align: center;
+  padding: 50px 20px 60px;
+  border-top: 1px solid rgba(255,133,192,.12);
+  margin-top: 20px;
+}
+.special-teaser h2 {
+  font-family: 'Monoton', cursive;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  color: var(--accent);
+  text-shadow: 0 0 8px rgba(255,133,192,.35);
+  margin-bottom: 18px;
+}
+.special-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.special-pill {
+  font-family: 'Audiowide', sans-serif;
+  font-size: .7rem;
+  padding: 8px 18px;
+  border: 1px solid rgba(255,133,192,.25);
+  border-radius: 20px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  transition: all .3s;
+}
+.special-pill:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 10px rgba(255,133,192,.25);
+}
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  :root { --card-w: 140px; --card-h: 210px; }
+  .scroll-row { gap: 12px; padding: 8px 16px 16px; }
+  .genre-header { padding: 0 16px 8px; gap: 10px; }
+  .genre-header::before, .genre-header::after { max-width: 60px; }
+  .site-header { padding: 32px 16px 8px; }
+  .card-title { font-size: .7rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1 class="site-title">Amy's 80s Movie Vault</h1>
+  <p class="tagline">296 films. One decade. All yours.</p>
+</header>
+
+<nav class="filter-bar" id="filterBar"></nav>
+
+<main id="genreRows"></main>
+
+<section class="special-teaser">
+  <h2>Special Sections</h2>
+  <div class="special-pills">
+    <span class="special-pill">Cult Classics</span>
+    <span class="special-pill">Holiday Films</span>
+    <span class="special-pill">Horror Vault</span>
+    <span class="special-pill">John Hughes Universe</span>
+    <span class="special-pill">Queer Cinema &amp; Stories</span>
+    <span class="special-pill">Spielberg Universe</span>
+  </div>
+</section>
+
+<script>
+const GENRES = {
+  Action: [
+    {t:"Raiders of the Lost Ark",y:1981},{t:"Die Hard",y:1988},{t:"The Terminator",y:1984},
+    {t:"RoboCop",y:1987},{t:"Beverly Hills Cop",y:1984},{t:"Top Gun",y:1986},
+    {t:"Lethal Weapon",y:1987},{t:"Aliens",y:1986},{t:"Predator",y:1987},{t:"First Blood",y:1982}
+  ],
+  Comedy: [
+    {t:"Ghostbusters",y:1984},{t:"Ferris Bueller's Day Off",y:1986},{t:"Tootsie",y:1982},
+    {t:"Beetlejuice",y:1988},{t:"Airplane!",y:1980},{t:"Coming to America",y:1988},
+    {t:"Spaceballs",y:1987},{t:"Trading Places",y:1983},{t:"9 to 5",y:1980},
+    {t:"National Lampoon's Vacation",y:1983}
+  ],
+  Horror: [
+    {t:"The Shining",y:1980},{t:"A Nightmare on Elm Street",y:1984},{t:"The Thing",y:1982},
+    {t:"Poltergeist",y:1982},{t:"Gremlins",y:1984},{t:"The Fly",y:1986},
+    {t:"Friday the 13th",y:1980},{t:"Hellraiser",y:1987},{t:"Christine",y:1983},
+    {t:"Halloween II",y:1981}
+  ],
+  Teen: [
+    {t:"The Breakfast Club",y:1985},{t:"Sixteen Candles",y:1984},{t:"Pretty in Pink",y:1986},
+    {t:"Heathers",y:1988},{t:"Fast Times at Ridgemont High",y:1982},{t:"Say Anything",y:1989},
+    {t:"Weird Science",y:1985},{t:"Valley Girl",y:1983},{t:"Some Kind of Wonderful",y:1987},
+    {t:"Ferris Bueller's Day Off",y:1986}
+  ],
+  "Sci-Fi": [
+    {t:"Back to the Future",y:1985},{t:"Blade Runner",y:1982},{t:"E.T.",y:1982},
+    {t:"Tron",y:1982},{t:"WarGames",y:1983},{t:"The Terminator",y:1984},
+    {t:"They Live",y:1988},{t:"Aliens",y:1986},{t:"The Last Starfighter",y:1984},
+    {t:"Cocoon",y:1985}
+  ],
+  Romance: [
+    {t:"Dirty Dancing",y:1987},{t:"Flashdance",y:1983},{t:"The Princess Bride",y:1987},
+    {t:"When Harry Met Sally",y:1989},{t:"Moonstruck",y:1987},
+    {t:"An Officer and a Gentleman",y:1982},{t:"Roxanne",y:1987},{t:"Say Anything",y:1989}
+  ]
+};
+
+const GRADS = [
+  ['#4a1942','#c74b50'],['#200122','#6f0000'],['#1d4350','#a43931'],
+  ['#6b1d5e','#1a2a6c'],['#0f0c29','#302b63'],['#1f1c2c','#928dab'],
+  ['#0c0c1d','#6441a5'],['#1a1a2e','#e94560'],['#16222a','#3a6073'],
+  ['#2c3e50','#fd746c'],['#0b486b','#f56217'],['#232526','#414345'],
+  ['#141e30','#243b55'],['#1e3c72','#2a5298'],['#0f2027','#203a43'],
+  ['#3a1c71','#d76d77'],['#2b5876','#4e4376'],['#1a2980','#26d0ce'],
+  ['#0f0c29','#24243e'],['#2c3e50','#4ca1af'],['#1d2b64','#f8cdda'],
+  ['#0f2027','#2c5364'],['#360033','#0b8793'],['#1f4037','#99f2c8'],
+  ['#0f2027','#203a43'],['#200122','#6f0000'],['#1a1a2e','#16213e'],
+  ['#0c0c1d','#6441a5'],['#141e30','#243b55'],['#3a1c71','#d76d77']
+];
+let gi = 0;
+function nextGrad() { const g = GRADS[gi % GRADS.length]; gi++; return g; }
+
+function buildCard(movie) {
+  const [c1, c2] = nextGrad();
+  return `<div class="movie-card">
+    <div class="card-poster" style="background:linear-gradient(135deg,${c1},${c2})"></div>
+    <div class="card-info">
+      <div class="card-title">${movie.t}</div>
+      <div class="card-year">${movie.y}</div>
+    </div>
+  </div>`;
+}
+
+const filterBar = document.getElementById('filterBar');
+const allBtn = document.createElement('button');
+allBtn.className = 'filter-btn active';
+allBtn.textContent = 'All';
+allBtn.dataset.genre = 'all';
+filterBar.appendChild(allBtn);
+Object.keys(GENRES).forEach(g => {
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn';
+  btn.textContent = g;
+  btn.dataset.genre = g;
+  filterBar.appendChild(btn);
+});
+
+const main = document.getElementById('genreRows');
+Object.entries(GENRES).forEach(([genre, movies]) => {
+  const section = document.createElement('section');
+  section.className = 'genre-section';
+  section.dataset.genre = genre;
+  section.innerHTML = `<h2 class="genre-header">${genre}</h2>
+    <div class="scroll-row">${movies.map(m => buildCard(m)).join('')}</div>`;
+  main.appendChild(section);
+});
+
+filterBar.addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const genre = btn.dataset.genre;
+  document.querySelectorAll('.genre-section').forEach(s => {
+    s.classList.toggle('hidden', genre !== 'all' && s.dataset.genre !== genre);
+  });
+});
+
+document.querySelectorAll('.scroll-row').forEach(row => {
+  let isDown = false, startX, scrollLeft;
+  row.addEventListener('mousedown', e => {
+    isDown = true; row.classList.add('dragging');
+    startX = e.pageX - row.offsetLeft;
+    scrollLeft = row.scrollLeft;
+  });
+  row.addEventListener('mouseleave', () => { isDown = false; row.classList.remove('dragging'); });
+  row.addEventListener('mouseup', () => { isDown = false; row.classList.remove('dragging'); });
+  row.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    e.preventDefault();
+    row.scrollLeft = scrollLeft - (e.pageX - row.offsetLeft - startX) * 1.5;
+  });
+  let tStartX, tScrollLeft;
+  row.addEventListener('touchstart', e => { tStartX = e.touches[0].pageX; tScrollLeft = row.scrollLeft; }, {passive:true});
+  row.addEventListener('touchmove', e => {
+    row.scrollLeft = tScrollLeft - (e.touches[0].pageX - tStartX);
+  }, {passive:true});
+});
+</script>
+</body>
+</html>
